@@ -3,27 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motion AI Studio - Hoàn chỉnh</title>
+    <title>Motion AI Studio - Mô phỏng Vít Tải & Thiết bị</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/96/000000/particles.png">
+    <link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/96/000000/conveyor-belt.png">
 </head>
 <body>
     <div class="container">
         <!-- HEADER -->
         <header class="header">
             <div class="logo">
-                <i class="fas fa-atom"></i>
-                <h1>Motion AI Studio</h1>
-                <span class="version">v2.0 HOÀN CHỈNH</span>
+                <i class="fas fa-industry"></i>
+                <div>
+                    <h1>Motion AI Studio</h1>
+                    <p class="subtitle">Mô phỏng chuyển động vật liệu công nghiệp</p>
+                </div>
             </div>
             <div class="header-controls">
-                <div class="fps-display">
-                    <span id="fpsCounter">60 FPS</span>
-                    <div class="fps-bar">
-                        <div id="fpsBar" class="fps-fill"></div>
-                    </div>
+                <div class="status-indicator active" id="statusIndicator">
+                    <i class="fas fa-circle"></i>
+                    <span>Ready</span>
                 </div>
                 <button id="helpBtn" class="btn-help">
                     <i class="fas fa-question-circle"></i> Hướng dẫn
@@ -33,65 +33,93 @@
 
         <!-- MAIN CONTENT -->
         <div class="main-content">
-            <!-- LEFT SIDEBAR -->
-            <div class="sidebar left-sidebar">
+            <!-- LEFT PANEL -->
+            <div class="panel left-panel">
+                <!-- UPLOAD SECTION -->
                 <div class="section">
-                    <h3><i class="fas fa-upload"></i> Tải lên</h3>
+                    <h3><i class="fas fa-file-upload"></i> Tải file nền & vật liệu</h3>
                     <div class="upload-group">
-                        <label class="upload-btn">
-                            <i class="fas fa-image"></i> Upload Background
-                            <input type="file" id="uploadBackground" accept="image/*,video/*,.gif" hidden>
-                        </label>
-                        <label class="upload-btn">
-                            <i class="fas fa-palette"></i> Upload Material
-                            <input type="file" id="uploadMaterial" accept="image/*" hidden>
-                        </label>
-                        <button id="loadDemo" class="btn-secondary">
-                            <i class="fas fa-rocket"></i> Load Demo
+                        <div class="upload-area" id="gifUploadArea">
+                            <i class="fas fa-video"></i>
+                            <p>Kéo thả GIF/Video làm nền</p>
+                            <span class="file-types">.gif, .mp4, .webm, .jpg, .png</span>
+                            <input type="file" id="uploadBackground" accept=".gif,.mp4,.webm,.jpg,.jpeg,.png" hidden>
+                        </div>
+                        
+                        <div class="upload-area" id="materialUploadArea">
+                            <i class="fas fa-pallet"></i>
+                            <p>Kéo thả ảnh vật liệu</p>
+                            <span class="file-types">.jpg, .png, .svg</span>
+                            <input type="file" id="uploadMaterial" accept=".jpg,.jpeg,.png,.svg" hidden>
+                        </div>
+                        
+                        <button id="loadScrewDemo" class="btn-primary">
+                            <i class="fas fa-screwdriver"></i> Demo Vít Tải
                         </button>
                     </div>
                 </div>
 
+                <!-- DRAWING TOOLS -->
                 <div class="section">
-                    <h3><i class="fas fa-pencil-alt"></i> Công cụ vẽ</h3>
+                    <h3><i class="fas fa-draw-polygon"></i> Công cụ vẽ vùng</h3>
                     <div class="tool-grid">
-                        <button class="tool-btn active" data-tool="select">
-                            <i class="fas fa-mouse-pointer"></i> Select
+                        <button class="tool-btn active" data-tool="select" title="Chọn và di chuyển">
+                            <i class="fas fa-mouse-pointer"></i>
+                            <span>Select</span>
                         </button>
-                        <button class="tool-btn" data-tool="pen">
-                            <i class="fas fa-pen"></i> Pen
+                        <button class="tool-btn" data-tool="pen" title="Vẽ vùng tự do">
+                            <i class="fas fa-pen"></i>
+                            <span>Pen Tool</span>
                         </button>
-                        <button class="tool-btn" data-tool="rectangle">
-                            <i class="fas fa-square"></i> Rectangle
+                        <button class="tool-btn" data-tool="rect" title="Vẽ vùng hình chữ nhật">
+                            <i class="fas fa-square"></i>
+                            <span>Rectangle</span>
                         </button>
-                        <button class="tool-btn" data-tool="circle">
-                            <i class="fas fa-circle"></i> Circle
+                        <button class="tool-btn" data-tool="edit" title="Sửa điểm (như PowerPoint)">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit Points</span>
                         </button>
                     </div>
-                    <div class="ai-tools">
-                        <button id="aiSmoothBtn" class="btn-ai">
-                            <i class="fas fa-magic"></i> Smooth Path AI
+                    
+                    <div class="tool-options">
+                        <div class="option">
+                            <label>Độ dày nét: <span id="brushSizeValue">3</span>px</label>
+                            <input type="range" id="brushSize" min="1" max="10" value="3" class="slider">
+                        </div>
+                        <button id="clearPathBtn" class="btn-secondary">
+                            <i class="fas fa-trash"></i> Xóa vùng chọn
                         </button>
                     </div>
                 </div>
 
+                <!-- DEVICE PRESETS -->
                 <div class="section">
-                    <h3><i class="fas fa-industry"></i> Thiết bị công nghiệp</h3>
-                    <div class="device-grid">
-                        <button class="device-preset" data-device="screw-conveyor">
-                            <i class="fas fa-screwdriver"></i> Vít tải
+                    <h3><i class="fas fa-cogs"></i> Mẫu thiết bị</h3>
+                    <div class="preset-grid">
+                        <button class="preset-btn active" data-preset="screw">
+                            <i class="fas fa-screwdriver"></i>
+                            <span>Vít tải</span>
+                            <small>Chuyển động xoắn</small>
                         </button>
-                        <button class="device-preset" data-device="conveyor-belt">
-                            <i class="fas fa-conveyor-belt"></i> Băng tải
+                        <button class="preset-btn" data-preset="conveyor">
+                            <i class="fas fa-conveyor-belt"></i>
+                            <span>Băng tải</span>
+                            <small>Chuyển động thẳng</small>
                         </button>
-                        <button class="device-preset" data-device="mixer">
-                            <i class="fas fa-blender"></i> Máy trộn
+                        <button class="preset-btn" data-preset="mixer">
+                            <i class="fas fa-blender"></i>
+                            <span>Máy trộn</span>
+                            <small>Chuyển động hỗn hợp</small>
                         </button>
-                        <button class="device-preset" data-device="vibrating-screen">
-                            <i class="fas fa-filter"></i> Sàng rung
+                        <button class="preset-btn" data-preset="vibrating">
+                            <i class="fas fa-vihara"></i>
+                            <span>Sàng rung</span>
+                            <small>Rung và sàng</small>
                         </button>
-                        <button class="device-preset" data-device="pump">
-                            <i class="fas fa-tint"></i> Bơm
+                        <button class="preset-btn" data-preset="pump">
+                            <i class="fas fa-tint"></i>
+                            <span>Bơm</span>
+                            <small>Chảy theo đường ống</small>
                         </button>
                     </div>
                 </div>
@@ -100,232 +128,285 @@
             <!-- CANVAS AREA -->
             <div class="canvas-container">
                 <div class="canvas-header">
-                    <h3><i class="fas fa-play-circle"></i> Animation Preview</h3>
-                    <div class="animation-controls">
-                        <button id="playBtn" class="btn-play">
-                            <i class="fas fa-play"></i> Play
+                    <div class="canvas-info">
+                        <h3><i class="fas fa-play-circle"></i> Khu vực mô phỏng</h3>
+                        <div class="canvas-stats">
+                            <span id="canvasStats">Kích thước: 1920x1080</span>
+                        </div>
+                    </div>
+                    <div class="canvas-controls">
+                        <button id="zoomInBtn" class="btn-icon" title="Phóng to">
+                            <i class="fas fa-search-plus"></i>
                         </button>
-                        <button id="stopBtn" class="btn-stop">
-                            <i class="fas fa-stop"></i> Stop
+                        <button id="zoomOutBtn" class="btn-icon" title="Thu nhỏ">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button id="resetViewBtn" class="btn-secondary">
+                            <i class="fas fa-sync-alt"></i> Reset
                         </button>
                     </div>
                 </div>
-                <canvas id="mainCanvas" width="1920" height="1080"></canvas>
                 
-                <!-- Direction Controls -->
-                <div class="direction-grid">
-                    <button class="dir-btn" data-dir="↖">↖</button>
-                    <button class="dir-btn" data-dir="↑">↑</button>
-                    <button class="dir-btn" data-dir="↗">↗</button>
-                    <button class="dir-btn" data-dir="←">←</button>
-                    <button class="dir-btn" data-dir="○">○</button>
-                    <button class="dir-btn" data-dir="→">→</button>
-                    <button class="dir-btn" data-dir="↙">↙</button>
-                    <button class="dir-btn" data-dir="↓">↓</button>
-                    <button class="dir-btn" data-dir="↘">↘</button>
+                <!-- CANVAS WRAPPER -->
+                <div class="canvas-wrapper" id="canvasWrapper">
+                    <canvas id="mainCanvas" width="1920" height="1080"></canvas>
+                    <canvas id="drawCanvas" width="1920" height="1080"></canvas>
+                    
+                    <!-- DIRECTION ARROWS (Hiển thị khi vẽ) -->
+                    <div class="direction-overlay" id="directionOverlay">
+                        <div class="direction-grid">
+                            <button class="dir-btn" data-dir="↖" title="Hướng Tây Bắc">↖</button>
+                            <button class="dir-btn" data-dir="↑" title="Hướng Bắc">↑</button>
+                            <button class="dir-btn" data-dir="↗" title="Hướng Đông Bắc">↗</button>
+                            <button class="dir-btn" data-dir="←" title="Hướng Tây">←</button>
+                            <button class="dir-btn" data-dir="○" title="Xoay tròn">○</button>
+                            <button class="dir-btn" data-dir="→" title="Hướng Đông">→</button>
+                            <button class="dir-btn" data-dir="↙" title="Hướng Tây Nam">↙</button>
+                            <button class="dir-btn" data-dir="↓" title="Hướng Nam">↓</button>
+                            <button class="dir-btn" data-dir="↘" title="Hướng Đông Nam">↘</button>
+                        </div>
+                    </div>
+                    
+                    <!-- INSTRUCTIONS -->
+                    <div class="canvas-instruction" id="canvasInstruction">
+                        <div class="instruction-content">
+                            <h4><i class="fas fa-mouse-pointer"></i> Hướng dẫn vẽ vùng</h4>
+                            <ol>
+                                <li>Chọn công cụ vẽ (Pen hoặc Rectangle)</li>
+                                <li><strong>Click chuột trái</strong> vào ảnh để bắt đầu vẽ</li>
+                                <li>Giữ và kéo để tạo vùng chọn</li>
+                                <li><strong>Double click</strong> để kết thúc vẽ</li>
+                                <li>Sử dụng mũi tên để chọn hướng chuyển động</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ANIMATION CONTROLS -->
+                <div class="animation-controls">
+                    <button id="playBtn" class="btn-play">
+                        <i class="fas fa-play"></i> Xem trước
+                    </button>
+                    <button id="pauseBtn" class="btn-secondary" disabled>
+                        <i class="fas fa-pause"></i> Tạm dừng
+                    </button>
+                    <button id="stopBtn" class="btn-stop">
+                        <i class="fas fa-stop"></i> Dừng
+                    </button>
+                    
+                    <div class="playback-controls">
+                        <label>Speed:</label>
+                        <input type="range" id="playbackSpeed" min="10" max="200" value="100" class="slider-small">
+                        <span id="speedPercent">100%</span>
+                    </div>
+                    
+                    <div class="loop-control">
+                        <input type="checkbox" id="loopToggle" checked>
+                        <label for="loopToggle">Lặp lại</label>
+                    </div>
                 </div>
             </div>
 
-            <!-- RIGHT SIDEBAR -->
-            <div class="sidebar right-sidebar">
+            <!-- RIGHT PANEL -->
+            <div class="panel right-panel">
+                <!-- MOTION SETTINGS -->
                 <div class="section">
-                    <h3><i class="fas fa-sliders-h"></i> Điều khiển chuyển động</h3>
+                    <h3><i class="fas fa-sliders-h"></i> Cài đặt chuyển động</h3>
                     
                     <div class="control-group">
-                        <label>Motion Type</label>
-                        <div class="motion-grid">
-                            <button class="motion-option active" data-motion="flow">
-                                <i class="fas fa-water"></i> Flow
-                            </button>
-                            <button class="motion-option" data-motion="follow">
-                                <i class="fas fa-road"></i> Follow
-                            </button>
-                            <button class="motion-option" data-motion="swirl">
-                                <i class="fas fa-sync-alt"></i> Swirl
-                            </button>
-                            <button class="motion-option" data-motion="random">
-                                <i class="fas fa-random"></i> Random
-                            </button>
+                        <label>Hướng chuyển động</label>
+                        <div class="direction-preview">
+                            <div class="selected-direction" id="selectedDirection">↗</div>
+                            <span id="directionText">Đông Bắc (45°)</span>
                         </div>
                     </div>
 
                     <div class="control-group">
-                        <label>Speed: <span id="speedValue">50%</span></label>
-                        <input type="range" id="speedSlider" min="1" max="100" value="50" class="slider">
+                        <label>Tốc độ: <span id="motionSpeedValue">50</span>%</label>
+                        <input type="range" id="motionSpeed" min="1" max="100" value="50" class="slider">
                     </div>
 
                     <div class="control-group">
-                        <label>Particle Count: <span id="countValue">100</span></label>
-                        <input type="range" id="countSlider" min="10" max="1000" value="100" class="slider">
+                        <label>Số lượng hạt: <span id="particleCountValue">120</span></label>
+                        <input type="range" id="particleCount" min="10" max="500" value="120" class="slider">
                     </div>
 
                     <div class="control-group">
-                        <label>Particle Size: <span id="sizeValue">10</span></label>
-                        <input type="range" id="sizeSlider" min="2" max="50" value="10" class="slider">
+                        <label>Kích thước vật liệu: <span id="materialSizeValue">15</span>px</label>
+                        <input type="range" id="materialSize" min="5" max="50" value="15" class="slider">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Độ xoáy (cho vít tải): <span id="swirlValue">75</span>%</label>
+                        <input type="range" id="swirlStrength" min="0" max="100" value="75" class="slider">
                     </div>
                 </div>
 
+                <!-- AI OPTIMIZATION -->
                 <div class="section">
-                    <h3><i class="fas fa-robot"></i> AI Features</h3>
-                    <div class="ai-presets">
-                        <button id="waterPreset" class="ai-preset-btn water">
-                            <i class="fas fa-tint"></i> Water
+                    <h3><i class="fas fa-robot"></i> Tối ưu hóa AI</h3>
+                    <div class="ai-actions">
+                        <button id="aiDetectMotion" class="btn-ai">
+                            <i class="fas fa-eye"></i> Phát hiện chuyển động
                         </button>
-                        <button id="smokePreset" class="ai-preset-btn smoke">
-                            <i class="fas fa-smog"></i> Smoke
+                        <button id="aiOptimizePath" class="btn-ai">
+                            <i class="fas fa-magic"></i> Tối ưu đường đi
                         </button>
-                        <button id="particlesPreset" class="ai-preset-btn particles">
-                            <i class="fas fa-star"></i> Particles
-                        </button>
-                    </div>
-                    <button id="aiOptimizeBtn" class="btn-ai-primary">
-                        <i class="fas fa-bolt"></i> Optimize with AI
-                    </button>
-                </div>
-
-                <div class="section">
-                    <h3><i class="fas fa-download"></i> Export</h3>
-                    <div class="export-grid">
-                        <button id="exportGif" class="export-btn gif">
-                            <i class="fas fa-film"></i> GIF
-                        </button>
-                        <button id="exportMp4" class="export-btn mp4">
-                            <i class="fas fa-video"></i> MP4
-                        </button>
-                        <button id="exportPng" class="export-btn png">
-                            <i class="fas fa-image"></i> PNG
+                        <button id="aiSuggestParams" class="btn-ai">
+                            <i class="fas fa-lightbulb"></i> Đề xuất thông số
                         </button>
                     </div>
                     
-                    <div class="export-options">
-                        <div class="option-group">
-                            <label>Quality:</label>
-                            <select id="qualitySelect" class="select-box">
-                                <option value="low">Low</option>
-                                <option value="medium" selected>Medium</option>
-                                <option value="high">High</option>
-                                <option value="ultra">Ultra</option>
+                    <div class="ai-presets">
+                        <button class="ai-preset-btn" data-preset="gentle">
+                            <i class="fas fa-wind"></i> Nhẹ nhàng
+                        </button>
+                        <button class="ai-preset-btn" data-preset="intense">
+                            <i class="fas fa-bolt"></i> Mạnh mẽ
+                        </button>
+                        <button class="ai-preset-btn" data-preset="natural">
+                            <i class="fas fa-leaf"></i> Tự nhiên
+                        </button>
+                    </div>
+                </div>
+
+                <!-- EXPORT SECTION -->
+                <div class="section">
+                    <h3><i class="fas fa-file-export"></i> Xuất file kết quả</h3>
+                    
+                    <div class="export-format">
+                        <button class="format-btn active" data-format="gif">
+                            <i class="fas fa-film"></i> GIF động
+                        </button>
+                        <button class="format-btn" data-format="mp4">
+                            <i class="fas fa-video"></i> MP4 Video
+                        </button>
+                        <button class="format-btn" data-format="png">
+                            <i class="fas fa-image"></i> PNG Sequence
+                        </button>
+                    </div>
+                    
+                    <div class="export-settings">
+                        <div class="setting">
+                            <label>Chất lượng:</label>
+                            <select id="qualitySelect">
+                                <option value="low">Thấp (nhanh)</option>
+                                <option value="medium" selected>Trung bình</option>
+                                <option value="high">Cao</option>
+                                <option value="ultra">Siêu nét</option>
                             </select>
                         </div>
                         
-                        <div class="option-group">
+                        <div class="setting">
                             <label>FPS:</label>
-                            <select id="fpsSelect" class="select-box">
-                                <option value="15">15</option>
-                                <option value="24">24</option>
-                                <option value="30" selected>30</option>
-                                <option value="60">60</option>
+                            <select id="fpsSelect">
+                                <option value="12">12 FPS</option>
+                                <option value="24">24 FPS</option>
+                                <option value="30" selected>30 FPS</option>
+                                <option value="60">60 FPS</option>
                             </select>
                         </div>
+                        
+                        <div class="setting">
+                            <label>Thời lượng: <span id="durationValue">5</span>s</label>
+                            <input type="range" id="durationSlider" min="1" max="30" value="5" class="slider">
+                        </div>
+                    </div>
+                    
+                    <button id="exportBtn" class="btn-export">
+                        <i class="fas fa-download"></i> Xuất file kết hợp
+                    </button>
+                    
+                    <div class="export-note">
+                        <small><i class="fas fa-info-circle"></i> File xuất ra sẽ kết hợp GIF nền + chuyển động tạo thành 1 file duy nhất</small>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- STATUS BAR -->
-        <div class="status-bar">
+        <footer class="status-bar">
             <div class="status-item">
-                <i class="fas fa-cube"></i>
-                <span>Particles: <strong id="particleCountDisplay">100</strong></span>
-            </div>
-            <div class="status-item">
-                <i class="fas fa-bolt"></i>
-                <span>Motion: <strong id="motionTypeDisplay">Flow</strong></span>
+                <i class="fas fa-layer-group"></i>
+                <span>Chế độ: <strong>Layer trên GIF</strong></span>
             </div>
             <div class="status-item">
                 <i class="fas fa-draw-polygon"></i>
-                <span>Paths: <strong id="pathCountDisplay">0</strong></span>
+                <span>Vùng chọn: <strong id="selectionStatus">Chưa có</strong></span>
             </div>
             <div class="status-item">
-                <i class="fas fa-hdd"></i>
-                <span>Ready to export</span>
+                <i class="fas fa-cube"></i>
+                <span>Vật liệu: <strong id="materialStatus">Chưa tải</strong></span>
             </div>
-        </div>
+            <div class="status-item">
+                <i class="fas fa-history"></i>
+                <span>FPS: <strong id="fpsCounter">60</strong></span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-database"></i>
+                <span>Bộ nhớ: <strong id="memoryUsage">45MB</strong></span>
+            </div>
+        </footer>
     </div>
 
     <!-- MODALS -->
-    <div id="tutorialModal" class="modal hidden">
+    <div id="tutorialModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2><i class="fas fa-graduation-cap"></i> Hướng dẫn sử dụng</h2>
-                <button id="closeTutorial" class="modal-close">&times;</button>
+                <h2><i class="fas fa-graduation-cap"></i> Hướng dẫn sử dụng: Mô phỏng Vít Tải</h2>
+                <button class="modal-close">&times;</button>
             </div>
             <div class="modal-body">
-                <div class="tutorial-step">
-                    <h3><i class="fas fa-upload"></i> Bước 1: Tải lên</h3>
-                    <p>• Click "Upload Background" để tải hình nền GIF/Video/Image</p>
-                    <p>• Click "Upload Material" để tải hình ảnh cho particles</p>
-                    <p>• Hoặc click "Load Demo" để xem ví dụ có sẵn</p>
-                </div>
-                
-                <div class="tutorial-step">
-                    <h3><i class="fas fa-draw-polygon"></i> Bước 2: Vẽ đường dẫn</h3>
-                    <p>• Chọn Pen tool để vẽ đường tự do</p>
-                    <p>• Chọn Rectangle/Circle để vẽ hình dạng</p>
-                    <p>• Click và kéo trên canvas để vẽ</p>
-                </div>
-                
-                <div class="tutorial-step">
-                    <h3><i class="fas fa-sliders-h"></i> Bước 3: Điều chỉnh</h3>
-                    <p>• Chọn motion type: Flow, Follow, Swirl, Random</p>
-                    <p>• Điều chỉnh speed, particle count, size</p>
-                    <p>• Click các nút mũi tên để thay đổi hướng</p>
-                </div>
-                
-                <div class="tutorial-step">
-                    <h3><i class="fas fa-robot"></i> Bước 4: AI Features</h3>
-                    <p>• Thử các AI presets: Water, Smoke, Particles</p>
-                    <p>• Click "Optimize with AI" để tối ưu hóa tự động</p>
-                    <p>• Click "Smooth Path AI" để làm mượt đường vẽ</p>
-                </div>
-                
-                <div class="tutorial-step">
-                    <h3><i class="fas fa-download"></i> Bước 5: Xuất file</h3>
-                    <p>• Chọn định dạng: GIF, MP4, PNG</p>
-                    <p>• Chọn chất lượng và FPS</p>
-                    <p>• Click export và chờ quá trình hoàn tất</p>
+                <div class="tutorial-section">
+                    <h3><i class="fas fa-screwdriver"></i> Ví dụ: Mô phỏng Vít Tải</h3>
+                    <p>1. Tải lên <strong>file GIF vít tải</strong> làm background</p>
+                    <p>2. Tải <strong>ảnh vật liệu</strong> (hạt, bột, viên nén)</p>
+                    <p>3. Dùng <strong>Pen Tool</strong> vẽ vùng vật liệu chuyển động trong vít</p>
+                    <p>4. Chọn hướng chuyển động <strong>xoắn ốc</strong> (↗ hoặc ○)</p>
+                    <p>5. Điều chỉnh <strong>độ xoáy</strong> cho giống thực tế</p>
+                    <p>6. Xuất file GIF kết hợp cả vít tải và vật liệu chuyển động</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="exportModal" class="modal hidden">
+    <div id="exportModal" class="modal">
         <div class="modal-content export-modal">
             <div class="modal-header">
-                <h2><i class="fas fa-download"></i> Exporting Animation</h2>
+                <h2><i class="fas fa-cogs"></i> Đang xuất file kết hợp...</h2>
             </div>
             <div class="modal-body">
-                <div class="progress-container">
+                <div class="export-progress">
                     <div class="progress-bar">
-                        <div id="exportProgress" class="progress-fill"></div>
+                        <div class="progress-fill" id="exportProgressFill"></div>
                     </div>
-                    <div id="exportProgressText" class="progress-text">Preparing export...</div>
+                    <div class="progress-text" id="exportProgressText">Đang xử lý khung hình 1/150...</div>
                 </div>
                 
-                <div class="export-steps">
-                    <div class="step active">
-                        <i class="fas fa-cog"></i>
-                        <span>Processing</span>
+                <div class="export-details">
+                    <div class="detail">
+                        <span>Định dạng:</span>
+                        <strong id="exportFormat">GIF</strong>
                     </div>
-                    <div class="step">
-                        <i class="fas fa-film"></i>
-                        <span>Rendering</span>
+                    <div class="detail">
+                        <span>Kích thước:</span>
+                        <strong>1920x1080</strong>
                     </div>
-                    <div class="step">
-                        <i class="fas fa-sync-alt"></i>
-                        <span>Encoding</span>
+                    <div class="detail">
+                        <span>Thời lượng:</span>
+                        <strong id="exportDuration">5 giây</strong>
                     </div>
-                    <div class="step">
-                        <i class="fas fa-check-circle"></i>
-                        <span>Complete</span>
+                    <div class="detail">
+                        <span>Kết hợp:</span>
+                        <strong>GIF nền + Layer chuyển động</strong>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- NOTIFICATION CONTAINER -->
-    <div id="notificationContainer" class="notification-container"></div>
+    <!-- NOTIFICATION CENTER -->
+    <div class="notification-center" id="notificationCenter"></div>
 
     <script src="app.js"></script>
 </body>

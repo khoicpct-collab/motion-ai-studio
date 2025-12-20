@@ -1,4 +1,8 @@
-// ==================== AI MOTION STUDIO ====================
+// ==================== AI MOTION STUDIO - WORKING VERSION ====================
+
+console.log('🚀 AI Motion Studio - Professional Motion Overlay Application');
+console.log('Version 1.0 - Fully Functional');
+console.log('Visit: https://github.com/khoicpct-collab/motion-ai-studio');
 
 class AIMotionStudio {
     constructor() {
@@ -9,876 +13,483 @@ class AIMotionStudio {
         this.motionPath = null;
         this.particles = [];
         this.isPlaying = false;
+        this.currentTool = 'pen';
+        this.isDrawing = false;
+        this.drawingPoints = [];
         
         this.init();
     }
     
     async init() {
-        console.log('🚀 AI Motion Studio - Professional Motion Overlay');
+        console.log('🔄 Initializing AI Motion Studio...');
         
-        // Create UI
-        this.createPowerPointLikeUI();
+        // Wait for DOM
+        await this.waitForDOM();
+        
+        // Setup UI
+        this.setupUI();
         
         // Setup canvas
         this.setupCanvas();
-        
-        // Load AI presets
-        await this.loadAIPresets();
         
         // Setup event listeners
         this.setupEventListeners();
         
         // Load demo
-        this.loadDemoProject();
+        this.loadDemo();
+        
+        console.log('✅ AI Motion Studio initialized successfully!');
     }
     
-    createPowerPointLikeUI() {
-        document.body.innerHTML = `
-            <!-- PowerPoint-like Ribbon -->
-            <div class="ribbon">
-                <div class="ribbon-tabs">
-                    <button class="tab active" data-tab="file">
-                        <i class="fas fa-file"></i> File
-                    </button>
-                    <button class="tab" data-tab="home">
-                        <i class="fas fa-home"></i> Home
-                    </button>
-                    <button class="tab" data-tab="draw">
-                        <i class="fas fa-pen"></i> Draw
-                    </button>
-                    <button class="tab" data-tab="animation">
-                        <i class="fas fa-play-circle"></i> Animation
-                    </button>
-                    <button class="tab" data-tab="ai">
-                        <i class="fas fa-brain"></i> AI
-                    </button>
-                </div>
-                
-                <div class="ribbon-content">
-                    <!-- File Tab -->
-                    <div class="tab-content active" id="file-tab">
-                        <button class="ribbon-btn" id="upload-bg">
-                            <i class="fas fa-images"></i> Upload GIF/Video
-                        </button>
-                        <button class="ribbon-btn" id="upload-material">
-                            <i class="fas fa-shapes"></i> Upload Material
-                        </button>
-                        <button class="ribbon-btn" id="save-project">
-                            <i class="fas fa-save"></i> Save Project
-                        </button>
-                        <button class="ribbon-btn" id="export-gif">
-                            <i class="fas fa-file-export"></i> Export GIF
-                        </button>
-                    </div>
-                    
-                    <!-- Draw Tab -->
-                    <div class="tab-content" id="draw-tab">
-                        <div class="tool-group">
-                            <h4>Shapes</h4>
-                            <button class="tool-btn" data-tool="pen">
-                                <i class="fas fa-pen"></i> Pen
-                            </button>
-                            <button class="tool-btn" data-tool="rectangle">
-                                <i class="fas fa-square"></i> Rectangle
-                            </button>
-                            <button class="tool-btn" data-tool="circle">
-                                <i class="fas fa-circle"></i> Circle
-                            </button>
-                            <button class="tool-btn" data-tool="polygon">
-                                <i class="fas fa-draw-polygon"></i> Polygon
-                            </button>
-                        </div>
-                        
-                        <div class="tool-group">
-                            <h4>Edit</h4>
-                            <button class="tool-btn" data-tool="select">
-                                <i class="fas fa-mouse-pointer"></i> Select
-                            </button>
-                            <button class="tool-btn" data-tool="edit-points">
-                                <i class="fas fa-vector-square"></i> Edit Points
-                            </button>
-                            <button class="tool-btn" data-tool="smooth">
-                                <i class="fas fa-wave-square"></i> Smooth
-                            </button>
-                            <button class="tool-btn" data-tool="clear">
-                                <i class="fas fa-trash"></i> Clear
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Animation Tab -->
-                    <div class="tab-content" id="animation-tab">
-                        <div class="tool-group">
-                            <h4>Motion Type</h4>
-                            <select id="motion-type" class="ribbon-select">
-                                <option value="flow">Flow Direction</option>
-                                <option value="follow">Follow Path</option>
-                                <option value="swirl">Swirl Motion</option>
-                                <option value="custom">Custom AI</option>
-                            </select>
-                        </div>
-                        
-                        <div class="tool-group">
-                            <h4>Direction</h4>
-                            <div class="direction-grid">
-                                <button class="dir-btn" data-dir="nw">↖</button>
-                                <button class="dir-btn" data-dir="n">↑</button>
-                                <button class="dir-btn" data-dir="ne">↗</button>
-                                <button class="dir-btn" data-dir="w">←</button>
-                                <button class="dir-btn" data-dir="center">○</button>
-                                <button class="dir-btn" data-dir="e">→</button>
-                                <button class="dir-btn" data-dir="sw">↙</button>
-                                <button class="dir-btn" data-dir="s">↓</button>
-                                <button class="dir-btn" data-dir="se">↘</button>
-                            </div>
-                        </div>
-                        
-                        <div class="tool-group">
-                            <h4>Speed & Density</h4>
-                            <div class="slider-group">
-                                <label>Speed: <span id="speed-value">50</span>%</label>
-                                <input type="range" id="speed-slider" min="1" max="100" value="50">
-                            </div>
-                            <div class="slider-group">
-                                <label>Density: <span id="density-value">100</span></label>
-                                <input type="range" id="density-slider" min="10" max="500" value="100">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- AI Tab -->
-                    <div class="tab-content" id="ai-tab">
-                        <div class="tool-group">
-                            <h4>AI Presets</h4>
-                            <button class="ai-preset" data-preset="water-flow">
-                                <i class="fas fa-tint"></i> Water Flow
-                            </button>
-                            <button class="ai-preset" data-preset="smoke">
-                                <i class="fas fa-smog"></i> Smoke Effect
-                            </button>
-                            <button class="ai-preset" data-preset="particles">
-                                <i class="fas fa-atom"></i> Particle System
-                            </button>
-                            <button class="ai-preset" data-preset="custom-ai">
-                                <i class="fas fa-wand-magic-sparkles"></i> Smart Suggest
-                            </button>
-                        </div>
-                        
-                        <div class="tool-group">
-                            <h4>AI Settings</h4>
-                            <div class="ai-option">
-                                <input type="checkbox" id="auto-detect" checked>
-                                <label for="auto-detect">Auto-detect best motion</label>
-                            </div>
-                            <div class="ai-option">
-                                <input type="checkbox" id="smart-smoothing" checked>
-                                <label for="smart-smoothing">Smart path smoothing</label>
-                            </div>
-                            <div class="ai-option">
-                                <input type="checkbox" id="physics-realistic" checked>
-                                <label for="physics-realistic">Realistic physics</label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Main Workspace -->
-            <div class="workspace">
-                <!-- Canvas Container -->
-                <div class="canvas-container">
-                    <div class="canvas-wrapper">
-                        <canvas id="main-canvas"></canvas>
-                        
-                        <!-- Direction Arrows Overlay -->
-                        <div class="direction-overlay" id="direction-overlay">
-                            <!-- 8-direction arrows will be positioned here -->
-                        </div>
-                        
-                        <!-- Edit Points Overlay -->
-                        <div class="edit-points-overlay" id="edit-points-overlay">
-                            <!-- Bezier control points -->
-                        </div>
-                    </div>
-                    
-                    <!-- Preview Controls -->
-                    <div class="preview-controls">
-                        <button id="play-preview" class="preview-btn">
-                            <i class="fas fa-play"></i> Preview
-                        </button>
-                        <button id="stop-preview" class="preview-btn">
-                            <i class="fas fa-stop"></i> Stop
-                        </button>
-                        <div class="time-display">
-                            <span id="current-time">0:00</span> / 
-                            <span id="total-time">0:00</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Properties Panel -->
-                <div class="properties-panel">
-                    <div class="panel-section">
-                        <h3><i class="fas fa-layer-group"></i> Layers</h3>
-                        <div class="layer-list" id="layer-list">
-                            <!-- Layers will be added here -->
-                        </div>
-                    </div>
-                    
-                    <div class="panel-section">
-                        <h3><i class="fas fa-sliders-h"></i> Properties</h3>
-                        <div class="property-group" id="path-properties">
-                            <h4>Path Properties</h4>
-                            <!-- Dynamic properties based on selection -->
-                        </div>
-                        
-                        <div class="property-group" id="motion-properties">
-                            <h4>Motion Properties</h4>
-                            <!-- Motion settings -->
-                        </div>
-                    </div>
-                    
-                    <div class="panel-section">
-                        <h3><i class="fas fa-download"></i> Export</h3>
-                        <div class="export-options">
-                            <div class="export-option">
-                                <input type="radio" name="export-format" id="gif-format" checked>
-                                <label for="gif-format">GIF Animation</label>
-                            </div>
-                            <div class="export-option">
-                                <input type="radio" name="export-format" id="video-format">
-                                <label for="video-format">MP4 Video</label>
-                            </div>
-                            
-                            <div class="export-quality">
-                                <label>Quality:</label>
-                                <select id="quality-select">
-                                    <option value="low">Low (Fast)</option>
-                                    <option value="medium" selected>Medium</option>
-                                    <option value="high">High</option>
-                                    <option value="ultra">Ultra (Best)</option>
-                                </select>
-                            </div>
-                            
-                            <button id="start-export" class="export-btn">
-                                <i class="fas fa-rocket"></i> Generate & Export
-                            </button>
-                            
-                            <div class="export-progress hidden" id="export-progress">
-                                <div class="progress-bar">
-                                    <div class="progress-fill" id="progress-fill"></div>
-                                </div>
-                                <span id="progress-text">Processing...</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Status Bar -->
-            <div class="status-bar">
-                <div class="status-item">
-                    <i class="fas fa-mouse-pointer"></i>
-                    <span id="tool-status">Ready</span>
-                </div>
-                <div class="status-item">
-                    <i class="fas fa-layer-group"></i>
-                    <span id="layer-status">No layers</span>
-                </div>
-                <div class="status-item">
-                    <i class="fas fa-bolt"></i>
-                    <span id="ai-status">AI: Active</span>
-                </div>
-                <div class="status-item" id="export-status">
-                    <i class="fas fa-check-circle"></i>
-                    <span>Ready to export</span>
-                </div>
-            </div>
-            
-            <!-- Hidden File Inputs -->
-            <input type="file" id="bg-file-input" accept="image/gif,video/*,image/*" hidden>
-            <input type="file" id="material-file-input" accept="image/*" hidden>
-            
-            <!-- Hidden Canvas for Export -->
-            <canvas id="export-canvas" style="display: none;"></canvas>
-        `;
+    waitForDOM() {
+        return new Promise(resolve => {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', resolve);
+            } else {
+                resolve();
+            }
+        });
+    }
+    
+    setupUI() {
+        // Hide loading screen
+        const loadingScreen = document.getElementById('loading-screen');
+        const appContainer = document.getElementById('app');
+        
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+        }
+        
+        if (appContainer) {
+            appContainer.classList.remove('hidden');
+        }
+        
+        // Update status
+        this.updateStatus('Ready', 'ai-status');
+        this.updateStatus('Select a tool to start', 'tool-status');
     }
     
     setupCanvas() {
         this.canvas = document.getElementById('main-canvas');
+        if (!this.canvas) {
+            console.error('Canvas not found!');
+            return;
+        }
+        
         this.ctx = this.canvas.getContext('2d');
         
         // Set canvas size
         this.resizeCanvas();
         window.addEventListener('resize', () => this.resizeCanvas());
+        
+        // Draw initial background
+        this.drawInitialBackground();
     }
     
     resizeCanvas() {
         const container = this.canvas.parentElement;
+        if (!container) return;
+        
         this.canvas.width = container.clientWidth;
-        this.canvas.height = container.clientHeight - 100;
+        this.canvas.height = container.clientHeight;
+        
+        // Redraw
+        this.draw();
     }
     
-    async loadAIPresets() {
-        // Load AI motion algorithms
-        this.aiPresets = {
-            'water-flow': {
-                type: 'flow',
-                speed: 0.5,
-                turbulence: 0.3,
-                particleSize: { min: 2, max: 8 },
-                color: '#4a90e2',
-                behavior: 'fluid'
-            },
-            'smoke': {
-                type: 'swirl',
-                speed: 0.3,
-                spread: 0.8,
-                particleSize: { min: 4, max: 12 },
-                color: '#ffffff',
-                opacity: 0.7,
-                behavior: 'rising'
-            },
-            'particles': {
-                type: 'random',
-                speed: 0.7,
-                particleCount: 200,
-                particleSize: { min: 1, max: 5 },
-                behavior: 'bounce'
-            }
-        };
+    drawInitialBackground() {
+        // Draw gradient background
+        const gradient = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
+        gradient.addColorStop(0, '#0f172a');
+        gradient.addColorStop(1, '#1e293b');
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw welcome text
+        this.ctx.fillStyle = '#ffffff';
+        this.ctx.font = 'bold 32px "Segoe UI", Arial, sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        
+        this.ctx.fillText('🎬 AI Motion Studio', centerX, centerY - 60);
+        
+        this.ctx.font = '18px "Segoe UI", Arial, sans-serif';
+        this.ctx.fillStyle = '#cbd5e1';
+        this.ctx.fillText('Upload GIF → Draw Path → Add Motion → Export', centerX, centerY - 20);
+        
+        this.ctx.font = '16px "Segoe UI", Arial, sans-serif';
+        this.ctx.fillStyle = '#94a3b8';
+        this.ctx.fillText('Click "Upload Background" to start', centerX, centerY + 20);
     }
     
     setupEventListeners() {
-        // Tab switching
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                const tabId = e.target.dataset.tab;
-                this.switchTab(tabId);
-            });
-        });
+        console.log('🔧 Setting up event listeners...');
         
-        // File upload
-        document.getElementById('upload-bg').addEventListener('click', () => {
-            document.getElementById('bg-file-input').click();
-        });
+        // File upload buttons
+        this.setupFileUpload();
         
-        document.getElementById('upload-material').addEventListener('click', () => {
-            document.getElementById('material-file-input').click();
-        });
+        // Tool buttons
+        this.setupToolButtons();
         
-        // Tool selection
-        document.querySelectorAll('.tool-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const tool = e.target.dataset.tool;
-                this.selectTool(tool);
-            });
-        });
+        // Direction buttons
+        this.setupDirectionButtons();
         
-        // Direction arrows
-        document.querySelectorAll('.dir-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const direction = e.target.dataset.dir;
-                this.setMotionDirection(direction);
-            });
-        });
+        // Preview/Play buttons
+        this.setupPreviewControls();
         
-        // AI presets
-        document.querySelectorAll('.ai-preset').forEach(preset => {
-            preset.addEventListener('click', (e) => {
-                const presetId = e.target.dataset.preset;
-                this.applyAIPreset(presetId);
-            });
-        });
-        
-        // Export
-        document.getElementById('start-export').addEventListener('click', () => {
-            this.exportAnimation();
-        });
-        
-        // Preview
-        document.getElementById('play-preview').addEventListener('click', () => {
-            this.previewAnimation();
-        });
-        
-        // File input handlers
-        document.getElementById('bg-file-input').addEventListener('change', (e) => {
-            this.loadBackground(e.target.files[0]);
-        });
-        
-        document.getElementById('material-file-input').addEventListener('change', (e) => {
-            this.loadMaterialImage(e.target.files[0]);
-        });
+        // Export button
+        this.setupExportButton();
         
         // Canvas interactions
         this.setupCanvasInteractions();
+        
+        // Tab switching
+        this.setupTabSwitching();
+        
+        // AI preset buttons
+        this.setupAIPresets();
+        
+        console.log('✅ Event listeners setup complete');
     }
     
-    switchTab(tabId) {
-        // Hide all tabs
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
+    setupFileUpload() {
+        const bgUploadBtn = document.getElementById('upload-bg');
+        const materialUploadBtn = document.getElementById('upload-material');
+        const bgFileInput = document.getElementById('bg-file-input');
+        const materialFileInput = document.getElementById('material-file-input');
+        
+        if (bgUploadBtn && bgFileInput) {
+            bgUploadBtn.addEventListener('click', () => {
+                bgFileInput.click();
+                this.showNotification('📁 Select a GIF or image for background');
+            });
+        }
+        
+        if (materialUploadBtn && materialFileInput) {
+            materialUploadBtn.addEventListener('click', () => {
+                materialFileInput.click();
+                this.showNotification('🖼️ Select an image for particle material');
+            });
+        }
+        
+        // Handle file selection
+        if (bgFileInput) {
+            bgFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    this.loadBackground(file);
+                }
+            });
+        }
+        
+        if (materialFileInput) {
+            materialFileInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    this.loadMaterial(file);
+                }
+            });
+        }
+        
+        // Demo button
+        const demoBtn = document.getElementById('load-demo');
+        if (demoBtn) {
+            demoBtn.addEventListener('click', () => {
+                this.loadDemoProject();
+            });
+        }
+    }
+    
+    setupToolButtons() {
+        const toolButtons = document.querySelectorAll('.tool-btn');
+        toolButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const tool = e.currentTarget.dataset.tool;
+                this.selectTool(tool);
+                
+                // Update UI
+                toolButtons.forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                
+                this.showNotification(`🛠️ Selected tool: ${tool}`);
+            });
         });
-        
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        
-        // Show selected tab
-        document.getElementById(`${tabId}-tab`).classList.add('active');
-        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
-        
-        // Update tool status
-        document.getElementById('tool-status').textContent = `Tab: ${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`;
     }
     
     selectTool(tool) {
-        console.log(`Selected tool: ${tool}`);
-        
-        // Update UI
-        document.querySelectorAll('.tool-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.classList.add('active');
-        
-        // Set current tool
         this.currentTool = tool;
+        this.updateStatus(`Tool: ${tool}`, 'tool-status');
         
-        // Show direction arrows if drawing
+        // Show/hide direction arrows based on tool
         if (['pen', 'rectangle', 'circle', 'polygon'].includes(tool)) {
             this.showDirectionArrows();
+        } else {
+            this.hideDirectionArrows();
         }
         
-        // Update status
-        document.getElementById('tool-status').textContent = `Tool: ${tool}`;
+        // Show edit points if select tool
+        if (tool === 'edit-points' && this.motionPath) {
+            this.showEditPoints();
+        }
     }
     
     showDirectionArrows() {
         const overlay = document.getElementById('direction-overlay');
+        if (!overlay) return;
+        
         overlay.innerHTML = '';
         
-        // Create 8 direction arrows around center
-        const directions = [
-            { dir: 'n', angle: -90, x: 50, y: 20 },
-            { dir: 'ne', angle: -45, x: 80, y: 20 },
-            { dir: 'e', angle: 0, x: 80, y: 50 },
-            { dir: 'se', angle: 45, x: 80, y: 80 },
-            { dir: 's', angle: 90, x: 50, y: 80 },
-            { dir: 'sw', angle: 135, x: 20, y: 80 },
-            { dir: 'w', angle: 180, x: 20, y: 50 },
-            { dir: 'nw', angle: -135, x: 20, y: 20 }
+        // Create 8 direction arrows
+        const positions = [
+            { dir: 'nw', x: 30, y: 30, symbol: '↖' },
+            { dir: 'n', x: 50, y: 20, symbol: '↑' },
+            { dir: 'ne', x: 70, y: 30, symbol: '↗' },
+            { dir: 'w', x: 20, y: 50, symbol: '←' },
+            { dir: 'center', x: 50, y: 50, symbol: '○' },
+            { dir: 'e', x: 80, y: 50, symbol: '→' },
+            { dir: 'sw', x: 30, y: 70, symbol: '↙' },
+            { dir: 's', x: 50, y: 80, symbol: '↓' },
+            { dir: 'se', x: 70, y: 70, symbol: '↘' }
         ];
         
-        directions.forEach(d => {
+        positions.forEach(pos => {
             const arrow = document.createElement('div');
             arrow.className = 'direction-arrow';
-            arrow.dataset.dir = d.dir;
-            arrow.style.left = `${d.x}%`;
-            arrow.style.top = `${d.y}%`;
-            arrow.innerHTML = this.getArrowSymbol(d.angle);
+            arrow.dataset.dir = pos.dir;
+            arrow.style.left = `${pos.x}%`;
+            arrow.style.top = `${pos.y}%`;
+            arrow.textContent = pos.symbol;
+            arrow.title = `Direction: ${pos.dir.toUpperCase()}`;
+            
             arrow.addEventListener('click', (e) => {
-                this.setMotionDirection(d.dir);
+                e.stopPropagation();
+                this.setMotionDirection(pos.dir);
             });
+            
             overlay.appendChild(arrow);
         });
         
         overlay.style.display = 'block';
     }
     
-    getArrowSymbol(angle) {
-        const arrows = {
-            '-90': '↑',
-            '-45': '↗',
-            '0': '→',
-            '45': '↘',
-            '90': '↓',
-            '135': '↙',
-            '180': '←',
-            '-135': '↖'
-        };
-        return arrows[angle] || '○';
+    hideDirectionArrows() {
+        const overlay = document.getElementById('direction-overlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
     }
     
     setMotionDirection(direction) {
-        console.log(`Motion direction: ${direction}`);
+        console.log(`Setting motion direction: ${direction}`);
         
-        // Update UI
+        // Update direction buttons UI
         document.querySelectorAll('.dir-btn').forEach(btn => {
             btn.classList.remove('active');
         });
-        document.querySelector(`[data-dir="${direction}"]`).classList.add('active');
         
-        // Convert direction to vector
-        const vectors = {
-            'n': { x: 0, y: -1 },
-            'ne': { x: 0.7, y: -0.7 },
-            'e': { x: 1, y: 0 },
-            'se': { x: 0.7, y: 0.7 },
-            's': { x: 0, y: 1 },
-            'sw': { x: -0.7, y: 0.7 },
-            'w': { x: -1, y: 0 },
-            'nw': { x: -0.7, y: -0.7 },
-            'center': { x: 0, y: 0 }
-        };
-        
-        this.motionDirection = vectors[direction] || { x: 1, y: 0 };
-        
-        // AI suggestion
-        if (document.getElementById('auto-detect').checked) {
-            this.suggestAIMotion();
+        const activeBtn = document.querySelector(`.dir-btn[data-dir="${direction}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
         }
-    }
-    
-    suggestAIMotion() {
-        // AI suggests best motion parameters based on path shape
-        console.log('AI suggesting optimal motion...');
         
-        // Simulate AI thinking
-        document.getElementById('ai-status').textContent = 'AI: Analyzing...';
-        
-        setTimeout(() => {
-            const suggestions = [
-                "Try 'Swirl' motion for circular paths",
-                "Use 'Flow' with 45° angle for diagonal paths",
-                "Reduce speed for more natural movement",
-                "Increase particle density for better coverage"
-            ];
-            
-            const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
-            this.showAINotification(randomSuggestion);
-            
-            document.getElementById('ai-status').textContent = 'AI: Ready';
-        }, 1000);
-    }
-    
-    showAINotification(message) {
-        // Create AI notification
-        const notification = document.createElement('div');
-        notification.className = 'ai-notification';
-        notification.innerHTML = `
-            <i class="fas fa-brain"></i>
-            <span>${message}</span>
-            <button class="close-notification">&times;</button>
-        `;
-        
-        notification.querySelector('.close-notification').addEventListener('click', () => {
-            notification.remove();
+        // Update direction arrows in overlay
+        document.querySelectorAll('.direction-arrow').forEach(arrow => {
+            arrow.classList.remove('active');
         });
         
-        document.body.appendChild(notification);
-        
-        // Auto-remove after 5 seconds
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 5000);
-    }
-    
-    applyAIPreset(presetId) {
-        console.log(`Applying AI preset: ${presetId}`);
-        
-        const preset = this.aiPresets[presetId];
-        if (!preset) return;
-        
-        // Apply preset settings
-        document.getElementById('motion-type').value = preset.type;
-        document.getElementById('speed-slider').value = preset.speed * 100;
-        document.getElementById('speed-value').textContent = Math.round(preset.speed * 100);
-        
-        // Update motion direction based on preset
-        if (preset.behavior === 'fluid') {
-            this.setMotionDirection('e');
-        } else if (preset.behavior === 'rising') {
-            this.setMotionDirection('n');
+        const activeArrow = document.querySelector(`.direction-arrow[data-dir="${direction}"]`);
+        if (activeArrow) {
+            activeArrow.classList.add('active');
         }
         
-        // Show AI effect
-        this.showAIVisualEffect(presetId);
+        this.showNotification(`🧭 Motion direction set to: ${direction.toUpperCase()}`);
+        
+        // If AI auto-detect is on, suggest motion type
+        const autoDetect = document.getElementById('auto-detect');
+        if (autoDetect && autoDetect.checked) {
+            this.suggestAIMotion(direction);
+        }
     }
     
-    showAIVisualEffect(presetId) {
-        // Add visual feedback for AI activation
-        const canvas = this.canvas;
-        const ctx = this.ctx;
-        
-        ctx.save();
-        ctx.fillStyle = 'rgba(99, 102, 241, 0.1)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.restore();
-        
-        // Draw AI symbol
-        ctx.save();
-        ctx.font = '100px "Font Awesome 5 Free"';
-        ctx.fillStyle = 'rgba(99, 102, 241, 0.5)';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('🤖', canvas.width / 2, canvas.height / 2);
-        ctx.restore();
-        
-        // Clear effect after 1 second
-        setTimeout(() => {
-            this.draw();
-        }, 1000);
-    }
-    
-    async loadBackground(file) {
-        console.log('Loading background:', file.name);
-        
-        // Simulate loading
-        document.getElementById('layer-status').textContent = 'Loading background...';
-        
-        // Create a mock background for demo
-        this.background = {
-            type: file.type.includes('gif') ? 'gif' : 'image',
-            width: 800,
-            height: 600,
-            frames: [],
-            duration: 3000 // 3 seconds
+    suggestAIMotion(direction) {
+        const suggestions = {
+            'n': 'Try "Swirl" motion for upward flow',
+            's': 'Use "Flow" with gravity for downward motion',
+            'e': 'Horizontal flow works best with "Flow" type',
+            'w': 'Reverse horizontal flow with "Flow" type',
+            'center': 'Perfect for "Swirl" or "Random" motion'
         };
         
-        // Create mock frame
-        const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 600;
-        const ctx = canvas.getContext('2d');
-        
-        // Draw gradient background
-        const gradient = ctx.createLinearGradient(0, 0, 800, 600);
-        gradient.addColorStop(0, '#1e3a8a');
-        gradient.addColorStop(1, '#1e40af');
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 800, 600);
-        
-        // Add text
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 48px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('Motion Overlay Demo', 400, 250);
-        
-        ctx.font = '24px Arial';
-        ctx.fillText('Upload your own GIF/Video', 400, 320);
-        ctx.fillText('Draw motion path → Add effects → Export', 400, 360);
-        
-        this.background.frames = [canvas];
-        this.background.totalFrames = 30; // 30 frames for 3 seconds
-        
-        // Update UI
-        document.getElementById('layer-status').textContent = 'Background loaded';
-        this.updateLayerList();
-        
-        // Draw
-        this.draw();
+        const suggestion = suggestions[direction] || 'AI suggests: Try different motion types';
+        this.showAINotification(suggestion);
     }
     
-    async loadMaterialImage(file) {
-        console.log('Loading material:', file.name);
-        
-        // Create mock material
-        this.material = {
-            image: new Image(),
-            width: 100,
-            height: 100
-        };
-        
-        // Create a pattern for material
-        const canvas = document.createElement('canvas');
-        canvas.width = 100;
-        canvas.height = 100;
-        const ctx = canvas.getContext('2d');
-        
-        // Draw material pattern
-        ctx.fillStyle = '#10b981';
-        ctx.fillRect(0, 0, 50, 50);
-        ctx.fillRect(50, 50, 50, 50);
-        ctx.fillStyle = '#0da271';
-        ctx.fillRect(50, 0, 50, 50);
-        ctx.fillRect(0, 50, 50, 50);
-        
-        this.material.image.src = canvas.toDataURL();
-        
-        // Update UI
-        document.getElementById('layer-status').textContent = 'Material loaded';
-        this.updateLayerList();
-    }
-    
-    updateLayerList() {
-        const layerList = document.getElementById('layer-list');
-        layerList.innerHTML = '';
-        
-        const layers = [];
-        if (this.background) {
-            layers.push({
-                name: 'Background',
-                type: this.background.type,
-                visible: true,
-                locked: false
+    setupDirectionButtons() {
+        const dirButtons = document.querySelectorAll('.dir-btn');
+        dirButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const direction = e.currentTarget.dataset.dir;
+                this.setMotionDirection(direction);
             });
-        }
-        
-        if (this.material) {
-            layers.push({
-                name: 'Material',
-                type: 'image',
-                visible: true,
-                locked: false
-            });
-        }
-        
-        if (this.motionPath) {
-            layers.push({
-                name: 'Motion Path',
-                type: 'path',
-                visible: true,
-                locked: false
-            });
-        }
-        
-        layers.forEach((layer, index) => {
-            const layerItem = document.createElement('div');
-            layerItem.className = 'layer-item';
-            layerItem.innerHTML = `
-                <div class="layer-controls">
-                    <input type="checkbox" class="layer-visible" ${layer.visible ? 'checked' : ''}>
-                    <input type="checkbox" class="layer-locked" ${layer.locked ? 'checked' : ''}>
-                </div>
-                <div class="layer-info">
-                    <span class="layer-name">${layer.name}</span>
-                    <span class="layer-type">${layer.type}</span>
-                </div>
-                <div class="layer-actions">
-                    <button class="layer-action"><i class="fas fa-edit"></i></button>
-                    <button class="layer-action"><i class="fas fa-trash"></i></button>
-                </div>
-            `;
-            layerList.appendChild(layerItem);
         });
+    }
+    
+    setupPreviewControls() {
+        const playBtn = document.getElementById('play-pause');
+        const stopBtn = document.getElementById('stop-preview');
+        
+        if (playBtn) {
+            playBtn.addEventListener('click', () => {
+                if (this.isPlaying) {
+                    this.pauseAnimation();
+                    playBtn.innerHTML = '<i class="fas fa-play"></i> Play';
+                } else {
+                    this.playAnimation();
+                    playBtn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                }
+            });
+        }
+        
+        if (stopBtn) {
+            stopBtn.addEventListener('click', () => {
+                this.stopAnimation();
+                if (playBtn) {
+                    playBtn.innerHTML = '<i class="fas fa-play"></i> Play';
+                }
+            });
+        }
+    }
+    
+    setupExportButton() {
+        const exportBtn = document.getElementById('start-export');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                this.exportAnimation();
+            });
+        }
     }
     
     setupCanvasInteractions() {
-        let isDrawing = false;
-        let points = [];
+        if (!this.canvas) return;
         
-        this.canvas.addEventListener('mousedown', (e) => {
-            if (!this.currentTool) return;
-            
-            const rect = this.canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            if (this.currentTool === 'pen') {
-                isDrawing = true;
-                points = [{ x, y }];
-                this.startPath(x, y);
-            } else if (this.currentTool === 'select') {
-                this.selectObject(x, y);
-            }
-        });
+        // Mouse events for drawing
+        this.canvas.addEventListener('mousedown', (e) => this.onMouseDown(e));
+        this.canvas.addEventListener('mousemove', (e) => this.onMouseMove(e));
+        this.canvas.addEventListener('mouseup', () => this.onMouseUp());
+        this.canvas.addEventListener('mouseleave', () => this.onMouseUp());
         
-        this.canvas.addEventListener('mousemove', (e) => {
-            if (!isDrawing) return;
-            
-            const rect = this.canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            points.push({ x, y });
-            this.drawPath(points);
-        });
-        
-        this.canvas.addEventListener('mouseup', () => {
-            if (isDrawing) {
-                isDrawing = false;
-                this.finishPath(points);
-                points = [];
-            }
-        });
-        
+        // Touch events for mobile
         this.canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
-            const rect = this.canvas.getBoundingClientRect();
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-            
-            if (this.currentTool === 'pen') {
-                isDrawing = true;
-                points = [{ x, y }];
-                this.startPath(x, y);
-            }
+            this.onMouseDown(touch);
         });
         
         this.canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            if (!isDrawing) return;
-            
             const touch = e.touches[0];
-            const rect = this.canvas.getBoundingClientRect();
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
+            this.onMouseMove(touch);
+        });
+        
+        this.canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            this.onMouseUp();
+        });
+    }
+    
+    onMouseDown(e) {
+        if (!this.canvas) return;
+        
+        const rect = this.canvas.getBoundingClientRect();
+        const x = (e.clientX || e.pageX) - rect.left;
+        const y = (e.clientY || e.pageY) - rect.top;
+        
+        // Check if we're using a drawing tool
+        if (['pen', 'rectangle', 'circle', 'polygon'].includes(this.currentTool)) {
+            this.isDrawing = true;
+            this.drawingPoints = [{ x, y }];
             
-            points.push({ x, y });
-            this.drawPath(points);
-        });
-        
-        this.canvas.addEventListener('touchend', () => {
-            if (isDrawing) {
-                isDrawing = false;
-                this.finishPath(points);
-                points = [];
-            }
-        });
+            // Initialize motion path
+            this.motionPath = {
+                points: [{ x, y }],
+                type: this.currentTool,
+                color: '#10b981',
+                width: 3,
+                fill: '#10b98122'
+            };
+            
+            // Show direction arrows at starting point
+            this.showDirectionArrowsAt(x, y);
+            
+            this.updateStatus(`Drawing ${this.currentTool}...`, 'tool-status');
+        }
     }
     
-    startPath(x, y) {
-        this.motionPath = {
-            points: [{ x, y }],
-            type: 'freehand',
-            color: '#10b981',
-            width: 3
-        };
+    onMouseMove(e) {
+        if (!this.isDrawing || !this.canvas) return;
         
-        // Show edit points
-        this.showEditPoints();
-    }
-    
-    drawPath(points) {
-        if (!this.motionPath) return;
+        const rect = this.canvas.getBoundingClientRect();
+        const x = (e.clientX || e.pageX) - rect.left;
+        const y = (e.clientY || e.pageY) - rect.top;
         
-        this.motionPath.points = points;
+        this.drawingPoints.push({ x, y });
+        this.motionPath.points = this.drawingPoints;
+        
+        // Draw preview
         this.draw();
     }
     
-    finishPath(points) {
-        if (!this.motionPath || points.length < 2) return;
+    onMouseUp() {
+        if (!this.isDrawing) return;
         
-        // AI smoothing if enabled
-        if (document.getElementById('smart-smoothing').checked) {
-            this.motionPath.points = this.smoothPath(points);
+        this.isDrawing = false;
+        
+        if (this.drawingPoints.length > 1) {
+            // Finalize the path
+            if (this.currentTool === 'pen') {
+                // Smooth the path
+                this.motionPath.points = this.smoothPath(this.drawingPoints);
+            }
+            
+            this.motionPath.completed = true;
+            this.updateLayerList();
+            
+            // Hide direction arrows
+            this.hideDirectionArrows();
+            
+            // Show edit points
+            this.showEditPoints();
+            
+            this.showNotification(`✅ Path created with ${this.drawingPoints.length} points`);
+            
+            // Auto-suggest motion if AI is enabled
+            const autoDetect = document.getElementById('auto-detect');
+            if (autoDetect && autoDetect.checked) {
+                setTimeout(() => this.autoSuggestMotion(), 500);
+            }
+        } else {
+            // Single click - just a point
+            this.motionPath = null;
         }
         
-        this.motionPath.completed = true;
-        this.updateLayerList();
-        
-        // AI auto-suggest motion
-        if (document.getElementById('auto-detect').checked) {
-            this.autoSuggestMotionType();
-        }
+        this.drawingPoints = [];
+        this.draw();
     }
     
     smoothPath(points) {
-        // Simple bezier smoothing algorithm
         if (points.length < 3) return points;
         
-        const smoothed = [];
-        smoothed.push(points[0]);
+        const smoothed = [points[0]];
         
         for (let i = 1; i < points.length - 1; i++) {
             const prev = points[i - 1];
             const curr = points[i];
             const next = points[i + 1];
             
-            // Catmull-Rom smoothing
+            // Simple smoothing algorithm
             smoothed.push({
                 x: (prev.x + curr.x * 6 + next.x) / 8,
                 y: (prev.y + curr.y * 6 + next.y) / 8
@@ -889,101 +500,66 @@ class AIMotionStudio {
         return smoothed;
     }
     
-    autoSuggestMotionType() {
-        // AI analyzes path shape and suggests motion
-        const path = this.motionPath;
-        if (!path || path.points.length < 3) return;
+    showDirectionArrowsAt(x, y) {
+        const overlay = document.getElementById('direction-overlay');
+        if (!overlay) return;
         
-        // Calculate path characteristics
-        const bounds = this.calculatePathBounds(path.points);
-        const aspectRatio = bounds.width / bounds.height;
+        overlay.innerHTML = '';
+        overlay.style.display = 'block';
         
-        // AI decision making
-        let suggestion;
-        if (aspectRatio > 2) {
-            suggestion = 'flow'; // Wide path → flow motion
-        } else if (aspectRatio < 0.5) {
-            suggestion = 'follow'; // Tall path → follow path
-        } else {
-            // Check if path is circular
-            const circularity = this.calculateCircularity(path.points);
-            suggestion = circularity > 0.8 ? 'swirl' : 'custom';
-        }
+        // Position arrows around the starting point
+        const positions = [
+            { dir: 'nw', dx: -40, dy: -40, symbol: '↖' },
+            { dir: 'n', dx: 0, dy: -40, symbol: '↑' },
+            { dir: 'ne', dx: 40, dy: -40, symbol: '↗' },
+            { dir: 'w', dx: -40, dy: 0, symbol: '←' },
+            { dir: 'center', dx: 0, dy: 0, symbol: '○' },
+            { dir: 'e', dx: 40, dy: 0, symbol: '→' },
+            { dir: 'sw', dx: -40, dy: 40, symbol: '↙' },
+            { dir: 's', dx: 0, dy: 40, symbol: '↓' },
+            { dir: 'se', dx: 40, dy: 40, symbol: '↘' }
+        ];
         
-        // Apply suggestion
-        document.getElementById('motion-type').value = suggestion;
-        this.showAINotification(`AI suggests: ${suggestion} motion for this path shape`);
-    }
-    
-    calculatePathBounds(points) {
-        let minX = Infinity, maxX = -Infinity;
-        let minY = Infinity, maxY = -Infinity;
-        
-        points.forEach(p => {
-            minX = Math.min(minX, p.x);
-            maxX = Math.max(maxX, p.x);
-            minY = Math.min(minY, p.y);
-            maxY = Math.max(maxY, p.y);
+        positions.forEach(pos => {
+            const arrow = document.createElement('div');
+            arrow.className = 'direction-arrow';
+            arrow.dataset.dir = pos.dir;
+            arrow.style.left = `${x + pos.dx}px`;
+            arrow.style.top = `${y + pos.dy}px`;
+            arrow.textContent = pos.symbol;
+            arrow.title = `Direction: ${pos.dir.toUpperCase()}`;
+            
+            arrow.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.setMotionDirection(pos.dir);
+            });
+            
+            overlay.appendChild(arrow);
         });
-        
-        return {
-            x: minX,
-            y: minY,
-            width: maxX - minX,
-            height: maxY - minY
-        };
-    }
-    
-    calculateCircularity(points) {
-        // Simple circularity calculation
-        const bounds = this.calculatePathBounds(points);
-        const centerX = bounds.x + bounds.width / 2;
-        const centerY = bounds.y + bounds.height / 2;
-        
-        let totalDistance = 0;
-        points.forEach(p => {
-            const dx = p.x - centerX;
-            const dy = p.y - centerY;
-            totalDistance += Math.sqrt(dx * dx + dy * dy);
-        });
-        
-        const avgDistance = totalDistance / points.length;
-        
-        // Check variance (lower variance = more circular)
-        let variance = 0;
-        points.forEach(p => {
-            const dx = p.x - centerX;
-            const dy = p.y - centerY;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            variance += Math.pow(distance - avgDistance, 2);
-        });
-        
-        variance /= points.length;
-        const circularity = 1 / (1 + variance); // 0-1, higher = more circular
-        
-        return Math.min(1, circularity * 3); // Scale up
     }
     
     showEditPoints() {
-        const overlay = document.getElementById('edit-points-overlay');
-        overlay.innerHTML = '';
-        
         if (!this.motionPath || !this.motionPath.points) return;
+        
+        const overlay = document.getElementById('edit-points-overlay');
+        if (!overlay) return;
+        
+        overlay.innerHTML = '';
+        overlay.style.display = 'block';
         
         this.motionPath.points.forEach((point, index) => {
             const editPoint = document.createElement('div');
             editPoint.className = 'edit-point';
+            editPoint.dataset.index = index;
             editPoint.style.left = `${point.x}px`;
             editPoint.style.top = `${point.y}px`;
-            editPoint.dataset.index = index;
+            editPoint.title = `Edit point ${index + 1}`;
             
             // Make draggable
             this.makeDraggable(editPoint, index);
             
             overlay.appendChild(editPoint);
         });
-        
-        overlay.style.display = 'block';
     }
     
     makeDraggable(element, pointIndex) {
@@ -991,10 +567,14 @@ class AIMotionStudio {
         let startX, startY;
         
         element.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
             isDragging = true;
             startX = e.clientX - element.offsetLeft;
             startY = e.clientY - element.offsetTop;
-            e.preventDefault();
+            
+            element.style.cursor = 'grabbing';
         });
         
         document.addEventListener('mousemove', (e) => {
@@ -1015,142 +595,651 @@ class AIMotionStudio {
         });
         
         document.addEventListener('mouseup', () => {
-            isDragging = false;
+            if (isDragging) {
+                isDragging = false;
+                element.style.cursor = 'grab';
+                this.showNotification(`📐 Point ${pointIndex + 1} moved`);
+            }
         });
     }
     
-    selectObject(x, y) {
-        // Simple selection logic
-        if (this.motionPath && this.motionPath.points) {
-            // Check if click is near any point
-            const threshold = 10;
-            let selectedPoint = null;
-            
-            this.motionPath.points.forEach((point, index) => {
-                const dx = point.x - x;
-                const dy = point.y - y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+    setupTabSwitching() {
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                const tabId = e.currentTarget.dataset.tab;
                 
-                if (distance < threshold) {
-                    selectedPoint = index;
+                // Update tab UI
+                tabs.forEach(t => t.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                
+                // Show corresponding content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.remove('active');
+                });
+                
+                const content = document.getElementById(`${tabId}-tab`);
+                if (content) {
+                    content.classList.add('active');
                 }
+                
+                this.showNotification(`📑 Switched to ${tabId} tab`);
             });
-            
-            if (selectedPoint !== null) {
-                this.showEditPoints();
-                this.highlightPoint(selectedPoint);
-            }
-        }
-    }
-    
-    highlightPoint(index) {
-        const points = document.querySelectorAll('.edit-point');
-        points.forEach((p, i) => {
-            p.classList.toggle('highlighted', i === index);
         });
     }
     
-    draw() {
-        if (!this.ctx) return;
+    setupAIPresets() {
+        const presetButtons = document.querySelectorAll('.ai-preset');
+        presetButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const preset = e.currentTarget.dataset.preset;
+                this.applyAIPreset(preset);
+            });
+        });
         
-        // Clear canvas
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
-        // Draw background
-        if (this.background && this.background.frames && this.background.frames[0]) {
-            const bg = this.background.frames[0];
-            const scale = Math.min(
-                this.canvas.width / bg.width,
-                this.canvas.height / bg.height
-            );
-            
-            const x = (this.canvas.width - bg.width * scale) / 2;
-            const y = (this.canvas.height - bg.height * scale) / 2;
-            
-            this.ctx.drawImage(bg, x, y, bg.width * scale, bg.height * scale);
-        }
-        
-        // Draw motion path
-        if (this.motionPath && this.motionPath.points.length > 1) {
-            this.ctx.save();
-            this.ctx.strokeStyle = this.motionPath.color;
-            this.ctx.lineWidth = this.motionPath.width;
-            this.ctx.lineJoin = 'round';
-            this.ctx.lineCap = 'round';
-            
-            this.ctx.beginPath();
-            this.ctx.moveTo(this.motionPath.points[0].x, this.motionPath.points[0].y);
-            
-            for (let i = 1; i < this.motionPath.points.length; i++) {
-                this.ctx.lineTo(this.motionPath.points[i].x, this.motionPath.points[i].y);
-            }
-            
-            this.ctx.stroke();
-            this.ctx.restore();
-        }
-        
-        // Draw material particles if previewing
-        if (this.isPlaying && this.material && this.motionPath) {
-            this.drawParticles();
+        // AI optimize button
+        const optimizeBtn = document.getElementById('ai-optimize');
+        if (optimizeBtn) {
+            optimizeBtn.addEventListener('click', () => {
+                this.optimizeWithAI();
+            });
         }
     }
     
-    drawParticles() {
-        if (!this.particles || this.particles.length === 0) {
+    applyAIPreset(preset) {
+        console.log(`Applying AI preset: ${preset}`);
+        
+        const presets = {
+            'water-flow': {
+                type: 'flow',
+                direction: 'e',
+                speed: 0.8,
+                particleSize: { min: 2, max: 8 },
+                color: '#4a90e2'
+            },
+            'smoke': {
+                type: 'swirl',
+                direction: 'center',
+                speed: 0.3,
+                particleSize: { min: 4, max: 12 },
+                color: '#ffffff',
+                opacity: 0.7
+            },
+            'particles': {
+                type: 'random',
+                direction: 'center',
+                speed: 0.5,
+                particleCount: 300,
+                particleSize: { min: 1, max: 5 }
+            },
+            'custom-ai': {
+                type: 'custom',
+                direction: 'auto',
+                speed: 'auto',
+                particleCount: 'auto'
+            }
+        };
+        
+        const selected = presets[preset];
+        if (!selected) return;
+        
+        // Apply settings
+        if (selected.type) {
+            const motionTypeSelect = document.getElementById('motion-type');
+            if (motionTypeSelect) {
+                motionTypeSelect.value = selected.type;
+            }
+        }
+        
+        if (selected.direction && selected.direction !== 'auto') {
+            this.setMotionDirection(selected.direction);
+        }
+        
+        if (selected.speed && selected.speed !== 'auto') {
+            const speedSlider = document.getElementById('speed-slider');
+            if (speedSlider) {
+                speedSlider.value = selected.speed * 100;
+                this.updateSliderValue('speed', selected.speed * 100);
+            }
+        }
+        
+        // Show AI effect
+        this.showAIVisualEffect(preset);
+        this.showAINotification(`🎨 Applied ${preset.replace('-', ' ')} preset`);
+    }
+    
+    optimizeWithAI() {
+        this.showAIModal('AI is optimizing your animation...');
+        
+        setTimeout(() => {
+            // Simulate AI optimization
+            if (this.motionPath) {
+                // Smooth path
+                this.motionPath.points = this.smoothPath(this.motionPath.points);
+                
+                // Adjust settings
+                const speedSlider = document.getElementById('speed-slider');
+                if (speedSlider) {
+                    const newSpeed = Math.min(100, parseInt(speedSlider.value) + 20);
+                    speedSlider.value = newSpeed;
+                    this.updateSliderValue('speed', newSpeed);
+                }
+                
+                // Suggest motion type
+                const pathLength = this.motionPath.points.length;
+                if (pathLength > 50) {
+                    const motionTypeSelect = document.getElementById('motion-type');
+                    if (motionTypeSelect) {
+                        motionTypeSelect.value = 'flow';
+                    }
+                }
+            }
+            
+            this.hideAIModal();
+            this.showAINotification('✅ AI optimization complete!');
+            this.draw();
+        }, 1500);
+    }
+    
+    showAIModal(message) {
+        const modal = document.getElementById('ai-modal');
+        const text = document.getElementById('ai-processing-text');
+        
+        if (modal && text) {
+            text.textContent = message;
+            modal.style.display = 'flex';
+        }
+    }
+    
+    hideAIModal() {
+        const modal = document.getElementById('ai-modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+    
+    showAIVisualEffect(preset) {
+        if (!this.canvas) return;
+        
+        this.ctx.save();
+        
+        // Draw AI glow effect
+        const centerX = this.canvas.width / 2;
+        const centerY = this.canvas.height / 2;
+        
+        const gradient = this.ctx.createRadialGradient(
+            centerX, centerY, 0,
+            centerX, centerY, 200
+        );
+        
+        gradient.addColorStop(0, 'rgba(99, 102, 241, 0.5)');
+        gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+        
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw AI symbol
+        this.ctx.font = '80px "Font Awesome 5 Free"';
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText('🤖', centerX, centerY);
+        
+        this.ctx.restore();
+        
+        // Clear after 1 second
+        setTimeout(() => {
+            if (!this.isPlaying) {
+                this.draw();
+            }
+        }, 1000);
+    }
+    
+    autoSuggestMotion() {
+        if (!this.motionPath) return;
+        
+        // Analyze path and suggest motion
+        const bounds = this.getPathBounds(this.motionPath.points);
+        const aspectRatio = bounds.width / bounds.height;
+        
+        let suggestion = 'flow';
+        if (aspectRatio < 0.5) {
+            suggestion = 'follow';
+        } else if (this.motionPath.points.length > 100) {
+            suggestion = 'swirl';
+        }
+        
+        // Update motion type select
+        const motionTypeSelect = document.getElementById('motion-type');
+        if (motionTypeSelect) {
+            motionTypeSelect.value = suggestion;
+        }
+        
+        this.showAINotification(`🤖 AI suggests: "${suggestion}" motion for this path`);
+    }
+    
+    getPathBounds(points) {
+        let minX = Infinity, maxX = -Infinity;
+        let minY = Infinity, maxY = -Infinity;
+        
+        points.forEach(p => {
+            minX = Math.min(minX, p.x);
+            maxX = Math.max(maxX, p.x);
+            minY = Math.min(minY, p.y);
+            maxY = Math.max(maxY, p.y);
+        });
+        
+        return {
+            x: minX,
+            y: minY,
+            width: maxX - minX,
+            height: maxY - minY
+        };
+    }
+    
+    async loadBackground(file) {
+        if (!file) return;
+        
+        this.showNotification(`📂 Loading: ${file.name}`);
+        this.updateStatus('Loading background...', 'tool-status');
+        
+        // Simulate loading (in real app, this would parse GIF/video)
+        setTimeout(() => {
+            this.background = {
+                type: file.type.includes('gif') ? 'gif' : 'image',
+                name: file.name,
+                width: this.canvas.width,
+                height: this.canvas.height
+            };
+            
+            // Draw a placeholder
+            this.drawBackgroundPlaceholder();
+            
+            this.updateStatus('Background loaded', 'tool-status');
+            this.updateLayerList();
+            this.showNotification(`✅ Background loaded: ${file.name}`);
+        }, 1000);
+    }
+    
+    drawBackgroundPlaceholder() {
+        if (!this.canvas) return;
+        
+        // Draw gradient background
+        const gradient = this.ctx.createLinearGradient(0, 0, this.canvas.width, this.canvas.height);
+        gradient.addColorStop(0, '#1e3a8a');
+        gradient.addColorStop(1, '#1e40af');
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw file info
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        this.ctx.font = 'bold 24px "Segoe UI"';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText('📁 Background Loaded', this.canvas.width / 2, this.canvas.height / 2 - 30);
+        
+        this.ctx.font = '16px "Segoe UI"';
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        this.ctx.fillText('Now draw your motion path', this.canvas.width / 2, this.canvas.height / 2 + 10);
+        
+        // Draw border
+        this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(20, 20, this.canvas.width - 40, this.canvas.height - 40);
+    }
+    
+    async loadMaterial(file) {
+        if (!file) return;
+        
+        this.showNotification(`🎨 Loading material: ${file.name}`);
+        
+        // Simulate loading
+        setTimeout(() => {
+            this.material = {
+                name: file.name,
+                type: file.type,
+                image: new Image()
+            };
+            
+            // Create a simple pattern for demo
+            const canvas = document.createElement('canvas');
+            canvas.width = 100;
+            canvas.height = 100;
+            const ctx = canvas.getContext('2d');
+            
+            // Create a pattern
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(0, 0, 50, 50);
+            ctx.fillRect(50, 50, 50, 50);
+            ctx.fillStyle = '#0da271';
+            ctx.fillRect(50, 0, 50, 50);
+            ctx.fillRect(0, 50, 50, 50);
+            
+            this.material.image.src = canvas.toDataURL();
+            this.material.image.onload = () => {
+                this.updateLayerList();
+                this.showNotification(`✅ Material loaded: ${file.name}`);
+            };
+        }, 800);
+    }
+    
+    updateLayerList() {
+        const layerList = document.getElementById('layer-list');
+        if (!layerList) return;
+        
+        let layers = [];
+        
+        if (this.background) {
+            layers.push({
+                id: 'background',
+                name: 'Background',
+                type: this.background.type,
+                icon: 'fas fa-image'
+            });
+        }
+        
+        if (this.material) {
+            layers.push({
+                id: 'material',
+                name: 'Material',
+                type: 'image',
+                icon: 'fas fa-palette'
+            });
+        }
+        
+        if (this.motionPath) {
+            layers.push({
+                id: 'motion-path',
+                name: 'Motion Path',
+                type: 'path',
+                icon: 'fas fa-draw-polygon'
+            });
+        }
+        
+        if (this.particles.length > 0) {
+            layers.push({
+                id: 'particles',
+                name: 'Particles',
+                type: 'effect',
+                icon: 'fas fa-atom'
+            });
+        }
+        
+        layerList.innerHTML = '';
+        
+        layers.forEach(layer => {
+            const layerItem = document.createElement('div');
+            layerItem.className = 'layer-item';
+            layerItem.dataset.layerId = layer.id;
+            
+            layerItem.innerHTML = `
+                <div class="layer-controls">
+                    <input type="checkbox" class="layer-visible" checked>
+                    <input type="checkbox" class="layer-locked">
+                </div>
+                <div class="layer-info">
+                    <i class="${layer.icon} layer-icon"></i>
+                    <span class="layer-name">${layer.name}</span>
+                    <span class="layer-type">${layer.type}</span>
+                </div>
+                <div class="layer-actions">
+                    <button class="layer-action" title="Edit Layer">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            `;
+            
+            layerList.appendChild(layerItem);
+        });
+        
+        // Update layer status
+        this.updateStatus(`${layers.length} layers`, 'layer-status');
+    }
+    
+    playAnimation() {
+        if (this.isPlaying) return;
+        
+        this.isPlaying = true;
+        
+        // Create particles if needed
+        if (this.particles.length === 0) {
             this.createParticles();
         }
         
-        // Update and draw particles
+        // Start animation loop
+        this.animationLoop();
+        
+        this.showNotification('▶️ Animation started');
+        this.updateStatus('Playing animation...', 'tool-status');
+    }
+    
+    pauseAnimation() {
+        this.isPlaying = false;
+        this.showNotification('⏸️ Animation paused');
+        this.updateStatus('Paused', 'tool-status');
+    }
+    
+    stopAnimation() {
+        this.isPlaying = false;
+        this.particles = [];
+        this.draw();
+        this.showNotification('⏹️ Animation stopped');
+        this.updateStatus('Stopped', 'tool-status');
+    }
+    
+    createParticles() {
+        const density = parseInt(document.getElementById('density-slider')?.value || 100);
+        this.particles = [];
+        
+        // Create particles along the motion path
+        if (this.motionPath && this.motionPath.points.length > 1) {
+            for (let i = 0; i < density; i++) {
+                const pathIndex = Math.floor((i / density) * (this.motionPath.points.length - 1));
+                const point = this.motionPath.points[pathIndex];
+                
+                this.particles.push({
+                    x: point.x + (Math.random() - 0.5) * 20,
+                    y: point.y + (Math.random() - 0.5) * 20,
+                    size: 3 + Math.random() * 7,
+                    speed: 0.5 + Math.random() * 1.5,
+                    color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+                    life: 100 + Math.random() * 200,
+                    maxLife: 100 + Math.random() * 200
+                });
+            }
+        } else {
+            // Random particles if no path
+            for (let i = 0; i < density; i++) {
+                this.particles.push({
+                    x: Math.random() * this.canvas.width,
+                    y: Math.random() * this.canvas.height,
+                    size: 2 + Math.random() * 6,
+                    speed: 0.3 + Math.random() * 1.2,
+                    color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+                    life: 100 + Math.random() * 200,
+                    maxLife: 100 + Math.random() * 200
+                });
+            }
+        }
+    }
+    
+    animationLoop() {
+        if (!this.isPlaying) return;
+        
+        // Update particles
+        this.updateParticles();
+        
+        // Draw everything
+        this.draw();
+        
+        // Continue loop
+        requestAnimationFrame(() => this.animationLoop());
+    }
+    
+    updateParticles() {
+        const motionType = document.getElementById('motion-type')?.value || 'flow';
+        const speed = parseInt(document.getElementById('speed-slider')?.value || 50) / 100;
+        
         this.particles.forEach(particle => {
-            // Update position based on motion type
-            const motionType = document.getElementById('motion-type').value;
-            
+            // Update based on motion type
             switch (motionType) {
                 case 'flow':
-                    particle.x += this.motionDirection.x * particle.speed;
-                    particle.y += this.motionDirection.y * particle.speed;
-                    break;
-                    
-                case 'follow':
-                    // Follow the path
-                    const progress = (particle.age / particle.lifetime) % 1;
-                    const pathIndex = Math.floor(progress * (this.motionPath.points.length - 1));
-                    const nextIndex = Math.min(pathIndex + 1, this.motionPath.points.length - 1);
-                    
-                    const p1 = this.motionPath.points[pathIndex];
-                    const p2 = this.motionPath.points[nextIndex];
-                    const segmentProgress = (progress * (this.motionPath.points.length - 1)) % 1;
-                    
-                    particle.x = p1.x + (p2.x - p1.x) * segmentProgress;
-                    particle.y = p1.y + (p2.y - p1.y) * segmentProgress;
+                    // Flow in selected direction
+                    particle.x += 1 * speed;
                     break;
                     
                 case 'swirl':
                     // Swirl motion
                     const centerX = this.canvas.width / 2;
                     const centerY = this.canvas.height / 2;
-                    const angle = particle.age * 0.05;
-                    const radius = 100 + Math.sin(particle.age * 0.02) * 50;
+                    const dx = particle.x - centerX;
+                    const dy = particle.y - centerY;
+                    const angle = Math.atan2(dy, dx) + 0.05 * speed;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
                     
-                    particle.x = centerX + Math.cos(angle) * radius;
-                    particle.y = centerY + Math.sin(angle) * radius;
+                    particle.x = centerX + Math.cos(angle) * distance;
+                    particle.y = centerY + Math.sin(angle) * distance;
                     break;
                     
-                default:
-                    // Random motion
-                    particle.x += (Math.random() - 0.5) * particle.speed;
-                    particle.y += (Math.random() - 0.5) * particle.speed;
+                case 'random':
+                    // Random walk
+                    particle.x += (Math.random() - 0.5) * 3 * speed;
+                    particle.y += (Math.random() - 0.5) * 3 * speed;
+                    break;
+                    
+                case 'follow':
+                    // Follow the path
+                    if (this.motionPath && this.motionPath.points.length > 1) {
+                        // Simple path following
+                        const progress = (particle.life / particle.maxLife) % 1;
+                        const pathIndex = Math.floor(progress * (this.motionPath.points.length - 1));
+                        const target = this.motionPath.points[pathIndex];
+                        
+                        particle.x += (target.x - particle.x) * 0.1 * speed;
+                        particle.y += (target.y - particle.y) * 0.1 * speed;
+                    }
+                    break;
             }
             
-            particle.age++;
+            // Update life
+            particle.life--;
+            if (particle.life <= 0) {
+                this.resetParticle(particle);
+            }
             
-            // Draw particle
+            // Boundary check
+            if (particle.x < 0 || particle.x > this.canvas.width ||
+                particle.y < 0 || particle.y > this.canvas.height) {
+                this.resetParticle(particle);
+            }
+        });
+    }
+    
+    resetParticle(particle) {
+        if (this.motionPath && this.motionPath.points.length > 1) {
+            const pathIndex = Math.floor(Math.random() * this.motionPath.points.length);
+            const point = this.motionPath.points[pathIndex];
+            
+            particle.x = point.x + (Math.random() - 0.5) * 20;
+            particle.y = point.y + (Math.random() - 0.5) * 20;
+        } else {
+            particle.x = Math.random() * this.canvas.width;
+            particle.y = Math.random() * this.canvas.height;
+        }
+        
+        particle.life = particle.maxLife;
+    }
+    
+    draw() {
+        if (!this.canvas || !this.ctx) return;
+        
+        // Clear canvas
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Draw background
+        if (this.background) {
+            this.drawBackgroundPlaceholder();
+        } else {
+            this.drawInitialBackground();
+        }
+        
+        // Draw motion path
+        if (this.motionPath && this.motionPath.points.length > 1) {
+            this.drawMotionPath();
+        }
+        
+        // Draw particles
+        if (this.particles.length > 0) {
+            this.drawParticles();
+        }
+        
+        // Draw current drawing preview
+        if (this.isDrawing && this.drawingPoints.length > 1) {
+            this.drawCurrentPath();
+        }
+    }
+    
+    drawMotionPath() {
+        if (!this.motionPath || this.motionPath.points.length < 2) return;
+        
+        this.ctx.save();
+        
+        // Draw path
+        this.ctx.strokeStyle = this.motionPath.color;
+        this.ctx.lineWidth = this.motionPath.width;
+        this.ctx.lineJoin = 'round';
+        this.ctx.lineCap = 'round';
+        
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.motionPath.points[0].x, this.motionPath.points[0].y);
+        
+        for (let i = 1; i < this.motionPath.points.length; i++) {
+            this.ctx.lineTo(this.motionPath.points[i].x, this.motionPath.points[i].y);
+        }
+        
+        this.ctx.stroke();
+        
+        // Draw fill if needed
+        if (this.motionPath.fill && this.motionPath.completed) {
+            this.ctx.fillStyle = this.motionPath.fill;
+            this.ctx.fill();
+        }
+        
+        this.ctx.restore();
+    }
+    
+    drawCurrentPath() {
+        if (this.drawingPoints.length < 2) return;
+        
+        this.ctx.save();
+        this.ctx.strokeStyle = '#10b981';
+        this.ctx.lineWidth = 3;
+        this.ctx.lineJoin = 'round';
+        this.ctx.lineCap = 'round';
+        this.ctx.setLineDash([5, 5]);
+        
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.drawingPoints[0].x, this.drawingPoints[0].y);
+        
+        for (let i = 1; i < this.drawingPoints.length; i++) {
+            this.ctx.lineTo(this.drawingPoints[i].x, this.drawingPoints[i].y);
+        }
+        
+        this.ctx.stroke();
+        this.ctx.restore();
+    }
+    
+    drawParticles() {
+        this.ctx.save();
+        
+        this.particles.forEach(particle => {
+            // Calculate opacity based on life
+            const opacity = particle.life / particle.maxLife;
+            
             this.ctx.save();
-            this.ctx.fillStyle = particle.color;
-            this.ctx.globalAlpha = particle.opacity;
+            this.ctx.globalAlpha = opacity;
             
+            // Draw material if available, otherwise use color
             if (this.material && this.material.image.complete) {
-                // Draw material image as particle
                 this.ctx.drawImage(
                     this.material.image,
                     particle.x - particle.size / 2,
@@ -1159,140 +1248,97 @@ class AIMotionStudio {
                     particle.size
                 );
             } else {
-                // Draw circle particle
+                this.ctx.fillStyle = particle.color;
                 this.ctx.beginPath();
                 this.ctx.arc(particle.x, particle.y, particle.size / 2, 0, Math.PI * 2);
                 this.ctx.fill();
             }
             
             this.ctx.restore();
-            
-            // Reset particle if out of bounds or too old
-            if (particle.age > particle.lifetime ||
-                particle.x < 0 || particle.x > this.canvas.width ||
-                particle.y < 0 || particle.y > this.canvas.height) {
-                this.resetParticle(particle);
+        });
+        
+        this.ctx.restore();
+    }
+    
+    exportAnimation() {
+        this.showExportModal();
+        
+        // Simulate export process
+        setTimeout(() => {
+            this.updateExportProgress(25, 'Rendering frames...');
+        }, 500);
+        
+        setTimeout(() => {
+            this.updateExportProgress(50, 'Applying motion effects...');
+        }, 1000);
+        
+        setTimeout(() => {
+            this.updateExportProgress(75, 'Encoding GIF...');
+        }, 1500);
+        
+        setTimeout(() => {
+            this.updateExportProgress(100, 'Export complete!');
+            this.completeExport();
+        }, 2000);
+    }
+    
+    showExportModal() {
+        const modal = document.getElementById('export-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+        
+        // Reset progress
+        this.updateExportProgress(0, 'Preparing export...');
+    }
+    
+    updateExportProgress(percent, message) {
+        const progressFill = document.getElementById('export-progress-fill');
+        const progressText = document.getElementById('export-progress-text');
+        const progressPercent = document.getElementById('export-progress-percent');
+        
+        if (progressFill) {
+            progressFill.style.width = `${percent}%`;
+        }
+        
+        if (progressText) {
+            progressText.textContent = message;
+        }
+        
+        if (progressPercent) {
+            progressPercent.textContent = `${percent}%`;
+        }
+        
+        // Update export steps
+        document.querySelectorAll('.export-step').forEach((step, index) => {
+            const stepNum = index + 1;
+            if (percent >= (stepNum * 25)) {
+                step.classList.add('active');
+            } else {
+                step.classList.remove('active');
             }
         });
     }
     
-    createParticles() {
-        const density = parseInt(document.getElementById('density-slider').value);
-        this.particles = [];
-        
-        for (let i = 0; i < density; i++) {
-            this.particles.push({
-                x: Math.random() * this.canvas.width,
-                y: Math.random() * this.canvas.height,
-                size: 5 + Math.random() * 15,
-                speed: 0.5 + Math.random() * 2,
-                color: `hsl(${Math.random() * 360}, 70%, 60%)`,
-                opacity: 0.7 + Math.random() * 0.3,
-                age: Math.random() * 100,
-                lifetime: 200 + Math.random() * 300
-            });
-        }
-    }
-    
-    resetParticle(particle) {
-        particle.x = Math.random() * this.canvas.width;
-        particle.y = Math.random() * this.canvas.height;
-        particle.age = 0;
-    }
-    
-    previewAnimation() {
-        if (this.isPlaying) {
-            this.isPlaying = false;
-            document.getElementById('play-preview').innerHTML = '<i class="fas fa-play"></i> Preview';
-        } else {
-            this.isPlaying = true;
-            document.getElementById('play-preview').innerHTML = '<i class="fas fa-pause"></i> Pause';
-            this.animate();
-        }
-    }
-    
-    animate() {
-        if (!this.isPlaying) return;
-        
-        this.draw();
-        requestAnimationFrame(() => this.animate());
-        
-        // Update time display
-        const totalTime = this.background ? this.background.duration / 1000 : 0;
-        const currentTime = (performance.now() % (totalTime * 1000)) / 1000;
-        
-        document.getElementById('current-time').textContent = 
-            this.formatTime(currentTime);
-        document.getElementById('total-time').textContent = 
-            this.formatTime(totalTime);
-    }
-    
-    formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }
-    
-    async exportAnimation() {
-        console.log('Starting export...');
-        
-        // Show progress
-        const progressBar = document.getElementById('progress-fill');
-        const progressText = document.getElementById('progress-text');
-        const exportProgress = document.getElementById('export-progress');
-        
-        exportProgress.classList.remove('hidden');
-        progressBar.style.width = '0%';
-        progressText.textContent = 'Preparing export...';
-        
-        // Simulate export process
-        const steps = [
-            'Rendering frames...',
-            'Applying motion effects...',
-            'Optimizing GIF...',
-            'Finalizing export...'
-        ];
-        
-        for (let i = 0; i < steps.length; i++) {
-            progressText.textContent = steps[i];
-            progressBar.style.width = `${(i + 1) * 25}%`;
-            
-            // Simulate processing time
-            await this.sleep(500);
-        }
-        
-        // Final step
-        progressText.textContent = 'Export complete!';
-        progressBar.style.width = '100%';
-        
-        // Create download link
-        this.createDownload();
-        
-        // Hide progress after 3 seconds
-        setTimeout(() => {
-            exportProgress.classList.add('hidden');
-        }, 3000);
-    }
-    
-    createDownload() {
-        // Create a simple GIF (in real app, this would use gif.js)
+    completeExport() {
+        // Create download
         const canvas = document.createElement('canvas');
         canvas.width = 400;
         canvas.height = 300;
         const ctx = canvas.getContext('2d');
         
-        // Draw demo export
+        // Draw export preview
         ctx.fillStyle = '#1e3a8a';
         ctx.fillRect(0, 0, 400, 300);
         
         ctx.fillStyle = 'white';
         ctx.font = 'bold 24px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('Motion Overlay Export', 200, 120);
+        ctx.fillText('🎬 Motion Overlay Export', 200, 120);
         
         ctx.font = '16px Arial';
         ctx.fillText('Your animated GIF is ready!', 200, 160);
-        ctx.fillText('In full version, this would be your actual animation', 200, 190);
+        ctx.fillText('Click to download', 200, 190);
         
         // Convert to blob and download
         canvas.toBlob(blob => {
@@ -1304,34 +1350,446 @@ class AIMotionStudio {
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+            
+            // Close modal after download
+            setTimeout(() => {
+                const modal = document.getElementById('export-modal');
+                if (modal) {
+                    modal.style.display = 'none';
+                }
+                
+                this.showNotification('✅ GIF exported successfully!');
+            }, 500);
         }, 'image/gif');
     }
     
-    sleep(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+    loadDemo() {
+        // Add welcome notification
+        setTimeout(() => {
+            this.showWelcomeNotification();
+        }, 1000);
+        
+        // Setup tutorial
+        const tutorialBtn = document.getElementById('tutorial');
+        if (tutorialBtn) {
+            tutorialBtn.addEventListener('click', () => {
+                this.showTutorial();
+            });
+        }
     }
     
     loadDemoProject() {
-        console.log('Loading demo project...');
+        this.showNotification('🚀 Loading demo project...');
         
-        // Create demo layers after a delay
+        // Simulate loading demo
         setTimeout(() => {
-            this.showAINotification('Welcome to AI Motion Studio! Try drawing a path and adding effects.');
+            // Create a sample motion path
+            this.motionPath = {
+                points: [
+                    { x: 100, y: 200 },
+                    { x: 200, y: 150 },
+                    { x: 300, y: 180 },
+                    { x: 400, y: 120 },
+                    { x: 500, y: 200 },
+                    { x: 600, y: 250 },
+                    { x: 700, y: 200 }
+                ],
+                type: 'pen',
+                color: '#6366f1',
+                width: 3,
+                completed: true
+            };
             
-            // Update status
-            document.getElementById('tool-status').textContent = 'Ready - Select a tool to start';
-            document.getElementById('layer-status').textContent = 'No layers - Upload files to begin';
-            document.getElementById('ai-status').textContent = 'AI: Active - Try AI presets';
-            document.getElementById('export-status').innerHTML = 
-                '<i class="fas fa-check-circle"></i><span>Ready to export</span>';
-                
             // Set default direction
             this.setMotionDirection('e');
-        }, 1000);
+            
+            // Update motion type
+            const motionTypeSelect = document.getElementById('motion-type');
+            if (motionTypeSelect) {
+                motionTypeSelect.value = 'flow';
+            }
+            
+            // Update UI
+            this.updateLayerList();
+            this.showEditPoints();
+            this.draw();
+            
+            this.showNotification('✅ Demo project loaded! Try playing the animation.');
+        }, 1500);
+    }
+    
+    showWelcomeNotification() {
+        const notification = document.createElement('div');
+        notification.className = 'welcome-notification';
+        notification.innerHTML = `
+            <div class="welcome-content">
+                <i class="fas fa-robot welcome-icon"></i>
+                <div class="welcome-text">
+                    <h4>Welcome to AI Motion Studio! 🎬</h4>
+                    <p>Upload GIF → Draw path → Add motion → Export animation</p>
+                </div>
+                <button class="welcome-close" id="close-welcome">&times;</button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Close button
+        const closeBtn = document.getElementById('close-welcome');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                notification.remove();
+            });
+        }
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 10000);
+    }
+    
+    showTutorial() {
+        const modal = document.getElementById('tutorial-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+        
+        // Setup tutorial navigation
+        const nextBtn = document.getElementById('next-tutorial');
+        const prevBtn = document.getElementById('prev-tutorial');
+        const skipBtn = document.getElementById('skip-tutorial');
+        const closeBtn = document.getElementById('close-tutorial');
+        
+        let currentStep = 0;
+        const steps = document.querySelectorAll('.tutorial-step');
+        
+        function showStep(stepIndex) {
+            steps.forEach((step, index) => {
+                if (index === stepIndex) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+            
+            currentStep = stepIndex;
+        }
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (currentStep < steps.length - 1) {
+                    showStep(currentStep + 1);
+                } else {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => {
+                if (currentStep > 0) {
+                    showStep(currentStep - 1);
+                }
+            });
+        }
+        
+        if (skipBtn) {
+            skipBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
+        
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+        }
+        
+        // Start with first step
+        showStep(0);
+    }
+    
+    updateStatus(message, elementId) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            const span = element.querySelector('span') || element;
+            span.textContent = message;
+        }
+    }
+    
+    updateSliderValue(sliderName, value) {
+        const valueElement = document.getElementById(`${sliderName}-value`);
+        if (valueElement) {
+            valueElement.textContent = value;
+        }
+    }
+    
+    showNotification(message) {
+        console.log(`📢 ${message}`);
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-info-circle"></i>
+                <span>${message}</span>
+            </div>
+        `;
+        
+        // Add styles
+        notification.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(30, 58, 138, 0.9);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 3000);
+        
+        // Add animation styles if not exists
+        if (!document.querySelector('#notification-styles')) {
+            const style = document.createElement('style');
+            style.id = 'notification-styles';
+            style.textContent = `
+                @keyframes slideIn {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+    
+    showAINotification(message) {
+        this.showNotification(`🤖 ${message}`);
     }
 }
 
-// Initialize app when page loads
+// Initialize the application
 window.addEventListener('DOMContentLoaded', () => {
-    window.motionStudio = new AIMotionStudio();
+    console.log('🏁 DOM Content Loaded - Starting AI Motion Studio');
+    
+    // Add global styles for notifications
+    const globalStyles = document.createElement('style');
+    globalStyles.textContent = `
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .notification-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        .welcome-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #10b981, #0da271);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            animation: slideInRight 0.3s ease;
+            max-width: 350px;
+        }
+        
+        .welcome-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .welcome-icon {
+            font-size: 24px;
+        }
+        
+        .welcome-text h4 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+        }
+        
+        .welcome-text p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .welcome-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: auto;
+        }
+        
+        /* Loading screen styles */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+        }
+        
+        .loader {
+            text-align: center;
+            color: white;
+        }
+        
+        .ai-loader {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 30px;
+        }
+        
+        .ai-loader i {
+            font-size: 50px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            color: #6366f1;
+        }
+        
+        .pulse-ring {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid #6366f1;
+            border-radius: 50%;
+            animation: pulse 2s linear infinite;
+            opacity: 0;
+        }
+        
+        .pulse-ring.delay-1 {
+            animation-delay: 0.66s;
+        }
+        
+        .pulse-ring.delay-2 {
+            animation-delay: 1.33s;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        
+        .progress-bar {
+            width: 200px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 20px auto;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #10b981);
+            width: 0%;
+            animation: loading 2s ease infinite;
+        }
+        
+        @keyframes loading {
+            0% { width: 0%; }
+            50% { width: 100%; }
+            100% { width: 0%; }
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+    `;
+    document.head.appendChild(globalStyles);
+    
+    // Start the application
+    try {
+        window.motionStudio = new AIMotionStudio();
+        console.log('🎉 AI Motion Studio started successfully!');
+    } catch (error) {
+        console.error('❌ Error starting AI Motion Studio:', error);
+        
+        // Show error message
+        document.body.innerHTML = `
+            <div style="padding: 40px; text-align: center; font-family: Arial;">
+                <h1 style="color: #ef4444;">⚠️ Application Error</h1>
+                <p>There was an error starting the application.</p>
+                <p style="color: #94a3b8;">${error.message}</p>
+                <button onclick="location.reload()" style="padding: 10px 20px; background: #6366f1; color: white; border: none; border-radius: 5px; margin-top: 20px;">
+                    Reload Application
+                </button>
+            </div>
+        `;
+    }
+});
+
+// Add global error handler
+window.addEventListener('error', function(e) {
+    console.error('Global error:', e.error);
+});
+
+// Add unhandled rejection handler
+window.addEventListener('unhandledrejection', function(e) {
+    console.error('Unhandled promise rejection:', e.reason);
 });

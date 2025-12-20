@@ -3,658 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Motion Studio - Working Version</title>
+    <title>Motion AI Studio - Hoàn chỉnh</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #0f172a, #1e293b);
-            color: white;
-            min-height: 100vh;
-        }
-        
-        .app-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        header {
-            text-align: center;
-            padding: 30px 0;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: #6366f1;
-        }
-        
-        .subtitle {
-            color: #94a3b8;
-            font-size: 1.2rem;
-        }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: 250px 1fr 300px;
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .panel {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 15px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .panel h3 {
-            margin-bottom: 20px;
-            color: #cbd5e1;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .btn {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(99, 102, 241, 0.4);
-        }
-        
-        .canvas-container {
-            background: #000;
-            border-radius: 15px;
-            overflow: hidden;
-            position: relative;
-            min-height: 500px;
-        }
-        
-        #main-canvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-            background: #1a1a1a;
-        }
-        
-        .direction-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .dir-btn {
-            aspect-ratio: 1;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            font-size: 24px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .dir-btn:hover {
-            background: rgba(99, 102, 241, 0.3);
-            border-color: #6366f1;
-        }
-        
-        .dir-btn.active {
-            background: #6366f1;
-            border-color: #6366f1;
-        }
-        
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, #10b981, #0da271);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            animation: slideIn 0.3s ease;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            max-width: 300px;
-        }
-        
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-        
-        .status-bar {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: 20px;
-        }
-        
-        .status-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #94a3b8;
-        }
-        
-        @media (max-width: 1024px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/96/000000/particles.png">
 </head>
 <body>
-    <div class="app-container">
-        <header>
-            <h1><i class="fas fa-brain"></i> AI Motion Studio</h1>
-            <p class="subtitle">Tạo chuyển động thông minh trên GIF - Hoạt động 100%</p>
-        </header>
-        
-        <div class="main-content">
-            <!-- Left Panel - Tools -->
-            <div class="panel">
-                <h3><i class="fas fa-tools"></i> Công cụ</h3>
-                <button class="btn" id="upload-btn">
-                    <i class="fas fa-upload"></i> Upload GIF
-                </button>
-                <button class="btn" id="pen-tool">
-                    <i class="fas fa-pen"></i> Vẽ Path
-                </button>
-                <button class="btn" id="demo-btn">
-                    <i class="fas fa-play-circle"></i> Load Demo
-                </button>
-                <button class="btn" id="play-btn">
-                    <i class="fas fa-play"></i> Play Animation
-                </button>
-                <button class="btn" id="export-btn" style="background: linear-gradient(135deg, #10b981, #0da271);">
-                    <i class="fas fa-download"></i> Export GIF
-                </button>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-atom"></i>
+                <h1>Motion AI Studio</h1>
+                <span class="version">v2.0 HOÀN CHỈNH</span>
             </div>
-            
-            <!-- Center Panel - Canvas -->
-            <div class="panel" style="padding: 0;">
-                <div class="canvas-container">
-                    <canvas id="main-canvas" width="800" height="500"></canvas>
-                </div>
-            </div>
-            
-            <!-- Right Panel - Settings -->
-            <div class="panel">
-                <h3><i class="fas fa-sliders-h"></i> Thiết lập</h3>
-                
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: #cbd5e1;">Hướng chuyển động:</label>
-                    <div class="direction-grid">
-                        <button class="dir-btn" data-dir="nw">↖</button>
-                        <button class="dir-btn" data-dir="n">↑</button>
-                        <button class="dir-btn" data-dir="ne">↗</button>
-                        <button class="dir-btn" data-dir="w">←</button>
-                        <button class="dir-btn active" data-dir="center">○</button>
-                        <button class="dir-btn" data-dir="e">→</button>
-                        <button class="dir-btn" data-dir="sw">↙</button>
-                        <button class="dir-btn" data-dir="s">↓</button>
-                        <button class="dir-btn" data-dir="se">↘</button>
+            <div class="header-controls">
+                <div class="fps-display">
+                    <span id="fpsCounter">60 FPS</span>
+                    <div class="fps-bar">
+                        <div id="fpsBar" class="fps-fill"></div>
                     </div>
                 </div>
-                
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: #cbd5e1;">Tốc độ: <span id="speed-value">50%</span></label>
-                    <input type="range" id="speed-slider" min="1" max="100" value="50" style="width: 100%;">
+                <button id="helpBtn" class="btn-help">
+                    <i class="fas fa-question-circle"></i> Hướng dẫn
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
+        <div class="main-content">
+            <!-- LEFT SIDEBAR -->
+            <div class="sidebar left-sidebar">
+                <div class="section">
+                    <h3><i class="fas fa-upload"></i> Tải lên</h3>
+                    <div class="upload-group">
+                        <label class="upload-btn">
+                            <i class="fas fa-image"></i> Upload Background
+                            <input type="file" id="uploadBackground" accept="image/*,video/*,.gif" hidden>
+                        </label>
+                        <label class="upload-btn">
+                            <i class="fas fa-palette"></i> Upload Material
+                            <input type="file" id="uploadMaterial" accept="image/*" hidden>
+                        </label>
+                        <button id="loadDemo" class="btn-secondary">
+                            <i class="fas fa-rocket"></i> Load Demo
+                        </button>
+                    </div>
                 </div>
-                
-                <div style="margin-bottom: 20px;">
-                    <label style="display: block; margin-bottom: 8px; color: #cbd5e1;">Số hạt: <span id="particle-value">100</span></label>
-                    <input type="range" id="particle-slider" min="10" max="500" value="100" style="width: 100%;">
+
+                <div class="section">
+                    <h3><i class="fas fa-pencil-alt"></i> Công cụ vẽ</h3>
+                    <div class="tool-grid">
+                        <button class="tool-btn active" data-tool="select">
+                            <i class="fas fa-mouse-pointer"></i> Select
+                        </button>
+                        <button class="tool-btn" data-tool="pen">
+                            <i class="fas fa-pen"></i> Pen
+                        </button>
+                        <button class="tool-btn" data-tool="rectangle">
+                            <i class="fas fa-square"></i> Rectangle
+                        </button>
+                        <button class="tool-btn" data-tool="circle">
+                            <i class="fas fa-circle"></i> Circle
+                        </button>
+                    </div>
+                    <div class="ai-tools">
+                        <button id="aiSmoothBtn" class="btn-ai">
+                            <i class="fas fa-magic"></i> Smooth Path AI
+                        </button>
+                    </div>
                 </div>
+
+                <div class="section">
+                    <h3><i class="fas fa-industry"></i> Thiết bị công nghiệp</h3>
+                    <div class="device-grid">
+                        <button class="device-preset" data-device="screw-conveyor">
+                            <i class="fas fa-screwdriver"></i> Vít tải
+                        </button>
+                        <button class="device-preset" data-device="conveyor-belt">
+                            <i class="fas fa-conveyor-belt"></i> Băng tải
+                        </button>
+                        <button class="device-preset" data-device="mixer">
+                            <i class="fas fa-blender"></i> Máy trộn
+                        </button>
+                        <button class="device-preset" data-device="vibrating-screen">
+                            <i class="fas fa-filter"></i> Sàng rung
+                        </button>
+                        <button class="device-preset" data-device="pump">
+                            <i class="fas fa-tint"></i> Bơm
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CANVAS AREA -->
+            <div class="canvas-container">
+                <div class="canvas-header">
+                    <h3><i class="fas fa-play-circle"></i> Animation Preview</h3>
+                    <div class="animation-controls">
+                        <button id="playBtn" class="btn-play">
+                            <i class="fas fa-play"></i> Play
+                        </button>
+                        <button id="stopBtn" class="btn-stop">
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                    </div>
+                </div>
+                <canvas id="mainCanvas" width="1920" height="1080"></canvas>
                 
-                <div>
-                    <h4 style="margin-bottom: 10px; color: #cbd5e1;">AI Presets</h4>
-                    <button class="btn" style="background: linear-gradient(135deg, #3b82f6, #1d4ed8); margin-bottom: 5px;">
-                        <i class="fas fa-tint"></i> Dòng nước
+                <!-- Direction Controls -->
+                <div class="direction-grid">
+                    <button class="dir-btn" data-dir="↖">↖</button>
+                    <button class="dir-btn" data-dir="↑">↑</button>
+                    <button class="dir-btn" data-dir="↗">↗</button>
+                    <button class="dir-btn" data-dir="←">←</button>
+                    <button class="dir-btn" data-dir="○">○</button>
+                    <button class="dir-btn" data-dir="→">→</button>
+                    <button class="dir-btn" data-dir="↙">↙</button>
+                    <button class="dir-btn" data-dir="↓">↓</button>
+                    <button class="dir-btn" data-dir="↘">↘</button>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDEBAR -->
+            <div class="sidebar right-sidebar">
+                <div class="section">
+                    <h3><i class="fas fa-sliders-h"></i> Điều khiển chuyển động</h3>
+                    
+                    <div class="control-group">
+                        <label>Motion Type</label>
+                        <div class="motion-grid">
+                            <button class="motion-option active" data-motion="flow">
+                                <i class="fas fa-water"></i> Flow
+                            </button>
+                            <button class="motion-option" data-motion="follow">
+                                <i class="fas fa-road"></i> Follow
+                            </button>
+                            <button class="motion-option" data-motion="swirl">
+                                <i class="fas fa-sync-alt"></i> Swirl
+                            </button>
+                            <button class="motion-option" data-motion="random">
+                                <i class="fas fa-random"></i> Random
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Speed: <span id="speedValue">50%</span></label>
+                        <input type="range" id="speedSlider" min="1" max="100" value="50" class="slider">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Particle Count: <span id="countValue">100</span></label>
+                        <input type="range" id="countSlider" min="10" max="1000" value="100" class="slider">
+                    </div>
+
+                    <div class="control-group">
+                        <label>Particle Size: <span id="sizeValue">10</span></label>
+                        <input type="range" id="sizeSlider" min="2" max="50" value="10" class="slider">
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h3><i class="fas fa-robot"></i> AI Features</h3>
+                    <div class="ai-presets">
+                        <button id="waterPreset" class="ai-preset-btn water">
+                            <i class="fas fa-tint"></i> Water
+                        </button>
+                        <button id="smokePreset" class="ai-preset-btn smoke">
+                            <i class="fas fa-smog"></i> Smoke
+                        </button>
+                        <button id="particlesPreset" class="ai-preset-btn particles">
+                            <i class="fas fa-star"></i> Particles
+                        </button>
+                    </div>
+                    <button id="aiOptimizeBtn" class="btn-ai-primary">
+                        <i class="fas fa-bolt"></i> Optimize with AI
                     </button>
-                    <button class="btn" style="background: linear-gradient(135deg, #6b7280, #4b5563); margin-bottom: 5px;">
-                        <i class="fas fa-smog"></i> Khói
-                    </button>
-                    <button class="btn" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                        <i class="fas fa-fire"></i> Lửa
-                    </button>
+                </div>
+
+                <div class="section">
+                    <h3><i class="fas fa-download"></i> Export</h3>
+                    <div class="export-grid">
+                        <button id="exportGif" class="export-btn gif">
+                            <i class="fas fa-film"></i> GIF
+                        </button>
+                        <button id="exportMp4" class="export-btn mp4">
+                            <i class="fas fa-video"></i> MP4
+                        </button>
+                        <button id="exportPng" class="export-btn png">
+                            <i class="fas fa-image"></i> PNG
+                        </button>
+                    </div>
+                    
+                    <div class="export-options">
+                        <div class="option-group">
+                            <label>Quality:</label>
+                            <select id="qualitySelect" class="select-box">
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="ultra">Ultra</option>
+                            </select>
+                        </div>
+                        
+                        <div class="option-group">
+                            <label>FPS:</label>
+                            <select id="fpsSelect" class="select-box">
+                                <option value="15">15</option>
+                                <option value="24">24</option>
+                                <option value="30" selected>30</option>
+                                <option value="60">60</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
+
+        <!-- STATUS BAR -->
         <div class="status-bar">
             <div class="status-item">
-                <i class="fas fa-circle" style="color: #10b981;"></i>
-                <span>Trạng thái: Sẵn sàng</span>
+                <i class="fas fa-cube"></i>
+                <span>Particles: <strong id="particleCountDisplay">100</strong></span>
             </div>
             <div class="status-item">
-                <i class="fas fa-mouse-pointer"></i>
-                <span>Công cụ: Chọn</span>
+                <i class="fas fa-bolt"></i>
+                <span>Motion: <strong id="motionTypeDisplay">Flow</strong></span>
             </div>
             <div class="status-item">
-                <i class="fas fa-layer-group"></i>
-                <span>Layers: 1</span>
+                <i class="fas fa-draw-polygon"></i>
+                <span>Paths: <strong id="pathCountDisplay">0</strong></span>
             </div>
             <div class="status-item">
-                <i class="fas fa-download"></i>
-                <span>Xuất: Sẵn sàng</span>
+                <i class="fas fa-hdd"></i>
+                <span>Ready to export</span>
             </div>
         </div>
     </div>
-    
-    <!-- Simple JavaScript -->
-    <script>
-        console.log('🎬 AI Motion Studio - SIMPLE WORKING VERSION');
-        
-        // Initialize canvas
-        const canvas = document.getElementById('main-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        let isPlaying = false;
-        let animationId = null;
-        
-        // Draw initial screen
-        drawWelcomeScreen();
-        
-        // Setup event listeners
-        document.getElementById('upload-btn').addEventListener('click', function() {
-            showNotification('📁 Upload feature sẽ được thêm trong phiên bản đầy đủ');
-        });
-        
-        document.getElementById('pen-tool').addEventListener('click', function() {
-            showNotification('✏️ Click và kéo trên canvas để vẽ path');
-            setupDrawing();
-        });
-        
-        document.getElementById('demo-btn').addEventListener('click', function() {
-            showNotification('🚀 Đang tải demo vít tải...');
-            loadDemo();
-        });
-        
-        document.getElementById('play-btn').addEventListener('click', function() {
-            if (isPlaying) {
-                stopAnimation();
-                this.innerHTML = '<i class="fas fa-play"></i> Play Animation';
-                showNotification('⏸️ Animation đã dừng');
-            } else {
-                startAnimation();
-                this.innerHTML = '<i class="fas fa-pause"></i> Pause Animation';
-                showNotification('▶️ Animation đang chạy');
-            }
-        });
-        
-        document.getElementById('export-btn').addEventListener('click', function() {
-            exportGIF();
-        });
-        
-        // Direction buttons
-        document.querySelectorAll('.dir-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.dir-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
+
+    <!-- MODALS -->
+    <div id="tutorialModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-graduation-cap"></i> Hướng dẫn sử dụng</h2>
+                <button id="closeTutorial" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-upload"></i> Bước 1: Tải lên</h3>
+                    <p>• Click "Upload Background" để tải hình nền GIF/Video/Image</p>
+                    <p>• Click "Upload Material" để tải hình ảnh cho particles</p>
+                    <p>• Hoặc click "Load Demo" để xem ví dụ có sẵn</p>
+                </div>
                 
-                const directions = {
-                    'nw': '↖ Trên-Trái', 'n': '↑ Trên', 'ne': '↗ Trên-Phải',
-                    'w': '← Trái', 'center': '○ Trung tâm', 'e': '→ Phải',
-                    'sw': '↙ Dưới-Trái', 's': '↓ Dưới', 'se': '↘ Dưới-Phải'
-                };
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-draw-polygon"></i> Bước 2: Vẽ đường dẫn</h3>
+                    <p>• Chọn Pen tool để vẽ đường tự do</p>
+                    <p>• Chọn Rectangle/Circle để vẽ hình dạng</p>
+                    <p>• Click và kéo trên canvas để vẽ</p>
+                </div>
                 
-                showNotification(`🧭 Hướng: ${directions[this.dataset.dir]}`);
-            });
-        });
-        
-        // Sliders
-        document.getElementById('speed-slider').addEventListener('input', function() {
-            document.getElementById('speed-value').textContent = this.value + '%';
-        });
-        
-        document.getElementById('particle-slider').addEventListener('input', function() {
-            document.getElementById('particle-value').textContent = this.value;
-        });
-        
-        function drawWelcomeScreen() {
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw gradient background
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, '#1e3a8a');
-            gradient.addColorStop(1, '#1e40af');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw title
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 36px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            
-            ctx.fillText('🎬 AI Motion Studio', canvas.width/2, canvas.height/2 - 40);
-            
-            ctx.font = '20px Arial';
-            ctx.fillStyle = '#cbd5e1';
-            ctx.fillText('Tạo chuyển động thông minh trên GIF', canvas.width/2, canvas.height/2);
-            
-            ctx.font = '16px Arial';
-            ctx.fillStyle = '#94a3b8';
-            ctx.fillText('Click "Load Demo" để bắt đầu', canvas.width/2, canvas.height/2 + 40);
-        }
-        
-        function setupDrawing() {
-            let isDrawing = false;
-            let points = [];
-            
-            canvas.onmousedown = function(e) {
-                isDrawing = true;
-                const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                points = [{x, y}];
-                showNotification('✏️ Bắt đầu vẽ path...');
-            };
-            
-            canvas.onmousemove = function(e) {
-                if (!isDrawing) return;
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-sliders-h"></i> Bước 3: Điều chỉnh</h3>
+                    <p>• Chọn motion type: Flow, Follow, Swirl, Random</p>
+                    <p>• Điều chỉnh speed, particle count, size</p>
+                    <p>• Click các nút mũi tên để thay đổi hướng</p>
+                </div>
                 
-                const rect = canvas.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                points.push({x, y});
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-robot"></i> Bước 4: AI Features</h3>
+                    <p>• Thử các AI presets: Water, Smoke, Particles</p>
+                    <p>• Click "Optimize with AI" để tối ưu hóa tự động</p>
+                    <p>• Click "Smooth Path AI" để làm mượt đường vẽ</p>
+                </div>
                 
-                // Draw preview
-                drawWelcomeScreen();
+                <div class="tutorial-step">
+                    <h3><i class="fas fa-download"></i> Bước 5: Xuất file</h3>
+                    <p>• Chọn định dạng: GIF, MP4, PNG</p>
+                    <p>• Chọn chất lượng và FPS</p>
+                    <p>• Click export và chờ quá trình hoàn tất</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="exportModal" class="modal hidden">
+        <div class="modal-content export-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-download"></i> Exporting Animation</h2>
+            </div>
+            <div class="modal-body">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div id="exportProgress" class="progress-fill"></div>
+                    </div>
+                    <div id="exportProgressText" class="progress-text">Preparing export...</div>
+                </div>
                 
-                // Draw current path
-                ctx.strokeStyle = '#10b981';
-                ctx.lineWidth = 3;
-                ctx.lineJoin = 'round';
-                ctx.lineCap = 'round';
-                
-                ctx.beginPath();
-                ctx.moveTo(points[0].x, points[0].y);
-                for (let i = 1; i < points.length; i++) {
-                    ctx.lineTo(points[i].x, points[i].y);
-                }
-                ctx.stroke();
-            };
-            
-            canvas.onmouseup = function() {
-                if (!isDrawing) return;
-                
-                isDrawing = false;
-                if (points.length > 5) {
-                    showNotification(`✅ Đã vẽ path với ${points.length} điểm`);
-                }
-            };
-        }
-        
-        function loadDemo() {
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw demo background
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, '#1e3a8a');
-            gradient.addColorStop(1, '#1e40af');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw demo title
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 28px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('🎬 Demo: Hệ thống vít tải', canvas.width/2, 50);
-            
-            // Draw screw conveyor
-            drawScrewConveyor();
-            
-            // Create particles
-            particles = [];
-            const particleCount = parseInt(document.getElementById('particle-slider').value);
-            
-            for (let i = 0; i < particleCount; i++) {
-                particles.push({
-                    x: 100 + Math.random() * 600,
-                    y: 200 + Math.sin(i * 0.1) * 100,
-                    size: 5 + Math.random() * 10,
-                    speed: 1 + Math.random() * 2,
-                    color: `hsl(${Math.random() * 60 + 30}, 80%, 60%)` // Orange/yellow tones
-                });
-            }
-            
-            showNotification('✅ Demo vít tải đã sẵn sàng!');
-        }
-        
-        function drawScrewConveyor() {
-            const centerY = canvas.height / 2;
-            
-            // Draw conveyor body
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-            ctx.fillRect(100, centerY - 50, 600, 100);
-            
-            // Draw screw
-            ctx.strokeStyle = '#10b981';
-            ctx.lineWidth = 4;
-            
-            ctx.beginPath();
-            for (let x = 100; x <= 700; x += 20) {
-                const y = centerY + Math.sin(x * 0.05) * 40;
-                if (x === 100) {
-                    ctx.moveTo(x, y);
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            }
-            ctx.stroke();
-            
-            // Draw end caps
-            ctx.fillStyle = '#64748b';
-            ctx.fillRect(95, centerY - 60, 10, 120);
-            ctx.fillRect(695, centerY - 60, 10, 120);
-        }
-        
-        function startAnimation() {
-            if (isPlaying) return;
-            
-            isPlaying = true;
-            
-            if (particles.length === 0) {
-                loadDemo();
-            }
-            
-            function animate() {
-                if (!isPlaying) return;
-                
-                // Clear with trail effect
-                ctx.fillStyle = 'rgba(30, 58, 138, 0.1)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Redraw conveyor
-                drawScrewConveyor();
-                
-                // Get direction
-                const activeDir = document.querySelector('.dir-btn.active').dataset.dir;
-                const speed = parseInt(document.getElementById('speed-slider').value) / 50;
-                
-                // Update and draw particles
-                particles.forEach(p => {
-                    // Move based on direction
-                    switch(activeDir) {
-                        case 'e':
-                            p.x += p.speed * speed;
-                            break;
-                        case 'w':
-                            p.x -= p.speed * speed;
-                            break;
-                        case 'n':
-                            p.y -= p.speed * speed;
-                            break;
-                        case 's':
-                            p.y += p.speed * speed;
-                            break;
-                        case 'ne':
-                            p.x += p.speed * speed * 0.7;
-                            p.y -= p.speed * speed * 0.7;
-                            break;
-                        case 'nw':
-                            p.x -= p.speed * speed * 0.7;
-                            p.y -= p.speed * speed * 0.7;
-                            break;
-                        case 'se':
-                            p.x += p.speed * speed * 0.7;
-                            p.y += p.speed * speed * 0.7;
-                            break;
-                        case 'sw':
-                            p.x -= p.speed * speed * 0.7;
-                            p.y += p.speed * speed * 0.7;
-                            break;
-                        case 'center':
-                            // Circular motion
-                            const centerX = canvas.width / 2;
-                            const centerY = canvas.height / 2;
-                            const dx = p.x - centerX;
-                            const dy = p.y - centerY;
-                            const angle = Math.atan2(dy, dx) + 0.02 * speed;
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            
-                            p.x = centerX + Math.cos(angle) * distance;
-                            p.y = centerY + Math.sin(angle) * distance;
-                            break;
-                    }
-                    
-                    // Boundary check
-                    if (p.x < 0) p.x = canvas.width;
-                    if (p.x > canvas.width) p.x = 0;
-                    if (p.y < 0) p.y = canvas.height;
-                    if (p.y > canvas.height) p.y = 0;
-                    
-                    // Draw particle
-                    ctx.fillStyle = p.color;
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2);
-                    ctx.fill();
-                });
-                
-                animationId = requestAnimationFrame(animate);
-            }
-            
-            animate();
-        }
-        
-        function stopAnimation() {
-            isPlaying = false;
-            if (animationId) {
-                cancelAnimationFrame(animationId);
-                animationId = null;
-            }
-        }
-        
-        function exportGIF() {
-            showNotification('⏳ Đang xuất GIF...');
-            
-            // Create a simple GIF for demo
-            const exportCanvas = document.createElement('canvas');
-            exportCanvas.width = 400;
-            exportCanvas.height = 300;
-            const exportCtx = exportCanvas.getContext('2d');
-            
-            // Draw export image
-            exportCtx.fillStyle = '#1e3a8a';
-            exportCtx.fillRect(0, 0, 400, 300);
-            
-            exportCtx.fillStyle = 'white';
-            exportCtx.font = 'bold 24px Arial';
-            exportCtx.textAlign = 'center';
-            exportCtx.fillText('AI Motion Studio', 200, 120);
-            exportCtx.fillText('GIF Export Demo', 200, 160);
-            
-            exportCtx.font = '16px Arial';
-            exportCtx.fillText('Chúc mừng! Bạn đã tạo', 200, 200);
-            exportCtx.fillText('animation thành công', 200, 230);
-            
-            // Download
-            exportCanvas.toBlob(function(blob) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = 'motion-studio-demo.gif';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                showNotification('✅ Đã tải xuống GIF demo!');
-            }, 'image/gif');
-        }
-        
-        function showNotification(message) {
-            console.log('Notification:', message);
-            
-            // Remove existing notifications
-            document.querySelectorAll('.notification').forEach(n => n.remove());
-            
-            // Create new notification
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.innerHTML = `
-                <i class="fas fa-info-circle"></i>
-                <span>${message}</span>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            // Auto remove after 3 seconds
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.style.animation = 'slideIn 0.3s ease reverse';
-                    setTimeout(() => notification.remove(), 300);
-                }
-            }, 3000);
-        }
-        
-        // Initialize
-        console.log('✅ AI Motion Studio initialized successfully!');
-        showNotification('🎬 Chào mừng đến với AI Motion Studio!');
-    </script>
+                <div class="export-steps">
+                    <div class="step active">
+                        <i class="fas fa-cog"></i>
+                        <span>Processing</span>
+                    </div>
+                    <div class="step">
+                        <i class="fas fa-film"></i>
+                        <span>Rendering</span>
+                    </div>
+                    <div class="step">
+                        <i class="fas fa-sync-alt"></i>
+                        <span>Encoding</span>
+                    </div>
+                    <div class="step">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Complete</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION CONTAINER -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <script src="app.js"></script>
 </body>
 </html>

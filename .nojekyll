@@ -1,2 +1,2 @@
-# Tạo file trống
-touch .nojekyll
+# Tạo file .nojekyll trống
+# Trên GitHub: Tạo file mới, tên ".nojekyll", không cần nội dung

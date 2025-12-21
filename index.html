@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motion AI Studio - Hoàn chỉnh với Layer System</title>
+    <title>Motion AI Studio - Layer System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -79,6 +79,7 @@
             align-items: center;
             gap: 8px;
             transition: all 0.3s ease;
+            font-size: 14px;
         }
 
         .btn-play {
@@ -184,9 +185,11 @@
             cursor: pointer;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            gap: 8px;
             transition: all 0.3s ease;
             margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
         }
 
         .layer-btn.active {
@@ -228,7 +231,7 @@
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
-        .tool-btn:hover {
+        .tool-btn:hover:not(:disabled) {
             transform: translateY(-2px);
         }
 
@@ -243,7 +246,7 @@
             border: 2px solid #fcc;
         }
 
-        .btn-danger:hover {
+        .btn-danger:hover:not(:disabled) {
             background: #fdd;
             border-color: #faa;
         }
@@ -294,6 +297,16 @@
             border-radius: 50%;
             background: #667eea;
             cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
 
@@ -593,10 +606,12 @@
                 <div class="section">
                     <h3><i class="fas fa-layer-group"></i> 🎬 Layers</h3>
                     <button id="toggleGifLayer" class="layer-btn active">
-                        <span><i class="fas fa-eye"></i> Layer 1: GIF Background</span>
+                        <i class="fas fa-eye"></i>
+                        <span>Layer 1: GIF Background</span>
                     </button>
                     <button id="toggleAnimLayer" class="layer-btn active">
-                        <span><i class="fas fa-eye"></i> Layer 2: Animation</span>
+                        <i class="fas fa-eye"></i>
+                        <span>Layer 2: Animation</span>
                     </button>
                 </div>
 
@@ -689,15 +704,15 @@
                 <div id="directionSelector" class="direction-selector hidden">
                     <div class="direction-title">Chọn hướng chuyển động:</div>
                     <div class="direction-grid">
-                        <button class="dir-btn" data-dir="up-left">↖️</button>
-                        <button class="dir-btn" data-dir="up">⬆️</button>
-                        <button class="dir-btn" data-dir="up-right">↗️</button>
-                        <button class="dir-btn" data-dir="left">⬅️</button>
-                        <button class="dir-btn" data-dir="scroll">🔄</button>
-                        <button class="dir-btn" data-dir="right">➡️</button>
-                        <button class="dir-btn" data-dir="down-left">↙️</button>
-                        <button class="dir-btn" data-dir="down">⬇️</button>
-                        <button class="dir-btn" data-dir="down-right">↘️</button>
+                        <button class="dir-btn" data-dir="up-left" data-vx="-0.707" data-vy="-0.707">↖️</button>
+                        <button class="dir-btn" data-dir="up" data-vx="0" data-vy="-1">⬆️</button>
+                        <button class="dir-btn" data-dir="up-right" data-vx="0.707" data-vy="-0.707">↗️</button>
+                        <button class="dir-btn" data-dir="left" data-vx="-1" data-vy="0">⬅️</button>
+                        <button class="dir-btn" data-dir="scroll" data-vx="0" data-vy="0" data-scroll="true">🔄</button>
+                        <button class="dir-btn" data-dir="right" data-vx="1" data-vy="0">➡️</button>
+                        <button class="dir-btn" data-dir="down-left" data-vx="-0.707" data-vy="0.707">↙️</button>
+                        <button class="dir-btn" data-dir="down" data-vx="0" data-vy="1">⬇️</button>
+                        <button class="dir-btn" data-dir="down-right" data-vx="0.707" data-vy="0.707">↘️</button>
                     </div>
                     <div id="directionInfo" class="direction-info">Chọn một hướng</div>
                 </div>

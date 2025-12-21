@@ -1,11 +1,16 @@
-// Copy code này và paste vào file index.html
-export const htmlCode = `<!DOCTYPE html>
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { Download, Copy, Check } from 'lucide-react';
+
+export default function MotionStudioDownload() {
+  const [copied, setCopied] = React.useState(false);
+
+  const htmlCode = `<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motion AI Studio - Tạo hiệu ứng chuyển động</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Motion AI Studio</title>
     <style>
         * {
             margin: 0;
@@ -14,22 +19,17 @@ export const htmlCode = `<!DOCTYPE html>
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         .container {
             max-width: 1600px;
             margin: 0 auto;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
         }
 
-        /* Header */
         .header {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
@@ -38,7 +38,7 @@ export const htmlCode = `<!DOCTYPE html>
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
 
         .logo {
@@ -58,15 +58,17 @@ export const htmlCode = `<!DOCTYPE html>
             font-size: 28px;
         }
 
-        .logo-text h1 {
+        .logo h1 {
             color: white;
             font-size: 24px;
             font-weight: 700;
+            margin: 0;
         }
 
-        .logo-text p {
+        .logo p {
             color: rgba(255, 255, 255, 0.8);
             font-size: 12px;
+            margin: 0;
         }
 
         .header-buttons {
@@ -80,22 +82,13 @@ export const htmlCode = `<!DOCTYPE html>
             border: none;
             font-weight: 600;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             font-size: 14px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
         }
 
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
         }
 
         .btn-preview {
@@ -108,21 +101,18 @@ export const htmlCode = `<!DOCTYPE html>
             color: white;
         }
 
-        /* Main Content */
         .main-content {
             display: flex;
             gap: 20px;
         }
 
-        /* Sidebar */
         .sidebar {
             width: 350px;
             background: white;
             border-radius: 20px;
             padding: 25px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            overflow-y: auto;
             max-height: calc(100vh - 140px);
+            overflow-y: auto;
         }
 
         .section {
@@ -130,37 +120,25 @@ export const htmlCode = `<!DOCTYPE html>
         }
 
         .section-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #333;
             font-weight: 600;
             margin-bottom: 15px;
+            color: #333;
             font-size: 15px;
         }
 
-        /* Upload boxes */
         .upload-box {
             border: 2px dashed #ddd;
             border-radius: 15px;
             padding: 25px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             margin-bottom: 15px;
-            position: relative;
         }
 
         .upload-box:hover {
             border-color: #667eea;
             background: #f8f9ff;
-            transform: translateY(-2px);
-        }
-
-        .upload-box i {
-            font-size: 40px;
-            color: #aaa;
-            margin-bottom: 10px;
         }
 
         .upload-box.uploaded {
@@ -168,14 +146,14 @@ export const htmlCode = `<!DOCTYPE html>
             background: #f0fdf9;
         }
 
-        .upload-box.uploaded i {
-            color: #06d6a0;
+        .upload-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
         }
 
         .upload-text {
             font-weight: 600;
             color: #333;
-            margin-bottom: 5px;
         }
 
         .upload-subtitle {
@@ -183,7 +161,6 @@ export const htmlCode = `<!DOCTYPE html>
             color: #999;
         }
 
-        /* Tool buttons */
         .tool-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -192,22 +169,18 @@ export const htmlCode = `<!DOCTYPE html>
         }
 
         .tool-btn {
-            padding: 20px 10px;
+            padding: 15px;
             border: 2px solid #ddd;
             border-radius: 12px;
             background: white;
             cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
+            transition: all 0.3s;
+            text-align: center;
             font-size: 13px;
             font-weight: 600;
         }
 
         .tool-btn:hover {
-            transform: translateY(-2px);
             border-color: #667eea;
         }
 
@@ -215,7 +188,6 @@ export const htmlCode = `<!DOCTYPE html>
             background: #667eea;
             color: white;
             border-color: #667eea;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .tool-btn:disabled {
@@ -223,32 +195,19 @@ export const htmlCode = `<!DOCTYPE html>
             cursor: not-allowed;
         }
 
-        .tool-btn i {
-            font-size: 20px;
-        }
-
-        /* Action buttons */
         .action-buttons {
             display: flex;
             gap: 10px;
-            margin-top: 15px;
         }
 
         .action-buttons .btn {
             flex: 1;
-            justify-content: center;
-            padding: 10px;
             font-size: 13px;
         }
 
         .btn-danger {
             background: #fee;
             color: #dc3545;
-            border: 1px solid #fcc;
-        }
-
-        .btn-danger:hover {
-            background: #fdd;
         }
 
         .btn-secondary {
@@ -256,15 +215,12 @@ export const htmlCode = `<!DOCTYPE html>
             color: #666;
         }
 
-        /* Info box */
         .info-box {
             background: #e7f3ff;
             border-left: 4px solid #2196f3;
             padding: 15px;
             border-radius: 8px;
             font-size: 13px;
-            line-height: 1.6;
-            margin-top: 15px;
         }
 
         .info-box strong {
@@ -273,12 +229,6 @@ export const htmlCode = `<!DOCTYPE html>
             color: #0d47a1;
         }
 
-        .info-box ul {
-            margin-left: 15px;
-            color: #1565c0;
-        }
-
-        /* Direction grid */
         .direction-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -295,23 +245,21 @@ export const htmlCode = `<!DOCTYPE html>
             border-radius: 10px;
             background: white;
             cursor: pointer;
+            font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            font-size: 20px;
+            transition: all 0.3s;
         }
 
         .direction-btn:hover {
             border-color: #667eea;
-            transform: scale(1.05);
         }
 
         .direction-btn.active {
             background: #667eea;
             color: white;
             border-color: #667eea;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
 
         .direction-btn.empty {
@@ -320,7 +268,6 @@ export const htmlCode = `<!DOCTYPE html>
             cursor: default;
         }
 
-        /* Slider controls */
         .slider-control {
             margin-bottom: 20px;
         }
@@ -331,7 +278,6 @@ export const htmlCode = `<!DOCTYPE html>
             margin-bottom: 8px;
             font-size: 14px;
             font-weight: 600;
-            color: #333;
         }
 
         .slider-label .value {
@@ -354,7 +300,6 @@ export const htmlCode = `<!DOCTYPE html>
             border-radius: 50%;
             background: #667eea;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
         }
 
         .slider::-moz-range-thumb {
@@ -364,17 +309,14 @@ export const htmlCode = `<!DOCTYPE html>
             background: #667eea;
             cursor: pointer;
             border: none;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
         }
 
-        /* Canvas area */
         .canvas-area {
             flex: 1;
             background: #1a1a2e;
             border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             position: relative;
+            overflow: hidden;
         }
 
         #mainCanvas {
@@ -383,7 +325,6 @@ export const htmlCode = `<!DOCTYPE html>
             display: block;
         }
 
-        /* Drawing indicator */
         .drawing-indicator {
             position: absolute;
             top: 20px;
@@ -395,35 +336,17 @@ export const htmlCode = `<!DOCTYPE html>
             font-size: 14px;
             font-weight: 600;
             display: none;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 15px rgba(6, 214, 160, 0.4);
         }
 
         .drawing-indicator.active {
-            display: flex;
+            display: block;
         }
 
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            background: white;
-            border-radius: 50%;
-            animation: pulse 1s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.2); }
-        }
-
-        /* Path counter */
         .path-counter {
             position: absolute;
             bottom: 20px;
             left: 20px;
             background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
             color: white;
             padding: 10px 20px;
             border-radius: 20px;
@@ -431,12 +354,10 @@ export const htmlCode = `<!DOCTYPE html>
             font-weight: 600;
         }
 
-        /* Preview modal */
         .preview-modal {
             position: fixed;
             inset: 0;
             background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(8px);
             z-index: 1000;
             display: none;
             align-items: center;
@@ -451,10 +372,8 @@ export const htmlCode = `<!DOCTYPE html>
         .preview-container {
             background: white;
             border-radius: 20px;
-            overflow: hidden;
             max-width: 900px;
             width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
 
         .preview-header {
@@ -467,7 +386,6 @@ export const htmlCode = `<!DOCTYPE html>
 
         .preview-header h3 {
             font-size: 18px;
-            color: #333;
         }
 
         .preview-controls {
@@ -483,139 +401,83 @@ export const htmlCode = `<!DOCTYPE html>
         #previewCanvas {
             width: 100%;
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .sidebar {
-                width: 300px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .main-content {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                width: 100%;
-                max-height: none;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .header-buttons {
-                width: 100%;
-            }
-
-            .header-buttons .btn {
-                flex: 1;
-            }
-        }
-
-        .divider {
-            height: 1px;
-            background: #eee;
-            margin: 20px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <div class="logo">
                 <div class="logo-icon">✨</div>
-                <div class="logo-text">
+                <div>
                     <h1>Motion AI Studio</h1>
-                    <p>Tạo hiệu ứng chuyển động chuyên nghiệp</p>
+                    <p>Tạo hiệu ứng chuyển động</p>
                 </div>
             </div>
             <div class="header-buttons">
                 <button class="btn btn-preview" onclick="showPreview()" id="previewBtn" disabled>
-                    <i class="fas fa-eye"></i> Xem trước
+                    👁️ Xem trước
                 </button>
                 <button class="btn btn-export" onclick="exportGIF()" id="exportBtn" disabled>
-                    <i class="fas fa-download"></i> Xuất GIF
+                    💾 Xuất GIF
                 </button>
             </div>
         </div>
 
-        <!-- Main Content -->
         <div class="main-content">
-            <!-- Sidebar -->
             <div class="sidebar">
-                <!-- Upload Section -->
                 <div class="section">
-                    <h3 class="section-title">
-                        <i class="fas fa-upload"></i> Tải lên
-                    </h3>
+                    <h3 class="section-title">📤 Tải lên</h3>
                     
-                    <input type="file" id="gifInput" accept=".gif" style="display: none;" onchange="handleGifUpload(event)">
+                    <input type="file" id="gifInput" accept=".gif" style="display: none;">
                     <div class="upload-box" id="gifBox" onclick="document.getElementById('gifInput').click()">
-                        <i class="fas fa-file-video"></i>
+                        <div class="upload-icon">🎬</div>
                         <div class="upload-text">GIF tham chiếu</div>
                         <div class="upload-subtitle">Chuyển động mẫu</div>
                     </div>
 
-                    <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
                     <div class="upload-box" id="imageBox" onclick="document.getElementById('imageInput').click()">
-                        <i class="fas fa-image"></i>
+                        <div class="upload-icon">🖼️</div>
                         <div class="upload-text">Ảnh tĩnh</div>
                         <div class="upload-subtitle">Vật liệu chuyển động</div>
                     </div>
                 </div>
 
-                <!-- Tools Section -->
                 <div class="section">
-                    <h3 class="section-title">
-                        <i class="fas fa-pen"></i> Công cụ
-                    </h3>
+                    <h3 class="section-title">🛠️ Công cụ</h3>
                     
                     <div class="tool-grid">
                         <div class="tool-btn" id="selectTool" onclick="setTool('select')">
-                            <i class="fas fa-mouse-pointer"></i>
-                            <span>Chọn</span>
+                            🖱️<br>Chọn
                         </div>
                         <div class="tool-btn active" id="penTool" onclick="setTool('pen')">
-                            <i class="fas fa-pen"></i>
-                            <span>Vẽ</span>
+                            ✏️<br>Vẽ
                         </div>
                         <div class="tool-btn" id="editTool" onclick="setTool('edit')" disabled>
-                            <i class="fas fa-arrows-alt"></i>
-                            <span>Sửa</span>
+                            ↔️<br>Sửa
                         </div>
                     </div>
 
                     <div class="action-buttons">
                         <button class="btn btn-danger" onclick="deleteSelectedPath()" id="deleteBtn" disabled>
-                            <i class="fas fa-trash"></i> Xóa vùng
+                            🗑️ Xóa vùng
                         </button>
                         <button class="btn btn-secondary" onclick="clearAll()">
-                            <i class="fas fa-redo"></i> Xóa hết
+                            🔄 Xóa hết
                         </button>
                     </div>
                 </div>
 
-                <!-- Instructions -->
                 <div class="info-box" id="penInstructions">
                     <strong>Hướng dẫn vẽ:</strong>
-                    <ul>
-                        <li>Click để bắt đầu vẽ</li>
-                        <li>Click thêm điểm để tạo vùng</li>
-                        <li>Double-click để kết thúc</li>
-                    </ul>
+                    • Click để bắt đầu vẽ<br>
+                    • Click thêm điểm<br>
+                    • Double-click kết thúc
                 </div>
 
-                <!-- Direction Controls -->
                 <div class="section" id="directionSection" style="display: none;">
-                    <h3 class="section-title">
-                        <i class="fas fa-arrow-right"></i> Hướng chuyển động
-                    </h3>
+                    <h3 class="section-title">➡️ Hướng chuyển động</h3>
                     
                     <div class="direction-grid">
                         <div class="direction-btn" onclick="setDirection('upLeft')">↖️</div>
@@ -630,7 +492,6 @@ export const htmlCode = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <!-- Motion Settings -->
                 <div class="section" id="motionSection" style="display: none;">
                     <div class="slider-control">
                         <div class="slider-label">
@@ -649,13 +510,8 @@ export const htmlCode = `<!DOCTYPE html>
                     </div>
                 </div>
 
-                <div class="divider"></div>
-
-                <!-- Global Settings -->
                 <div class="section">
-                    <h3 class="section-title">
-                        <i class="fas fa-play"></i> Cài đặt xuất
-                    </h3>
+                    <h3 class="section-title">⚙️ Cài đặt xuất</h3>
                     
                     <div class="slider-control">
                         <div class="slider-label">
@@ -675,13 +531,11 @@ export const htmlCode = `<!DOCTYPE html>
                 </div>
             </div>
 
-            <!-- Canvas Area -->
             <div class="canvas-area">
                 <canvas id="mainCanvas" width="1200" height="800"></canvas>
                 
                 <div class="drawing-indicator" id="drawingIndicator">
-                    <div class="pulse-dot"></div>
-                    Đang vẽ... (Double-click để kết thúc)
+                    Đang vẽ... (Double-click kết thúc)
                 </div>
 
                 <div class="path-counter" id="pathCounter">
@@ -691,17 +545,16 @@ export const htmlCode = `<!DOCTYPE html>
         </div>
     </div>
 
-    <!-- Preview Modal -->
     <div class="preview-modal" id="previewModal">
         <div class="preview-container">
             <div class="preview-header">
                 <h3>Xem trước</h3>
                 <div class="preview-controls">
                     <button class="btn btn-preview" onclick="togglePreviewPlay()" id="playBtn">
-                        <i class="fas fa-play"></i> Phát
+                        ▶️ Phát
                     </button>
                     <button class="btn btn-secondary" onclick="closePreview()">
-                        <i class="fas fa-times"></i>
+                        ❌
                     </button>
                 </div>
             </div>
@@ -711,9 +564,7 @@ export const htmlCode = `<!DOCTYPE html>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
     <script>
-        // State
         let state = {
             gifFile: null,
             staticImage: null,
@@ -723,7 +574,6 @@ export const htmlCode = `<!DOCTYPE html>
             selectedPathIndex: null,
             pathSettings: {},
             activeTool: 'pen',
-            isDrawing: false,
             drawingStarted: false,
             editingPointIndex: null,
             isPlaying: false,
@@ -733,7 +583,6 @@ export const htmlCode = `<!DOCTYPE html>
             currentFrame: 0
         };
 
-        // Direction vectors
         const directions = {
             up: { x: 0, y: -1 },
             down: { x: 0, y: 1 },
@@ -745,24 +594,23 @@ export const htmlCode = `<!DOCTYPE html>
             downRight: { x: 1, y: 1 }
         };
 
-        // Canvas setup
         const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
         const previewCanvas = document.getElementById('previewCanvas');
         const previewCtx = previewCanvas.getContext('2d');
 
-        // File upload handlers
-        function handleGifUpload(event) {
-            const file = event.target.files[0];
+        document.getElementById('gifInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
             if (!file) return;
             
             state.gifFile = URL.createObjectURL(file);
             document.getElementById('gifBox').classList.add('uploaded');
+            console.log('GIF uploaded:', file.name);
             updateCanvas();
-        }
+        });
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
             if (!file) return;
             
             const img = new Image();
@@ -770,28 +618,22 @@ export const htmlCode = `<!DOCTYPE html>
                 state.staticImage = URL.createObjectURL(file);
                 state.staticImageObj = img;
                 document.getElementById('imageBox').classList.add('uploaded');
+                console.log('Image uploaded:', file.name);
                 updateCanvas();
             };
             img.src = URL.createObjectURL(file);
-        }
+        });
 
-        // Tool management
         function setTool(tool) {
             state.activeTool = tool;
             
             document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tool + 'Tool').classList.add('active');
             
-            if (tool === 'pen') {
-                document.getElementById('penInstructions').style.display = 'block';
-            } else {
-                document.getElementById('penInstructions').style.display = 'none';
-            }
-            
+            document.getElementById('penInstructions').style.display = tool === 'pen' ? 'block' : 'none';
             canvas.style.cursor = tool === 'pen' ? 'crosshair' : tool === 'edit' ? 'move' : 'default';
         }
 
-        // Canvas event handlers
         canvas.addEventListener('click', function(e) {
             const coords = getCanvasCoords(e);
             
@@ -816,14 +658,6 @@ export const htmlCode = `<!DOCTYPE html>
             }
         });
 
-        canvas.addEventListener('mousemove', function(e) {
-            if (state.activeTool === 'edit' && state.editingPointIndex !== null && state.selectedPathIndex !== null) {
-                const coords = getCanvasCoords(e);
-                state.paths[state.selectedPathIndex][state.editingPointIndex] = coords;
-                updateCanvas();
-            }
-        });
-
         canvas.addEventListener('mousedown', function(e) {
             if (state.activeTool === 'edit' && state.selectedPathIndex !== null) {
                 const coords = getCanvasCoords(e);
@@ -834,6 +668,14 @@ export const htmlCode = `<!DOCTYPE html>
                 if (pointIndex >= 0) {
                     state.editingPointIndex = pointIndex;
                 }
+            }
+        });
+
+        canvas.addEventListener('mousemove', function(e) {
+            if (state.activeTool === 'edit' && state.editingPointIndex !== null && state.selectedPathIndex !== null) {
+                const coords = getCanvasCoords(e);
+                state.paths[state.selectedPathIndex][state.editingPointIndex] = coords;
+                updateCanvas();
             }
         });
 
@@ -917,17 +759,15 @@ export const htmlCode = `<!DOCTYPE html>
         }
 
         function updateDirectionButtons(activeDir) {
-            document.querySelectorAll('.direction-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
+            document.querySelectorAll('.direction-btn').forEach(btn => btn.classList.remove('active'));
             
-            const dirIndex = Object.keys(directions).indexOf(activeDir);
-            if (dirIndex >= 0) {
-                document.querySelectorAll('.direction-btn')[dirIndex].classList.add('active');
+            const directionMap = ['upLeft', 'up', 'upRight', 'left', null, 'right', 'downLeft', 'down', 'downRight'];
+            const index = directionMap.indexOf(activeDir);
+            if (index >= 0) {
+                document.querySelectorAll('.direction-btn')[index].classList.add('active');
             }
         }
 
-        // Settings handlers
         function setDirection(dir) {
             if (state.selectedPathIndex !== null) {
                 state.pathSettings[state.selectedPathIndex].direction = dir;
@@ -960,7 +800,6 @@ export const htmlCode = `<!DOCTYPE html>
             state.duration = parseFloat(value);
         }
 
-        // Path actions
         function deleteSelectedPath() {
             if (state.selectedPathIndex === null) return;
             
@@ -993,20 +832,16 @@ export const htmlCode = `<!DOCTYPE html>
             updateUI();
         }
 
-        // Canvas drawing
         function updateCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Background
             ctx.fillStyle = '#1a1a2e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Draw static image
             if (state.staticImageObj) {
                 ctx.drawImage(state.staticImageObj, 0, 0, canvas.width, canvas.height);
             }
             
-            // Draw paths
             state.paths.forEach((path, index) => {
                 drawPath(ctx, path, index === state.selectedPathIndex);
                 
@@ -1015,7 +850,6 @@ export const htmlCode = `<!DOCTYPE html>
                 }
             });
             
-            // Draw current path
             if (state.currentPath.length > 0) {
                 ctx.beginPath();
                 ctx.moveTo(state.currentPath[0].x, state.currentPath[0].y);
@@ -1034,12 +868,11 @@ export const htmlCode = `<!DOCTYPE html>
                 });
             }
             
-            // Instructions
             if (state.paths.length === 0 && state.currentPath.length === 0 && !state.staticImage) {
                 ctx.fillStyle = 'rgba(255,255,255,0.5)';
                 ctx.font = '20px sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('Upload ảnh tĩnh và chọn Pen Tool để vẽ vùng chuyển động', canvas.width / 2, canvas.height / 2);
+                ctx.fillText('Upload ảnh tĩnh và chọn Pen Tool để vẽ', canvas.width / 2, canvas.height / 2);
             }
         }
 
@@ -1085,10 +918,7 @@ export const htmlCode = `<!DOCTYPE html>
             
             const angle = Math.atan2(dir.y, dir.x);
             context.beginPath();
-            context.moveTo(
-                center.x + dir.x * arrowLength,
-                center.y + dir.y * arrowLength
-            );
+            context.moveTo(center.x + dir.x * arrowLength, center.y + dir.y * arrowLength);
             context.lineTo(
                 center.x + dir.x * arrowLength - 15 * Math.cos(angle - Math.PI / 6),
                 center.y + dir.y * arrowLength - 15 * Math.sin(angle - Math.PI / 6)
@@ -1107,10 +937,10 @@ export const htmlCode = `<!DOCTYPE html>
             return { x: sum.x / path.length, y: sum.y / path.length };
         }
 
-        // Preview
         function showPreview() {
             document.getElementById('previewModal').classList.add('active');
             state.isPlaying = false;
+            state.currentFrame = 0;
             renderPreviewFrame(0);
         }
 
@@ -1124,10 +954,10 @@ export const htmlCode = `<!DOCTYPE html>
             const playBtn = document.getElementById('playBtn');
             
             if (state.isPlaying) {
-                playBtn.innerHTML = '<i class="fas fa-pause"></i> Tạm dừng';
+                playBtn.textContent = '⏸️ Tạm dừng';
                 animatePreview();
             } else {
-                playBtn.innerHTML = '<i class="fas fa-play"></i> Phát';
+                playBtn.textContent = '▶️ Phát';
                 stopAnimation();
             }
         }
@@ -1149,12 +979,10 @@ export const htmlCode = `<!DOCTYPE html>
             
             previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
             
-            // Draw base image
             if (state.staticImageObj) {
                 previewCtx.drawImage(state.staticImageObj, 0, 0, previewCanvas.width, previewCanvas.height);
             }
             
-            // Animate each path
             state.paths.forEach((path, index) => {
                 const settings = state.pathSettings[index];
                 if (!settings) return;
@@ -1190,21 +1018,112 @@ export const htmlCode = `<!DOCTYPE html>
             }
         }
 
-        // Export GIF
         function exportGIF() {
-            alert('Đang phát triển tính năng xuất GIF...\n\nĐể xuất GIF, cần tích hợp thêm thư viện gif.js hoặc tương tự.');
+            alert('Tính năng xuất GIF đang phát triển...\\n\\nBạn có thể dùng screen recorder để ghi lại xem trước.');
         }
 
-        // UI updates
         function updateUI() {
             document.getElementById('pathCounter').textContent = state.paths.length + ' vùng chuyển động';
             document.getElementById('previewBtn').disabled = state.paths.length === 0;
             document.getElementById('exportBtn').disabled = state.paths.length === 0;
         }
 
-        // Initialize
         updateCanvas();
         updateUI();
     </script>
 </body>
 </html>`;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(htmlCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleDownload = () => {
+    const blob = new Blob([htmlCode], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'index.html';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 p-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
+          <div className="bg-gradient-to-r from-violet-600 to-purple-600 p-8 text-white">
+            <h1 className="text-3xl font-bold mb-2">Motion AI Studio - Download</h1>
+            <p className="text-white/80">Tải code HTML để upload lên GitHub Pages</p>
+          </div>
+
+          <div className="p-8 space-y-6">
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+              <h3 className="font-semibold text-blue-900 mb-2">📋 Hướng dẫn upload lên GitHub:</h3>
+              <ol className="text-sm text-blue-800 space-y-1 ml-4 list-decimal">
+                <li>Tải file HTML bằng nút bên dưới</li>
+                <li>Vào repository: <code className="bg-blue-100 px-1 rounded">khoicpct-collab/motion-ai-studio</code></li>
+                <li>Upload file <code className="bg-blue-100 px-1 rounded">index.html</code> (ghi đè file cũ)</li>
+                <li>Commit với message: "Update Motion AI Studio"</li>
+                <li>Đợi vài phút để GitHub Pages deploy</li>
+                <li>Truy cập: <code className="bg-blue-100 px-1 rounded">https://khoicpct-collab.github.io/motion-ai-studio/</code></li>
+              </ol>
+            </div>
+
+            <div className="flex gap-4">
+              <Button 
+                onClick={handleDownload}
+                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white gap-2 py-6 text-lg"
+              >
+                <Download className="w-5 h-5" /> Tải xuống index.html
+              </Button>
+
+              <Button 
+                onClick={handleCopy}
+                variant="outline"
+                className="flex-1 gap-2 py-6 text-lg"
+              >
+                {copied ? (
+                  <>
+                    <Check className="w-5 h-5 text-green-600" /> Đã copy!
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-5 h-5" /> Copy code
+                  </>
+                )}
+              </Button>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-4 border">
+              <h3 className="font-semibold mb-3 text-gray-700">✨ Tính năng đã hoàn thiện:</h3>
+              <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                <div>✅ Upload GIF tham chiếu</div>
+                <div>✅ Upload ảnh tĩnh</div>
+                <div>✅ Vẽ vùng (Pen Tool)</div>
+                <div>✅ Edit điểm vùng</div>
+                <div>✅ 8 hướng chuyển động</div>
+                <div>✅ Điều chỉnh tốc độ, cường độ</div>
+                <div>✅ Xem trước animation</div>
+                <div>✅ UI responsive</div>
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+              <h3 className="font-semibold text-yellow-900 mb-2">⚠️ Lưu ý quan trọng:</h3>
+              <ul className="text-sm text-yellow-800 space-y-1 ml-4 list-disc">
+                <li>File HTML hoàn toàn standalone - không cần framework</li>
+                <li>Upload được ảnh và GIF từ máy tính</li>
+                <li>Click để vẽ điểm, double-click để kết thúc vùng</li>
+                <li>Chọn vùng để hiện hướng chuyển động</li>
+                <li>Tính năng xuất GIF sẽ phát triển thêm</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

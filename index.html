@@ -1,1129 +1,189 @@
-import React from 'react';
-import { Button } from "@/components/ui/button";
-import { Download, Copy, Check } from 'lucide-react';
-
-export default function MotionStudioDownload() {
-  const [copied, setCopied] = React.useState(false);
-
-  const htmlCode = `<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motion AI Studio</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-        }
-
-        .container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 20px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #ffd166, #ff9f1c);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-        }
-
-        .logo h1 {
-            color: white;
-            font-size: 24px;
-            font-weight: 700;
-            margin: 0;
-        }
-
-        .logo p {
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 12px;
-            margin: 0;
-        }
-
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 12px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 14px;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-preview {
-            background: #06d6a0;
-            color: white;
-        }
-
-        .btn-export {
-            background: linear-gradient(135deg, #ec4899, #ef4444);
-            color: white;
-        }
-
-        .main-content {
-            display: flex;
-            gap: 20px;
-        }
-
-        .sidebar {
-            width: 350px;
-            background: white;
-            border-radius: 20px;
-            padding: 25px;
-            max-height: calc(100vh - 140px);
-            overflow-y: auto;
-        }
-
-        .section {
-            margin-bottom: 25px;
-        }
-
-        .section-title {
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 15px;
-        }
-
-        .upload-box {
-            border: 2px dashed #ddd;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 15px;
-        }
-
-        .upload-box:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-        }
-
-        .upload-box.uploaded {
-            border-color: #06d6a0;
-            background: #f0fdf9;
-        }
-
-        .upload-icon {
-            font-size: 40px;
-            margin-bottom: 10px;
-        }
-
-        .upload-text {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .upload-subtitle {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .tool-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .tool-btn {
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 12px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .tool-btn:hover {
-            border-color: #667eea;
-        }
-
-        .tool-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .tool-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .action-buttons .btn {
-            flex: 1;
-            font-size: 13px;
-        }
-
-        .btn-danger {
-            background: #fee;
-            color: #dc3545;
-        }
-
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #666;
-        }
-
-        .info-box {
-            background: #e7f3ff;
-            border-left: 4px solid #2196f3;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 13px;
-        }
-
-        .info-box strong {
-            display: block;
-            margin-bottom: 5px;
-            color: #0d47a1;
-        }
-
-        .direction-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-        }
-
-        .direction-btn {
-            width: 50px;
-            height: 50px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            background: white;
-            cursor: pointer;
-            font-size: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s;
-        }
-
-        .direction-btn:hover {
-            border-color: #667eea;
-        }
-
-        .direction-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-
-        .direction-btn.empty {
-            border: none;
-            background: transparent;
-            cursor: default;
-        }
-
-        .slider-control {
-            margin-bottom: 20px;
-        }
-
-        .slider-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .slider-label .value {
-            color: #667eea;
-        }
-
-        .slider {
-            width: 100%;
-            height: 8px;
-            border-radius: 4px;
-            background: #e0e0e0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-        }
-
-        .slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            border: none;
-        }
-
-        .canvas-area {
-            flex: 1;
-            background: #1a1a2e;
-            border-radius: 20px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #mainCanvas {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        .drawing-indicator {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: #06d6a0;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 25px;
-            font-size: 14px;
-            font-weight: 600;
-            display: none;
-        }
-
-        .drawing-indicator.active {
-            display: block;
-        }
-
-        .path-counter {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .preview-modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.85);
-            z-index: 1000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-        }
-
-        .preview-modal.active {
-            display: flex;
-        }
-
-        .preview-container {
-            background: white;
-            border-radius: 20px;
-            max-width: 900px;
-            width: 100%;
-        }
-
-        .preview-header {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .preview-header h3 {
-            font-size: 18px;
-        }
-
-        .preview-controls {
-            display: flex;
-            gap: 10px;
-        }
-
-        .preview-canvas-container {
-            background: #1a1a2e;
-            padding: 30px;
-        }
-
-        #previewCanvas {
-            width: 100%;
-            border-radius: 12px;
-        }
-    </style>
+    <title>Motion AI Studio - Mô phỏng Vật liệu</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Liên kết đến file CSS riêng -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <div class="header">
+    <div class="app-container">
+        <!-- HEADER -->
+        <header class="header">
             <div class="logo">
-                <div class="logo-icon">✨</div>
-                <div>
+                <div class="logo-icon"><i class="fas fa-atom"></i></div>
+                <div class="logo-text">
                     <h1>Motion AI Studio</h1>
-                    <p>Tạo hiệu ứng chuyển động</p>
+                    <p>Mô phỏng chuyển động vật liệu trên nền GIF</p>
                 </div>
             </div>
-            <div class="header-buttons">
-                <button class="btn btn-preview" onclick="showPreview()" id="previewBtn" disabled>
-                    👁️ Xem trước
+            <div class="controls-header">
+                <button id="playBtn" class="btn btn-primary">
+                    <i class="fas fa-play"></i> Play
                 </button>
-                <button class="btn btn-export" onclick="exportGIF()" id="exportBtn" disabled>
-                    💾 Xuất GIF
+                <button id="exportBtn" class="btn btn-export">
+                    <i class="fas fa-download"></i> Export PNG
+                </button>
+                <button id="clearAllBtn" class="btn btn-danger">
+                    <i class="fas fa-trash-alt"></i> Clear All
                 </button>
             </div>
-        </div>
+        </header>
 
+        <!-- MAIN CONTENT -->
         <div class="main-content">
+            <!-- LEFT SIDEBAR -->
             <div class="sidebar">
+                <!-- UPLOAD SECTION -->
                 <div class="section">
-                    <h3 class="section-title">📤 Tải lên</h3>
-                    
-                    <input type="file" id="gifInput" accept=".gif" style="display: none;">
-                    <div class="upload-box" id="gifBox" onclick="document.getElementById('gifInput').click()">
-                        <div class="upload-icon">🎬</div>
-                        <div class="upload-text">GIF tham chiếu</div>
-                        <div class="upload-subtitle">Chuyển động mẫu</div>
+                    <div class="section-title">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <span>📁 Upload Files</span>
                     </div>
-
-                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
-                    <div class="upload-box" id="imageBox" onclick="document.getElementById('imageInput').click()">
-                        <div class="upload-icon">🖼️</div>
-                        <div class="upload-text">Ảnh tĩnh</div>
-                        <div class="upload-subtitle">Vật liệu chuyển động</div>
-                    </div>
+                    <label class="upload-zone" for="uploadGif">
+                        <div class="upload-icon"><i class="fas fa-film"></i></div>
+                        <div class="upload-text">🎬 GIF Background</div>
+                        <div class="upload-sub">Layer nền thiết bị hoặc băng tải</div>
+                        <input type="file" id="uploadGif" accept="image/gif" hidden>
+                    </label>
+                    <label class="upload-zone" for="uploadMaterial">
+                        <div class="upload-icon"><i class="fas fa-palette"></i></div>
+                        <div class="upload-text">🎨 Material Image</div>
+                        <div class="upload-sub">Hạt, bột, vật liệu cần mô phỏng</div>
+                        <input type="file" id="uploadMaterial" accept="image/*" hidden>
+                    </label>
                 </div>
 
+                <!-- TOOLS SECTION -->
                 <div class="section">
-                    <h3 class="section-title">🛠️ Công cụ</h3>
-                    
-                    <div class="tool-grid">
-                        <div class="tool-btn" id="selectTool" onclick="setTool('select')">
-                            🖱️<br>Chọn
-                        </div>
-                        <div class="tool-btn active" id="penTool" onclick="setTool('pen')">
-                            ✏️<br>Vẽ
-                        </div>
-                        <div class="tool-btn" id="editTool" onclick="setTool('edit')" disabled>
-                            ↔️<br>Sửa
-                        </div>
+                    <div class="section-title">
+                        <i class="fas fa-tools"></i>
+                        <span>🛠️ Công Cụ Vẽ</span>
                     </div>
-
-                    <div class="action-buttons">
-                        <button class="btn btn-danger" onclick="deleteSelectedPath()" id="deleteBtn" disabled>
-                            🗑️ Xóa vùng
+                    <div class="tools-grid">
+                        <button class="tool-btn active" data-tool="select">
+                            <i class="fas fa-mouse-pointer"></i>
+                            <span>Select</span>
                         </button>
-                        <button class="btn btn-secondary" onclick="clearAll()">
-                            🔄 Xóa hết
+                        <button class="tool-btn" data-tool="pen">
+                            <i class="fas fa-pen"></i>
+                            <span>Pen Tool</span>
+                        </button>
+                        <button class="tool-btn" data-tool="edit">
+                            <i class="fas fa-edit"></i>
+                            <span>Edit Points</span>
                         </button>
                     </div>
-                </div>
-
-                <div class="info-box" id="penInstructions">
-                    <strong>Hướng dẫn vẽ:</strong>
-                    • Click để bắt đầu vẽ<br>
-                    • Click thêm điểm<br>
-                    • Double-click kết thúc
-                </div>
-
-                <div class="section" id="directionSection" style="display: none;">
-                    <h3 class="section-title">➡️ Hướng chuyển động</h3>
-                    
-                    <div class="direction-grid">
-                        <div class="direction-btn" onclick="setDirection('upLeft')">↖️</div>
-                        <div class="direction-btn" onclick="setDirection('up')">⬆️</div>
-                        <div class="direction-btn" onclick="setDirection('upRight')">↗️</div>
-                        <div class="direction-btn" onclick="setDirection('left')">⬅️</div>
-                        <div class="direction-btn empty"></div>
-                        <div class="direction-btn" onclick="setDirection('right')">➡️</div>
-                        <div class="direction-btn" onclick="setDirection('downLeft')">↙️</div>
-                        <div class="direction-btn" onclick="setDirection('down')">⬇️</div>
-                        <div class="direction-btn" onclick="setDirection('downRight')">↘️</div>
+                    <div class="info-box">
+                        <strong><i class="fas fa-lightbulb"></i> Hướng dẫn nhanh:</strong><br>
+                        1. Upload GIF và Material<br>
+                        2. <strong>Click vào canvas</strong> để bắt đầu vẽ vùng<br>
+                        3. Chọn hướng từ bảng mũi tên<br>
+                        4. <strong>Double-click</strong> để kết thúc vẽ<br>
+                        5. Bấm Play để xem mô phỏng
                     </div>
                 </div>
 
-                <div class="section" id="motionSection" style="display: none;">
-                    <div class="slider-control">
-                        <div class="slider-label">
-                            <span>Tốc độ</span>
-                            <span class="value" id="speedValue">50%</span>
-                        </div>
-                        <input type="range" class="slider" id="speedSlider" min="1" max="100" value="50" oninput="updateSpeed(this.value)">
-                    </div>
-
-                    <div class="slider-control">
-                        <div class="slider-label">
-                            <span>Cường độ</span>
-                            <span class="value" id="intensityValue">80%</span>
-                        </div>
-                        <input type="range" class="slider" id="intensitySlider" min="1" max="100" value="80" oninput="updateIntensity(this.value)">
-                    </div>
-                </div>
-
+                <!-- SETTINGS SECTION -->
                 <div class="section">
-                    <h3 class="section-title">⚙️ Cài đặt xuất</h3>
+                    <div class="section-title">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>⚙️ Cài Đặt Chuyển Động</span>
+                    </div>
                     
-                    <div class="slider-control">
-                        <div class="slider-label">
-                            <span>FPS</span>
-                            <span class="value" id="fpsValue">12</span>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Tốc độ:</span>
+                            <span id="speedValue" class="value-display">50%</span>
                         </div>
-                        <input type="range" class="slider" id="fpsSlider" min="6" max="30" value="12" oninput="updateFPS(this.value)">
+                        <input type="range" id="speedSlider" class="slider" min="1" max="100" value="50">
                     </div>
 
-                    <div class="slider-control">
-                        <div class="slider-label">
-                            <span>Thời lượng</span>
-                            <span class="value" id="durationValue">2s</span>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Số lượng hạt:</span>
+                            <span id="countValue" class="value-display">150</span>
                         </div>
-                        <input type="range" class="slider" id="durationSlider" min="1" max="10" step="0.5" value="2" oninput="updateDuration(this.value)">
+                        <input type="range" id="countSlider" class="slider" min="20" max="500" value="150">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Kích thước hạt:</span>
+                            <span id="sizeValue" class="value-display">15px</span>
+                        </div>
+                        <input type="range" id="sizeSlider" class="slider" min="5" max="50" value="15">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Độ xoáy (Swirl):</span>
+                            <span id="swirlValue" class="value-display">30%</span>
+                        </div>
+                        <input type="range" id="swirlSlider" class="slider" min="0" max="100" value="30">
                     </div>
                 </div>
             </div>
 
+            <!-- CANVAS AREA -->
             <div class="canvas-area">
-                <canvas id="mainCanvas" width="1200" height="800"></canvas>
+                <div class="canvas-header">
+                    <h2><i class="fas fa-play-circle"></i> Khu Vực Mô Phỏng</h2>
+                    <div class="canvas-stats">
+                        <div><i class="fas fa-draw-polygon"></i> Vùng: <span id="pathCount" class="status-value">0</span></div>
+                        <div><i class="fas fa-circle"></i> Hạt: <span id="particleCount" class="status-value">0</span></div>
+                        <div><i class="fas fa-tachometer-alt"></i> FPS: <span id="fpsCounter" class="status-value">0</span></div>
+                    </div>
+                </div>
                 
-                <div class="drawing-indicator" id="drawingIndicator">
-                    Đang vẽ... (Double-click kết thúc)
+                <!-- MAIN CANVAS -->
+                <canvas id="mainCanvas" width="1200" height="675"></canvas>
+                
+                <!-- DIRECTION SELECTOR OVERLAY -->
+                <div id="directionOverlay">
+                    <div class="direction-title">🎯 Chọn Hướng Chuyển Động</div>
+                    <div class="direction-grid">
+                        <button class="dir-btn" data-dir="up-left" data-vx="-0.7" data-vy="-0.7">↖</button>
+                        <button class="dir-btn" data-dir="up" data-vx="0" data-vy="-1">↑</button>
+                        <button class="dir-btn" data-dir="up-right" data-vx="0.7" data-vy="-0.7">↗</button>
+                        <button class="dir-btn" data-dir="left" data-vx="-1" data-vy="0">←</button>
+                        <button class="dir-btn" data-dir="scroll" data-vx="0" data-vy="0" data-scroll="true">↻</button>
+                        <button class="dir-btn" data-dir="right" data-vx="1" data-vy="0">→</button>
+                        <button class="dir-btn" data-dir="down-left" data-vx="-0.7" data-vy="0.7">↙</button>
+                        <button class="dir-btn" data-dir="down" data-vx="0" data-vy="1">↓</button>
+                        <button class="dir-btn" data-dir="down-right" data-vx="0.7" data-vy="0.7">↘</button>
+                    </div>
+                    <div class="direction-hint">
+                        ↻ = Chuyển động xoay tròn (cho vít tải)
+                    </div>
                 </div>
 
-                <div class="path-counter" id="pathCounter">
-                    0 vùng chuyển động
+                <!-- STATUS BAR -->
+                <div class="status-bar">
+                    <div class="status-item">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Trạng thái: <span id="statusText" class="status-value">Sẵn sàng</span></span>
+                    </div>
+                    <div class="status-item">
+                        <i class="fas fa-layer-group"></i>
+                        <span>Vật liệu: <span id="materialStatus" class="status-value">Chưa tải</span></span>
+                    </div>
+                    <div class="status-item">
+                        <i class="fas fa-compress-arrows-alt"></i>
+                        <span>Kích thước: <span class="status-value">1200×675px</span></span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="preview-modal" id="previewModal">
-        <div class="preview-container">
-            <div class="preview-header">
-                <h3>Xem trước</h3>
-                <div class="preview-controls">
-                    <button class="btn btn-preview" onclick="togglePreviewPlay()" id="playBtn">
-                        ▶️ Phát
-                    </button>
-                    <button class="btn btn-secondary" onclick="closePreview()">
-                        ❌
-                    </button>
-                </div>
-            </div>
-            <div class="preview-canvas-container">
-                <canvas id="previewCanvas" width="1200" height="800"></canvas>
-            </div>
-        </div>
-    </div>
+    <!-- NOTIFICATION -->
+    <div id="notification"></div>
 
-    <script>
-        let state = {
-            gifFile: null,
-            staticImage: null,
-            staticImageObj: null,
-            paths: [],
-            currentPath: [],
-            selectedPathIndex: null,
-            pathSettings: {},
-            activeTool: 'pen',
-            drawingStarted: false,
-            editingPointIndex: null,
-            isPlaying: false,
-            fps: 12,
-            duration: 2,
-            animationFrame: null,
-            currentFrame: 0
-        };
-
-        const directions = {
-            up: { x: 0, y: -1 },
-            down: { x: 0, y: 1 },
-            left: { x: -1, y: 0 },
-            right: { x: 1, y: 0 },
-            upLeft: { x: -1, y: -1 },
-            upRight: { x: 1, y: -1 },
-            downLeft: { x: -1, y: 1 },
-            downRight: { x: 1, y: 1 }
-        };
-
-        const canvas = document.getElementById('mainCanvas');
-        const ctx = canvas.getContext('2d');
-        const previewCanvas = document.getElementById('previewCanvas');
-        const previewCtx = previewCanvas.getContext('2d');
-
-        document.getElementById('gifInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            state.gifFile = URL.createObjectURL(file);
-            document.getElementById('gifBox').classList.add('uploaded');
-            console.log('GIF uploaded:', file.name);
-            updateCanvas();
-        });
-
-        document.getElementById('imageInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            const img = new Image();
-            img.onload = function() {
-                state.staticImage = URL.createObjectURL(file);
-                state.staticImageObj = img;
-                document.getElementById('imageBox').classList.add('uploaded');
-                console.log('Image uploaded:', file.name);
-                updateCanvas();
-            };
-            img.src = URL.createObjectURL(file);
-        });
-
-        function setTool(tool) {
-            state.activeTool = tool;
-            
-            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
-            document.getElementById(tool + 'Tool').classList.add('active');
-            
-            document.getElementById('penInstructions').style.display = tool === 'pen' ? 'block' : 'none';
-            canvas.style.cursor = tool === 'pen' ? 'crosshair' : tool === 'edit' ? 'move' : 'default';
-        }
-
-        canvas.addEventListener('click', function(e) {
-            const coords = getCanvasCoords(e);
-            
-            if (state.activeTool === 'pen') {
-                if (!state.drawingStarted) {
-                    state.drawingStarted = true;
-                    state.currentPath = [coords];
-                    document.getElementById('drawingIndicator').classList.add('active');
-                } else {
-                    state.currentPath.push(coords);
-                }
-                updateCanvas();
-            } else if (state.activeTool === 'select') {
-                const clickedIndex = findPathAtPoint(coords);
-                selectPath(clickedIndex);
-            }
-        });
-
-        canvas.addEventListener('dblclick', function(e) {
-            if (state.activeTool === 'pen' && state.drawingStarted && state.currentPath.length >= 3) {
-                finishDrawing();
-            }
-        });
-
-        canvas.addEventListener('mousedown', function(e) {
-            if (state.activeTool === 'edit' && state.selectedPathIndex !== null) {
-                const coords = getCanvasCoords(e);
-                const path = state.paths[state.selectedPathIndex];
-                const pointIndex = path.findIndex(p => 
-                    Math.sqrt((p.x - coords.x) ** 2 + (p.y - coords.y) ** 2) < 10
-                );
-                if (pointIndex >= 0) {
-                    state.editingPointIndex = pointIndex;
-                }
-            }
-        });
-
-        canvas.addEventListener('mousemove', function(e) {
-            if (state.activeTool === 'edit' && state.editingPointIndex !== null && state.selectedPathIndex !== null) {
-                const coords = getCanvasCoords(e);
-                state.paths[state.selectedPathIndex][state.editingPointIndex] = coords;
-                updateCanvas();
-            }
-        });
-
-        canvas.addEventListener('mouseup', function() {
-            state.editingPointIndex = null;
-        });
-
-        function getCanvasCoords(e) {
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            return {
-                x: (e.clientX - rect.left) * scaleX,
-                y: (e.clientY - rect.top) * scaleY
-            };
-        }
-
-        function finishDrawing() {
-            const newIndex = state.paths.length;
-            state.paths.push([...state.currentPath]);
-            state.pathSettings[newIndex] = {
-                direction: 'right',
-                speed: 50,
-                intensity: 80
-            };
-            state.currentPath = [];
-            state.drawingStarted = false;
-            document.getElementById('drawingIndicator').classList.remove('active');
-            selectPath(newIndex);
-            updateCanvas();
-            updateUI();
-        }
-
-        function findPathAtPoint(point) {
-            for (let i = state.paths.length - 1; i >= 0; i--) {
-                if (isPointInPath(point, state.paths[i])) {
-                    return i;
-                }
-            }
-            return null;
-        }
-
-        function isPointInPath(point, path) {
-            if (path.length < 3) return false;
-            let inside = false;
-            for (let i = 0, j = path.length - 1; i < path.length; j = i++) {
-                const xi = path[i].x, yi = path[i].y;
-                const xj = path[j].x, yj = path[j].y;
-                if ((yi > point.y) !== (yj > point.y) &&
-                    point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi) {
-                    inside = !inside;
-                }
-            }
-            return inside;
-        }
-
-        function selectPath(index) {
-            state.selectedPathIndex = index;
-            
-            if (index !== null) {
-                document.getElementById('directionSection').style.display = 'block';
-                document.getElementById('motionSection').style.display = 'block';
-                document.getElementById('editTool').disabled = false;
-                document.getElementById('deleteBtn').disabled = false;
-                
-                const settings = state.pathSettings[index];
-                document.getElementById('speedSlider').value = settings.speed;
-                document.getElementById('speedValue').textContent = settings.speed + '%';
-                document.getElementById('intensitySlider').value = settings.intensity;
-                document.getElementById('intensityValue').textContent = settings.intensity + '%';
-                
-                updateDirectionButtons(settings.direction);
-            } else {
-                document.getElementById('directionSection').style.display = 'none';
-                document.getElementById('motionSection').style.display = 'none';
-                document.getElementById('editTool').disabled = true;
-                document.getElementById('deleteBtn').disabled = true;
-            }
-            
-            updateCanvas();
-        }
-
-        function updateDirectionButtons(activeDir) {
-            document.querySelectorAll('.direction-btn').forEach(btn => btn.classList.remove('active'));
-            
-            const directionMap = ['upLeft', 'up', 'upRight', 'left', null, 'right', 'downLeft', 'down', 'downRight'];
-            const index = directionMap.indexOf(activeDir);
-            if (index >= 0) {
-                document.querySelectorAll('.direction-btn')[index].classList.add('active');
-            }
-        }
-
-        function setDirection(dir) {
-            if (state.selectedPathIndex !== null) {
-                state.pathSettings[state.selectedPathIndex].direction = dir;
-                updateDirectionButtons(dir);
-                updateCanvas();
-            }
-        }
-
-        function updateSpeed(value) {
-            document.getElementById('speedValue').textContent = value + '%';
-            if (state.selectedPathIndex !== null) {
-                state.pathSettings[state.selectedPathIndex].speed = parseInt(value);
-            }
-        }
-
-        function updateIntensity(value) {
-            document.getElementById('intensityValue').textContent = value + '%';
-            if (state.selectedPathIndex !== null) {
-                state.pathSettings[state.selectedPathIndex].intensity = parseInt(value);
-            }
-        }
-
-        function updateFPS(value) {
-            document.getElementById('fpsValue').textContent = value;
-            state.fps = parseInt(value);
-        }
-
-        function updateDuration(value) {
-            document.getElementById('durationValue').textContent = value + 's';
-            state.duration = parseFloat(value);
-        }
-
-        function deleteSelectedPath() {
-            if (state.selectedPathIndex === null) return;
-            
-            state.paths.splice(state.selectedPathIndex, 1);
-            
-            const newSettings = {};
-            Object.keys(state.pathSettings).forEach(key => {
-                const idx = parseInt(key);
-                if (idx < state.selectedPathIndex) {
-                    newSettings[idx] = state.pathSettings[idx];
-                } else if (idx > state.selectedPathIndex) {
-                    newSettings[idx - 1] = state.pathSettings[idx];
-                }
-            });
-            state.pathSettings = newSettings;
-            
-            state.selectedPathIndex = null;
-            updateCanvas();
-            updateUI();
-        }
-
-        function clearAll() {
-            state.paths = [];
-            state.pathSettings = {};
-            state.currentPath = [];
-            state.selectedPathIndex = null;
-            state.drawingStarted = false;
-            document.getElementById('drawingIndicator').classList.remove('active');
-            updateCanvas();
-            updateUI();
-        }
-
-        function updateCanvas() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.fillStyle = '#1a1a2e';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            if (state.staticImageObj) {
-                ctx.drawImage(state.staticImageObj, 0, 0, canvas.width, canvas.height);
-            }
-            
-            state.paths.forEach((path, index) => {
-                drawPath(ctx, path, index === state.selectedPathIndex);
-                
-                if (index === state.selectedPathIndex && state.pathSettings[index]) {
-                    drawDirectionArrow(ctx, path, state.pathSettings[index].direction);
-                }
-            });
-            
-            if (state.currentPath.length > 0) {
-                ctx.beginPath();
-                ctx.moveTo(state.currentPath[0].x, state.currentPath[0].y);
-                state.currentPath.forEach(p => ctx.lineTo(p.x, p.y));
-                ctx.strokeStyle = '#06d6a0';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                state.currentPath.forEach(p => {
-                    ctx.beginPath();
-                    ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
-                    ctx.fillStyle = '#06d6a0';
-                    ctx.fill();
-                });
-            }
-            
-            if (state.paths.length === 0 && state.currentPath.length === 0 && !state.staticImage) {
-                ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                ctx.font = '20px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('Upload ảnh tĩnh và chọn Pen Tool để vẽ', canvas.width / 2, canvas.height / 2);
-            }
-        }
-
-        function drawPath(context, path, isSelected) {
-            if (path.length < 2) return;
-            
-            context.beginPath();
-            context.moveTo(path[0].x, path[0].y);
-            path.forEach(p => context.lineTo(p.x, p.y));
-            context.closePath();
-            
-            context.fillStyle = isSelected ? 'rgba(102, 126, 234, 0.3)' : 'rgba(102, 126, 234, 0.15)';
-            context.fill();
-            
-            context.strokeStyle = isSelected ? '#667eea' : '#8b9dc3';
-            context.lineWidth = isSelected ? 3 : 2;
-            context.stroke();
-            
-            if (isSelected && state.activeTool === 'edit') {
-                path.forEach(p => {
-                    context.beginPath();
-                    context.arc(p.x, p.y, 6, 0, Math.PI * 2);
-                    context.fillStyle = '#fff';
-                    context.fill();
-                    context.strokeStyle = '#667eea';
-                    context.lineWidth = 2;
-                    context.stroke();
-                });
-            }
-        }
-
-        function drawDirectionArrow(context, path, direction) {
-            const center = getPathCenter(path);
-            const dir = directions[direction];
-            const arrowLength = 60;
-            
-            context.beginPath();
-            context.moveTo(center.x, center.y);
-            context.lineTo(center.x + dir.x * arrowLength, center.y + dir.y * arrowLength);
-            context.strokeStyle = '#ffd166';
-            context.lineWidth = 5;
-            context.stroke();
-            
-            const angle = Math.atan2(dir.y, dir.x);
-            context.beginPath();
-            context.moveTo(center.x + dir.x * arrowLength, center.y + dir.y * arrowLength);
-            context.lineTo(
-                center.x + dir.x * arrowLength - 15 * Math.cos(angle - Math.PI / 6),
-                center.y + dir.y * arrowLength - 15 * Math.sin(angle - Math.PI / 6)
-            );
-            context.lineTo(
-                center.x + dir.x * arrowLength - 15 * Math.cos(angle + Math.PI / 6),
-                center.y + dir.y * arrowLength - 15 * Math.sin(angle + Math.PI / 6)
-            );
-            context.closePath();
-            context.fillStyle = '#ffd166';
-            context.fill();
-        }
-
-        function getPathCenter(path) {
-            const sum = path.reduce((acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }), { x: 0, y: 0 });
-            return { x: sum.x / path.length, y: sum.y / path.length };
-        }
-
-        function showPreview() {
-            document.getElementById('previewModal').classList.add('active');
-            state.isPlaying = false;
-            state.currentFrame = 0;
-            renderPreviewFrame(0);
-        }
-
-        function closePreview() {
-            document.getElementById('previewModal').classList.remove('active');
-            stopAnimation();
-        }
-
-        function togglePreviewPlay() {
-            state.isPlaying = !state.isPlaying;
-            const playBtn = document.getElementById('playBtn');
-            
-            if (state.isPlaying) {
-                playBtn.textContent = '⏸️ Tạm dừng';
-                animatePreview();
-            } else {
-                playBtn.textContent = '▶️ Phát';
-                stopAnimation();
-            }
-        }
-
-        function animatePreview() {
-            if (!state.isPlaying) return;
-            
-            const totalFrames = state.fps * state.duration;
-            state.currentFrame = (state.currentFrame + 1) % totalFrames;
-            
-            renderPreviewFrame(state.currentFrame);
-            
-            state.animationFrame = requestAnimationFrame(animatePreview);
-        }
-
-        function renderPreviewFrame(frame) {
-            const totalFrames = state.fps * state.duration;
-            const progress = frame / totalFrames;
-            
-            previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
-            
-            if (state.staticImageObj) {
-                previewCtx.drawImage(state.staticImageObj, 0, 0, previewCanvas.width, previewCanvas.height);
-            }
-            
-            state.paths.forEach((path, index) => {
-                const settings = state.pathSettings[index];
-                if (!settings) return;
-                
-                const dir = directions[settings.direction];
-                const offset = Math.sin(progress * Math.PI * 2) * settings.speed * 0.8;
-                
-                previewCtx.save();
-                previewCtx.beginPath();
-                previewCtx.moveTo(path[0].x, path[0].y);
-                path.forEach(p => previewCtx.lineTo(p.x, p.y));
-                previewCtx.closePath();
-                previewCtx.clip();
-                
-                if (state.staticImageObj) {
-                    previewCtx.drawImage(
-                        state.staticImageObj,
-                        dir.x * offset,
-                        dir.y * offset,
-                        previewCanvas.width,
-                        previewCanvas.height
-                    );
-                }
-                
-                previewCtx.restore();
-            });
-        }
-
-        function stopAnimation() {
-            if (state.animationFrame) {
-                cancelAnimationFrame(state.animationFrame);
-                state.animationFrame = null;
-            }
-        }
-
-        function exportGIF() {
-            alert('Tính năng xuất GIF đang phát triển...\\n\\nBạn có thể dùng screen recorder để ghi lại xem trước.');
-        }
-
-        function updateUI() {
-            document.getElementById('pathCounter').textContent = state.paths.length + ' vùng chuyển động';
-            document.getElementById('previewBtn').disabled = state.paths.length === 0;
-            document.getElementById('exportBtn').disabled = state.paths.length === 0;
-        }
-
-        updateCanvas();
-        updateUI();
-    </script>
+    <!-- Liên kết đến file JavaScript chính -->
+    <script src="app.js"></script>
 </body>
-</html>`;
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(htmlCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleDownload = () => {
-    const blob = new Blob([htmlCode], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'index.html';
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700 p-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
-          <div className="bg-gradient-to-r from-violet-600 to-purple-600 p-8 text-white">
-            <h1 className="text-3xl font-bold mb-2">Motion AI Studio - Download</h1>
-            <p className="text-white/80">Tải code HTML để upload lên GitHub Pages</p>
-          </div>
-
-          <div className="p-8 space-y-6">
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-              <h3 className="font-semibold text-blue-900 mb-2">📋 Hướng dẫn upload lên GitHub:</h3>
-              <ol className="text-sm text-blue-800 space-y-1 ml-4 list-decimal">
-                <li>Tải file HTML bằng nút bên dưới</li>
-                <li>Vào repository: <code className="bg-blue-100 px-1 rounded">khoicpct-collab/motion-ai-studio</code></li>
-                <li>Upload file <code className="bg-blue-100 px-1 rounded">index.html</code> (ghi đè file cũ)</li>
-                <li>Commit với message: "Update Motion AI Studio"</li>
-                <li>Đợi vài phút để GitHub Pages deploy</li>
-                <li>Truy cập: <code className="bg-blue-100 px-1 rounded">https://khoicpct-collab.github.io/motion-ai-studio/</code></li>
-              </ol>
-            </div>
-
-            <div className="flex gap-4">
-              <Button 
-                onClick={handleDownload}
-                className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white gap-2 py-6 text-lg"
-              >
-                <Download className="w-5 h-5" /> Tải xuống index.html
-              </Button>
-
-              <Button 
-                onClick={handleCopy}
-                variant="outline"
-                className="flex-1 gap-2 py-6 text-lg"
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-5 h-5 text-green-600" /> Đã copy!
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-5 h-5" /> Copy code
-                  </>
-                )}
-              </Button>
-            </div>
-
-            <div className="bg-gray-50 rounded-xl p-4 border">
-              <h3 className="font-semibold mb-3 text-gray-700">✨ Tính năng đã hoàn thiện:</h3>
-              <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
-                <div>✅ Upload GIF tham chiếu</div>
-                <div>✅ Upload ảnh tĩnh</div>
-                <div>✅ Vẽ vùng (Pen Tool)</div>
-                <div>✅ Edit điểm vùng</div>
-                <div>✅ 8 hướng chuyển động</div>
-                <div>✅ Điều chỉnh tốc độ, cường độ</div>
-                <div>✅ Xem trước animation</div>
-                <div>✅ UI responsive</div>
-              </div>
-            </div>
-
-            <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
-              <h3 className="font-semibold text-yellow-900 mb-2">⚠️ Lưu ý quan trọng:</h3>
-              <ul className="text-sm text-yellow-800 space-y-1 ml-4 list-disc">
-                <li>File HTML hoàn toàn standalone - không cần framework</li>
-                <li>Upload được ảnh và GIF từ máy tính</li>
-                <li>Click để vẽ điểm, double-click để kết thúc vùng</li>
-                <li>Chọn vùng để hiện hướng chuyển động</li>
-                <li>Tính năng xuất GIF sẽ phát triển thêm</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
+</html>

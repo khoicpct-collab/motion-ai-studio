@@ -1,218 +1,338 @@
-// ============================================
-// MOTION SIM - Core Engine
-// Tối ưu hiệu suất, tập trung nghiệp vụ
-// ============================================
+// FILE: app.js - Logic chính cho Motion AI Studio
+// Phiên bản hoàn chỉnh & tối ưu cho Vercel
 
-// STATE - Đơn giản hoá tối đa
-const AppState = {
-    canvas: null, ctx: null,
-    drawCanvas: null, drawCtx: null,
-    background: null,
-    material: null,
-    isPlaying: false,
-    isDrawing: false,
-    currentPath: [],
-    selectedDirection: null,
-    particles: [],
+// ==================== CẤU HÌNH & STATE ====================
+const CONFIG = {
+    MAX_PARTICLES: 500,
+    FPS_LIMIT: 30,
+    BASE_SPEED: 0.5
+};
+
+const State = {
+    // Canvas & Context
+    canvas: null,
+    ctx: null,
+    
+    // Hình ảnh
+    bgImage: null,
+    materialImg: null,
+    
+    // Vẽ & Đường dẫn
     paths: [],
-
-    // Settings với giá trị mặc định tối ưu
+    currentPath: [],
+    selectedTool: 'select',
+    isDrawing: false,
+    selectedPathIndex: -1,
+    
+    // Particle system
+    particles: [],
+    isPlaying: false,
+    
+    // Hướng
+    selectedDirection: null,
+    
+    // Cài đặt
     speed: 50,
     particleCount: 150,
-    particleSize: 12,
-
+    particleSize: 15,
+    swirl: 30,
+    
     // Hiệu suất
     lastFrameTime: 0,
     fps: 0,
     frameCount: 0,
-    fpsInterval: 1000 / 30 // Mặc định 30 FPS để mượt
+    fpsInterval: 1000 / CONFIG.FPS_LIMIT,
+    
+    // Cache
+    particleCache: null
 };
 
-// ============================================
-// KHỞI TẠO
-// ============================================
+// ==================== KHỞI TẠO ====================
 function init() {
-    console.log('🚀 Motion Sim - Khởi động...');
-    AppState.canvas = document.getElementById('mainCanvas');
-    AppState.ctx = AppState.canvas.getContext('2d', { alpha: false }); // Tối ưu: tắt alpha
-    AppState.drawCanvas = document.getElementById('drawCanvas');
-    AppState.drawCtx = AppState.drawCanvas.getContext('2d');
-
+    console.log('🚀 Motion AI Studio - Khởi động...');
+    
+    // Thiết lập canvas
+    State.canvas = document.getElementById('mainCanvas');
+    State.ctx = State.canvas.getContext('2d', { alpha: false });
+    
+    // Tạo cache cho particle
+    createParticleCache();
+    
+    // Thiết lập sự kiện
     setupEventListeners();
-    setupDefaultParticleCache(); // Tạo cache sẵn cho particle
-    animate(0); // Bắt đầu vòng lặp
-
-    showNotification('✅ Ứng dụng sẵn sàng. Upload GIF và bắt đầu vẽ!');
+    
+    // Bắt đầu vòng lặp animation
+    requestAnimationFrame(animate);
+    
+    // Hiện thông báo chào mừng
+    showNotification('✅ Ứng dụng đã sẵn sàng! Upload GIF để bắt đầu.');
+    updateUI();
 }
 
-// ============================================
-// THIẾT LẬP SỰ KIỆN
-// ============================================
+// Tạo cache hình ảnh cho particle (tối ưu hiệu suất)
+function createParticleCache() {
+    const size = 64;
+    const cache = document.createElement('canvas');
+    cache.width = cache.height = size;
+    const ctx = cache.getContext('2d');
+    
+    // Vẽ particle mẫu với gradient
+    const gradient = ctx.createRadialGradient(
+        size/2, size/2, 0,
+        size/2, size/2, size/2
+    );
+    gradient.addColorStop(0, 'rgba(255, 107, 107, 1)');
+    gradient.addColorStop(1, 'rgba(255, 71, 87, 0.7)');
+    
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Thêm highlight
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    ctx.beginPath();
+    ctx.arc(size/3, size/3, size/6, 0, Math.PI * 2);
+    ctx.fill();
+    
+    State.particleCache = cache;
+}
+
+// ==================== THIẾT LẬP SỰ KIỆN ====================
 function setupEventListeners() {
-    // Upload
+    // Upload files
     document.getElementById('uploadGif').addEventListener('change', handleGifUpload);
     document.getElementById('uploadMaterial').addEventListener('change', handleMaterialUpload);
-    document.querySelectorAll('.upload-area').forEach(area => {
-        area.addEventListener('click', function() {
-            this.querySelector('input[type="file"]').click();
+    
+    // Tool selection
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            selectTool(this.dataset.tool);
         });
     });
-
-    // Canvas
-    AppState.canvas.addEventListener('mousedown', startDrawing);
-    AppState.canvas.addEventListener('mousemove', draw);
-    AppState.canvas.addEventListener('mouseup', stopDrawing);
-    AppState.canvas.addEventListener('dblclick', finishDrawing);
-
-    // Controls
-    document.getElementById('speedSlider').addEventListener('input', function() {
-        AppState.speed = this.value;
-        document.getElementById('speedValue').textContent = this.value + '%';
-        updateParticleVelocity();
-    });
-    document.getElementById('countSlider').addEventListener('input', function() {
-        AppState.particleCount = this.value;
-        document.getElementById('countValue').textContent = this.value;
-        regenerateParticles();
-    });
-    document.getElementById('sizeSlider').addEventListener('input', function() {
-        AppState.particleSize = this.value;
-        document.getElementById('sizeValue').textContent = this.value + 'px';
-        updateParticleSize();
-    });
-
-    // Buttons
-    document.getElementById('playBtn').addEventListener('click', togglePlay);
-    document.getElementById('exportBtn').addEventListener('click', exportComposite);
-
+    
+    // Canvas events
+    State.canvas.addEventListener('mousedown', startDrawing);
+    State.canvas.addEventListener('mousemove', draw);
+    State.canvas.addEventListener('mouseup', stopDrawing);
+    State.canvas.addEventListener('dblclick', finishDrawing);
+    
     // Direction buttons
     document.querySelectorAll('.dir-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             selectDirection(this);
         });
     });
+    
+    // Control sliders
+    const setupSlider = (id, property, displayId, suffix = '') => {
+        const slider = document.getElementById(id);
+        const display = document.getElementById(displayId);
+        
+        slider.addEventListener('input', function() {
+            State[property] = suffix ? parseInt(this.value) : this.value;
+            display.textContent = this.value + suffix;
+            
+            // Cập nhật particles nếu cần
+            if (property === 'speed') updateParticleVelocity();
+            if (property === 'particleCount') regenerateParticles();
+            if (property === 'particleSize') updateParticleSize();
+        });
+    };
+    
+    setupSlider('speedSlider', 'speed', 'speedValue', '%');
+    setupSlider('countSlider', 'particleCount', 'countValue', '');
+    setupSlider('sizeSlider', 'particleSize', 'sizeValue', 'px');
+    setupSlider('swirlSlider', 'swirl', 'swirlValue', '%');
+    
+    // Action buttons
+    document.getElementById('playBtn').addEventListener('click', togglePlay);
+    document.getElementById('exportBtn').addEventListener('click', exportImage);
+    document.getElementById('clearAllBtn').addEventListener('click', clearAll);
 }
 
-// ============================================
-// XỬ LÝ UPLOAD
-// ============================================
+// ==================== XỬ LÝ UPLOAD ====================
 function handleGifUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
-    showNotification('📁 Đang tải GIF...');
+    
+    showNotification('📁 Đang tải GIF nền...');
     const reader = new FileReader();
+    
     reader.onload = function(event) {
         const img = new Image();
         img.onload = function() {
-            AppState.background = img;
+            State.bgImage = img;
             drawCanvas();
-            showNotification('✅ GIF nền đã sẵn sàng. Click vào ảnh để vẽ vùng.');
+            showNotification('✅ GIF nền đã tải xong! Click vào canvas để vẽ vùng.');
         };
         img.src = event.target.result;
     };
+    
     reader.readAsDataURL(file);
 }
 
 function handleMaterialUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
+    
     showNotification('🎨 Đang tải vật liệu...');
     const reader = new FileReader();
+    
     reader.onload = function(event) {
         const img = new Image();
         img.onload = function() {
-            AppState.material = img;
-            drawCanvas();
-            showNotification('✅ Vật liệu đã tải. Vẽ vùng để xem mô phỏng.');
+            State.materialImg = img;
+            document.getElementById('materialStatus').textContent = file.name;
+            showNotification('✅ Vật liệu đã tải xong!');
         };
         img.src = event.target.result;
     };
+    
     reader.readAsDataURL(file);
 }
 
-// ============================================
-// VẼ VÙNG & CHỌN HƯỚNG (Core Logic)
-// ============================================
+// ==================== CÔNG CỤ VẼ ====================
+function selectTool(tool) {
+    State.selectedTool = tool;
+    State.isDrawing = false;
+    
+    // Cập nhật giao diện
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tool === tool);
+    });
+    
+    showNotification(`🛠️ Chọn công cụ: ${getToolName(tool)}`);
+}
+
+function getToolName(tool) {
+    const names = {
+        'select': 'Chọn',
+        'pen': 'Pen Tool',
+        'edit': 'Sửa điểm'
+    };
+    return names[tool] || tool;
+}
+
+function getCanvasPos(e) {
+    const rect = State.canvas.getBoundingClientRect();
+    const scaleX = State.canvas.width / rect.width;
+    const scaleY = State.canvas.height / rect.height;
+    
+    return {
+        x: (e.clientX - rect.left) * scaleX,
+        y: (e.clientY - rect.top) * scaleY
+    };
+}
+
 function startDrawing(e) {
-    if (!AppState.background) {
-        showNotification('⚠️ Hãy upload GIF trước!');
+    if (State.selectedTool !== 'pen') return;
+    if (!State.bgImage) {
+        showNotification('⚠️ Hãy upload GIF nền trước!', 'warning');
         return;
     }
-    const pos = getMousePos(e);
-    AppState.isDrawing = true;
-    AppState.currentPath = [pos];
     
-    // Hiện bảng chọn hướng tại vị trí click
+    const pos = getCanvasPos(e);
+    State.isDrawing = true;
+    State.currentPath = [pos];
+    
+    // Hiển thị bảng chọn hướng
     showDirectionSelector(pos.x, pos.y);
+    showNotification('🎯 Đang vẽ... Chọn hướng chuyển động');
 }
 
 function draw(e) {
-    if (!AppState.isDrawing) return;
-    const pos = getMousePos(e);
-    AppState.currentPath.push(pos);
-    drawCurrentPath();
+    if (!State.isDrawing || State.currentPath.length === 0) return;
+    
+    const pos = getCanvasPos(e);
+    const lastPoint = State.currentPath[State.currentPath.length - 1];
+    const dist = Math.hypot(pos.x - lastPoint.x, pos.y - lastPoint.y);
+    
+    if (dist > 10) {
+        State.currentPath.push(pos);
+        drawCurrentPath();
+    }
 }
 
 function stopDrawing() {
-    AppState.isDrawing = false;
+    State.isDrawing = false;
 }
 
 function finishDrawing(e) {
-    if (!AppState.isDrawing || AppState.currentPath.length < 3) return;
+    if (!State.isDrawing || State.currentPath.length < 3) return;
     
-    if (!AppState.selectedDirection) {
-        showNotification('⚠️ Hãy chọn hướng chuyển động trước!');
+    if (!State.selectedDirection) {
+        showNotification('⚠️ Hãy chọn hướng chuyển động trước!', 'warning');
         return;
     }
     
-    const pos = getMousePos(e);
-    AppState.currentPath.push(pos);
+    const pos = getCanvasPos(e);
+    State.currentPath.push(pos);
     
     // Tạo path đóng
     const closedPath = {
-        points: [...AppState.currentPath, AppState.currentPath[0]],
-        direction: AppState.selectedDirection
+        points: [...State.currentPath, State.currentPath[0]],
+        direction: State.selectedDirection,
+        color: getRandomColor()
     };
-    AppState.paths.push(closedPath);
     
-    // Tạo particles trong vùng
-    generateParticlesInPath(closedPath, AppState.paths.length - 1);
+    State.paths.push(closedPath);
+    generateParticlesForPath(closedPath, State.paths.length - 1);
     
     // Reset
-    AppState.currentPath = [];
-    AppState.selectedDirection = null;
+    State.currentPath = [];
+    State.selectedDirection = null;
     hideDirectionSelector();
     
+    updateUI();
     drawCanvas();
-    showNotification(`✅ Đã tạo vùng mô phỏng với ${closedPath.points.length} điểm.`);
+    
+    showNotification(`✅ Đã tạo vùng mô phỏng với ${closedPath.points.length} điểm!`);
 }
 
 function drawCurrentPath() {
-    const ctx = AppState.drawCtx;
-    ctx.clearRect(0, 0, AppState.drawCanvas.width, AppState.drawCanvas.height);
+    // Vẽ đường đi hiện tại
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = State.canvas.width;
+    tempCanvas.height = State.canvas.height;
+    const tempCtx = tempCanvas.getContext('2d');
     
-    if (AppState.currentPath.length < 2) return;
+    if (State.currentPath.length < 2) return;
     
-    ctx.strokeStyle = '#00ff00';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([5, 3]);
-    ctx.beginPath();
-    ctx.moveTo(AppState.currentPath[0].x, AppState.currentPath[0].y);
-    for (let i = 1; i < AppState.currentPath.length; i++) {
-        ctx.lineTo(AppState.currentPath[i].x, AppState.currentPath[i].y);
+    tempCtx.strokeStyle = '#00ff00';
+    tempCtx.lineWidth = 3;
+    tempCtx.setLineDash([10, 5]);
+    tempCtx.lineJoin = 'round';
+    tempCtx.lineCap = 'round';
+    
+    tempCtx.beginPath();
+    tempCtx.moveTo(State.currentPath[0].x, State.currentPath[0].y);
+    
+    for (let i = 1; i < State.currentPath.length; i++) {
+        tempCtx.lineTo(State.currentPath[i].x, State.currentPath[i].y);
     }
-    ctx.stroke();
-    ctx.setLineDash([]);
+    
+    tempCtx.stroke();
+    
+    // Vẽ lên canvas chính
+    State.ctx.drawImage(tempCanvas, 0, 0);
 }
 
-// ============================================
-// CHỌN HƯỚNG
-// ============================================
+// ==================== CHỌN HƯỚNG ====================
 function showDirectionSelector(x, y) {
     const overlay = document.getElementById('directionOverlay');
+    const rect = State.canvas.getBoundingClientRect();
+    const scaleX = State.canvas.width / rect.width;
+    const scaleY = State.canvas.height / rect.height;
+    
     overlay.style.display = 'block';
-    overlay.style.left = (x - 100) + 'px';
-    overlay.style.top = (y - 120) + 'px';
+    overlay.style.left = (rect.left + (x / scaleX) - 130) + 'px';
+    overlay.style.top = (rect.top + (y / scaleY) - 150) + 'px';
+    
+    // Reset selection
+    document.querySelectorAll('.dir-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
 }
 
 function hideDirectionSelector() {
@@ -220,184 +340,84 @@ function hideDirectionSelector() {
 }
 
 function selectDirection(btn) {
-    document.querySelectorAll('.dir-btn').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('.dir-btn').forEach(b => {
+        b.classList.remove('selected');
+    });
+    
     btn.classList.add('selected');
     
-    AppState.selectedDirection = {
+    State.selectedDirection = {
+        name: btn.dataset.dir,
         vx: parseFloat(btn.dataset.vx || 0),
         vy: parseFloat(btn.dataset.vy || 0),
         isScroll: btn.dataset.scroll === 'true'
     };
-    showNotification(`🎯 Hướng đã chọn: ${btn.textContent}`);
+    
+    showNotification(`🎯 Đã chọn hướng: ${getDirectionName(btn.dataset.dir)}`);
 }
 
-// ============================================
-// HỆ THỐNG PARTICLE - TỐI ƯU HIỆU SUẤT
-// ============================================
-// Cache cho particle (chỉ vẽ 1 lần)
-let particleCache = null;
-function setupDefaultParticleCache() {
-    const size = 50;
-    const cache = document.createElement('canvas');
-    cache.width = cache.height = size;
-    const ctx = cache.getContext('2d');
-    
-    // Vẽ hình tròn đơn giản với gradient
-    const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
-    gradient.addColorStop(0, 'rgba(255, 107, 107, 1)');
-    gradient.addColorStop(1, 'rgba(255, 71, 87, 0.7)');
-    ctx.fillStyle = gradient;
-    ctx.beginPath();
-    ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
-    ctx.fill();
-    
-    particleCache = cache;
+function getDirectionName(dir) {
+    const names = {
+        'up-left': 'Tây Bắc',
+        'up': 'Bắc', 
+        'up-right': 'Đông Bắc',
+        'left': 'Tây',
+        'scroll': 'Xoay tròn',
+        'right': 'Đông',
+        'down-left': 'Tây Nam',
+        'down': 'Nam',
+        'down-right': 'Đông Nam'
+    };
+    return names[dir] || dir;
 }
 
-function generateParticlesInPath(path, pathIndex) {
+// ==================== HỆ THỐNG PARTICLE ====================
+function generateParticlesForPath(path, pathIndex) {
+    if (!path.points || path.points.length < 3) return;
+    
     // Tính bounds của polygon
     const xs = path.points.map(p => p.x);
     const ys = path.points.map(p => p.y);
     const minX = Math.min(...xs), maxX = Math.max(...xs);
     const minY = Math.min(...ys), maxY = Math.max(...ys);
     
-    const newParticles = [];
-    const attempts = AppState.particleCount * 3;
+    const centerX = (minX + maxX) / 2;
+    const centerY = (minY + maxY) / 2;
     
-    for (let i = 0; i < attempts && newParticles.length < AppState.particleCount; i++) {
+    const newParticles = [];
+    const attempts = State.particleCount * 5;
+    
+    for (let i = 0; i < attempts && newParticles.length < State.particleCount; i++) {
         const x = minX + Math.random() * (maxX - minX);
         const y = minY + Math.random() * (maxY - minY);
         
         if (isPointInPolygon({x, y}, path.points)) {
+            const angle = Math.atan2(y - centerY, x - centerX);
+            const radius = Math.hypot(x - centerX, y - centerY);
+            
             newParticles.push({
                 x, y,
-                vx: path.direction.vx * (AppState.speed / 100),
-                vy: path.direction.vy * (AppState.speed / 100),
-                size: AppState.particleSize * (0.7 + Math.random() * 0.6),
+                vx: path.direction.vx * (State.speed / 100),
+                vy: path.direction.vy * (State.speed / 100),
+                size: State.particleSize * (0.7 + Math.random() * 0.6),
                 pathIndex,
+                isScroll: path.direction.isScroll || false,
+                angle: angle,
+                radius: radius,
+                centerX: centerX,
+                centerY: centerY,
                 life: Math.random() * 100,
-                rotation: Math.random() * Math.PI * 2
+                rotation: Math.random() * Math.PI * 2,
+                rotationSpeed: (Math.random() - 0.5) * 0.05
             });
         }
     }
     
     // Xóa particles cũ của path này (nếu có) và thêm mới
-    AppState.particles = AppState.particles.filter(p => p.pathIndex !== pathIndex);
-    AppState.particles.push(...newParticles);
-}
-
-function updateParticles(deltaTime) {
-    AppState.particles.forEach(p => {
-        // Cập nhật vị trí
-        p.x += p.vx * deltaTime * 0.05;
-        p.y += p.vy * deltaTime * 0.05;
-        p.life += deltaTime * 0.001;
-        p.rotation += 0.01;
-        
-        // Giữ particle trong path của nó
-        const path = AppState.paths[p.pathIndex];
-        if (path && !isPointInPolygon({x: p.x, y: p.y}, path.points)) {
-            // Nếu ra ngoài, đặt lại vị trí random trong path
-            const xs = path.points.map(pt => pt.x);
-            const ys = path.points.map(pt => pt.y);
-            const minX = Math.min(...xs), maxX = Math.max(...xs);
-            const minY = Math.min(...ys), maxY = Math.max(...ys);
-            
-            for (let i = 0; i < 5; i++) {
-                const testX = minX + Math.random() * (maxX - minX);
-                const testY = minY + Math.random() * (maxY - minY);
-                if (isPointInPolygon({x: testX, y: testY}, path.points)) {
-                    p.x = testX;
-                    p.y = testY;
-                    break;
-                }
-            }
-        }
-    });
-}
-
-// ============================================
-// VẼ CANVAS - TỐI ƯU
-// ============================================
-function drawCanvas() {
-    const ctx = AppState.ctx;
-    const width = AppState.canvas.width;
-    const height = AppState.canvas.height;
+    State.particles = State.particles.filter(p => p.pathIndex !== pathIndex);
+    State.particles.push(...newParticles);
     
-    // 1. Vẽ nền (nếu có)
-    ctx.clearRect(0, 0, width, height);
-    if (AppState.background) {
-        ctx.drawImage(AppState.background, 0, 0, width, height);
-    } else {
-        ctx.fillStyle = '#1e1e1e';
-        ctx.fillRect(0, 0, width, height);
-    }
-    
-    // 2. Vẽ các paths đã tạo
-    AppState.paths.forEach(path => {
-        if (path.points.length < 2) return;
-        ctx.strokeStyle = 'rgba(0, 255, 0, 0.6)';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(path.points[0].x, path.points[0].y);
-        for (let i = 1; i < path.points.length; i++) {
-            ctx.lineTo(path.points[i].x, path.points[i].y);
-        }
-        ctx.stroke();
-    });
-    
-    // 3. Vẽ particles - SỬ DỤNG CACHE để tối ưu
-    AppState.particles.forEach(p => {
-        ctx.save();
-        ctx.translate(p.x, p.y);
-        ctx.rotate(p.rotation);
-        
-        if (AppState.material && AppState.material.complete) {
-            // Vẽ material image từ cache
-            ctx.drawImage(
-                AppState.material,
-                -p.size/2, -p.size/2,
-                p.size, p.size
-            );
-        } else {
-            // Vẽ từ particle cache
-            ctx.drawImage(
-                particleCache,
-                -p.size/2, -p.size/2,
-                p.size, p.size
-            );
-        }
-        ctx.restore();
-    });
-}
-
-// ============================================
-// VÒNG LẶP CHÍNH - GIỚI HẠN 30 FPS
-// ============================================
-function animate(currentTime) {
-    requestAnimationFrame(animate);
-    
-    // Giới hạn FPS ~30 để hiệu suất ổn định
-    if (currentTime - AppState.lastFrameTime < AppState.fpsInterval) return;
-    
-    AppState.lastFrameTime = currentTime;
-    
-    if (AppState.isPlaying) {
-        updateParticles(AppState.fpsInterval);
-    }
-    
-    drawCanvas();
-}
-
-// ============================================
-// CONTROLS & UTILITIES
-// ============================================
-function getMousePos(e) {
-    const rect = AppState.canvas.getBoundingClientRect();
-    return {
-        x: (e.clientX - rect.left) * (AppState.canvas.width / rect.width),
-        y: (e.clientY - rect.top) * (AppState.canvas.height / rect.height)
-    };
+    updateUI();
 }
 
 function isPointInPolygon(point, polygon) {
@@ -413,66 +433,230 @@ function isPointInPolygon(point, polygon) {
     return inside;
 }
 
-function togglePlay() {
-    AppState.isPlaying = !AppState.isPlaying;
-    const btn = document.getElementById('playBtn');
-    btn.textContent = AppState.isPlaying ? '⏸ Pause' : '▶️ Play';
-    showNotification(AppState.isPlaying ? '▶️ Mô phỏng đang chạy' : '⏸ Đã dừng');
+function updateParticles(deltaTime) {
+    State.particles.forEach(p => {
+        // Cập nhật thời gian sống
+        p.life += deltaTime * 0.001;
+        p.rotation += p.rotationSpeed;
+        
+        let newX = p.x;
+        let newY = p.y;
+        
+        if (p.isScroll) {
+            // Chuyển động xoay tròn
+            p.angle += (State.swirl / 500) * deltaTime * 0.016;
+            newX = p.centerX + p.radius * Math.cos(p.angle);
+            newY = p.centerY + p.radius * Math.sin(p.angle);
+        } else {
+            // Chuyển động tuyến tính
+            newX = p.x + p.vx * deltaTime * 0.05;
+            newY = p.y + p.vy * deltaTime * 0.05;
+        }
+        
+        // Kiểm tra nếu particle vẫn trong vùng
+        const path = State.paths[p.pathIndex];
+        if (path && !isPointInPolygon({x: newX, y: newY}, path.points)) {
+            // Nếu ra ngoài, tìm vị trí mới trong vùng
+            for (let i = 0; i < 10; i++) {
+                const testX = p.x + (Math.random() - 0.5) * 50;
+                const testY = p.y + (Math.random() - 0.5) * 50;
+                
+                if (isPointInPolygon({x: testX, y: testY}, path.points)) {
+                    newX = testX;
+                    newY = testY;
+                    
+                    if (p.isScroll) {
+                        p.radius = Math.hypot(newX - p.centerX, newY - p.centerY);
+                        p.angle = Math.atan2(newY - p.centerY, newX - p.centerX);
+                    }
+                    break;
+                }
+            }
+        }
+        
+        p.x = newX;
+        p.y = newY;
+    });
 }
 
 function updateParticleVelocity() {
-    AppState.particles.forEach(p => {
-        const path = AppState.paths[p.pathIndex];
-        if (path && path.direction) {
-            p.vx = path.direction.vx * (AppState.speed / 100);
-            p.vy = path.direction.vy * (AppState.speed / 100);
+    State.particles.forEach(p => {
+        if (!p.isScroll) {
+            const path = State.paths[p.pathIndex];
+            if (path && path.direction) {
+                p.vx = path.direction.vx * (State.speed / 100);
+                p.vy = path.direction.vy * (State.speed / 100);
+            }
         }
     });
 }
 
 function updateParticleSize() {
-    // Particle size được cập nhật khi tạo mới
+    State.particles.forEach(p => {
+        const baseSize = State.particleSize;
+        p.size = baseSize * (0.7 + (p.size / State.particleSize - 0.7));
+    });
 }
 
 function regenerateParticles() {
-    AppState.particles = [];
-    AppState.paths.forEach((path, index) => {
-        generateParticlesInPath(path, index);
+    const oldCount = State.particles.length;
+    State.particles = [];
+    
+    State.paths.forEach((path, index) => {
+        generateParticlesForPath(path, index);
     });
-    showNotification(`🔄 Tái tạo ${AppState.particles.length} particles`);
+    
+    showNotification(`🔄 Tái tạo ${State.particles.length} particles`);
 }
 
-// ============================================
-// EXPORT - Tạo file kết hợp đơn giản
-// ============================================
-function exportComposite() {
-    if (!AppState.background) {
-        showNotification('⚠️ Chưa có GIF để export!');
+// ==================== VẼ CANVAS ====================
+function drawCanvas() {
+    const ctx = State.ctx;
+    const width = State.canvas.width;
+    const height = State.canvas.height;
+    
+    // 1. Xóa canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // 2. Vẽ nền (nếu có)
+    if (State.bgImage) {
+        ctx.drawImage(State.bgImage, 0, 0, width, height);
+    } else {
+        // Nền mặc định
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, width, height);
+    }
+    
+    // 3. Vẽ các paths đã tạo
+    State.paths.forEach((path, index) => {
+        if (path.points.length < 2) return;
+        
+        // Đường viền
+        ctx.strokeStyle = index === State.selectedPathIndex ? '#00ff00' : path.color;
+        ctx.lineWidth = index === State.selectedPathIndex ? 4 : 2;
+        ctx.setLineDash(index === State.selectedPathIndex ? [10, 5] : []);
+        
+        ctx.beginPath();
+        ctx.moveTo(path.points[0].x, path.points[0].y);
+        
+        for (let i = 1; i < path.points.length; i++) {
+            ctx.lineTo(path.points[i].x, path.points[i].y);
+        }
+        
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // Tô màu nhẹ bên trong
+        ctx.fillStyle = path.color.replace(')', ', 0.1)').replace('rgb', 'rgba');
+        ctx.beginPath();
+        ctx.moveTo(path.points[0].x, path.points[0].y);
+        
+        for (let i = 1; i < path.points.length; i++) {
+            ctx.lineTo(path.points[i].x, path.points[i].y);
+        }
+        
+        ctx.closePath();
+        ctx.fill();
+    });
+    
+    // 4. Vẽ particles
+    State.particles.forEach(p => {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        ctx.globalAlpha = 0.8 + 0.2 * Math.sin(p.life);
+        
+        if (State.materialImg && State.materialImg.complete) {
+            // Vẽ hình ảnh vật liệu
+            ctx.drawImage(
+                State.materialImg,
+                -p.size/2, -p.size/2,
+                p.size, p.size
+            );
+        } else {
+            // Vẽ từ cache hoặc hình cơ bản
+            ctx.drawImage(
+                State.particleCache,
+                -p.size/2, -p.size/2,
+                p.size, p.size
+            );
+        }
+        
+        ctx.restore();
+    });
+}
+
+// ==================== VÒNG LẶP ANIMATION ====================
+function animate(currentTime) {
+    requestAnimationFrame(animate);
+    
+    // Giới hạn FPS để tối ưu hiệu suất
+    if (currentTime - State.lastFrameTime < State.fpsInterval) return;
+    
+    // Tính FPS
+    const deltaTime = currentTime - State.lastFrameTime;
+    State.lastFrameTime = currentTime;
+    State.fps = Math.round(1000 / deltaTime);
+    
+    // Cập nhật nếu đang chạy
+    if (State.isPlaying) {
+        updateParticles(deltaTime);
+    }
+    
+    // Vẽ frame hiện tại
+    drawCanvas();
+    
+    // Cập nhật FPS trên giao diện
+    document.getElementById('fpsCounter').textContent = State.fps;
+}
+
+// ==================== ĐIỀU KHIỂN ====================
+function togglePlay() {
+    State.isPlaying = !State.isPlaying;
+    const btn = document.getElementById('playBtn');
+    
+    if (State.isPlaying) {
+        btn.innerHTML = '<i class="fas fa-pause"></i> Pause';
+        showNotification('▶️ Bắt đầu mô phỏng');
+    } else {
+        btn.innerHTML = '<i class="fas fa-play"></i> Play';
+        showNotification('⏸️ Tạm dừng mô phỏng');
+    }
+}
+
+function exportImage() {
+    if (!State.bgImage) {
+        showNotification('⚠️ Chưa có nền để export!', 'warning');
         return;
     }
     
-    showNotification('🎬 Đang tạo ảnh kết hợp...');
+    showNotification('📸 Đang tạo ảnh kết hợp...');
     
-    // Tạo canvas tạm để vẽ kết quả cuối cùng
+    // Tạo canvas tạm để export
     const exportCanvas = document.createElement('canvas');
-    exportCanvas.width = AppState.canvas.width;
-    exportCanvas.height = AppState.canvas.height;
+    exportCanvas.width = State.canvas.width;
+    exportCanvas.height = State.canvas.height;
     const exportCtx = exportCanvas.getContext('2d');
     
-    // 1. Vẽ nền
-    exportCtx.drawImage(AppState.background, 0, 0, exportCanvas.width, exportCanvas.height);
+    // Vẽ nền
+    exportCtx.drawImage(State.bgImage, 0, 0, exportCanvas.width, exportCanvas.height);
     
-    // 2. Vẽ particles
-    AppState.particles.forEach(p => {
+    // Vẽ particles lên nền
+    State.particles.forEach(p => {
         exportCtx.save();
         exportCtx.translate(p.x, p.y);
         
-        if (AppState.material && AppState.material.complete) {
-            exportCtx.drawImage(AppState.material, -p.size/2, -p.size/2, p.size, p.size);
+        if (State.materialImg && State.materialImg.complete) {
+            exportCtx.drawImage(
+                State.materialImg,
+                -p.size/2, -p.size/2,
+                p.size, p.size
+            );
         } else {
             const gradient = exportCtx.createRadialGradient(0, 0, 0, 0, 0, p.size/2);
             gradient.addColorStop(0, 'rgba(255, 107, 107, 0.9)');
             gradient.addColorStop(1, 'rgba(255, 71, 87, 0.6)');
+            
             exportCtx.fillStyle = gradient;
             exportCtx.beginPath();
             exportCtx.arc(0, 0, p.size/2, 0, Math.PI * 2);
@@ -482,31 +666,98 @@ function exportComposite() {
         exportCtx.restore();
     });
     
-    // 3. Tạo link download
+    // Thêm watermark
+    exportCtx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    exportCtx.fillRect(0, exportCanvas.height - 30, exportCanvas.width, 30);
+    exportCtx.fillStyle = 'white';
+    exportCtx.font = '12px Inter';
+    exportCtx.fillText(`Motion AI Studio - ${new Date().toLocaleDateString('vi-VN')}`, 10, exportCanvas.height - 10);
+    
+    // Tạo link tải xuống
     const dataUrl = exportCanvas.toDataURL('image/png');
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = `motion-sim-export-${Date.now()}.png`;
+    link.download = `motion-ai-export-${Date.now()}.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     
-    showNotification('✅ Đã xuất file PNG! (GIF export đang phát triển)');
+    showNotification('✅ Đã xuất file PNG thành công!');
 }
 
-// ============================================
-// UI HELPER
-// ============================================
-function showNotification(msg) {
-    const noti = document.getElementById('notification');
-    noti.textContent = msg;
-    noti.style.display = 'block';
+function clearAll() {
+    if (State.paths.length === 0 && State.particles.length === 0) {
+        showNotification('📭 Không có gì để xóa!', 'info');
+        return;
+    }
+    
+    if (!confirm(`Xóa tất cả ${State.paths.length} vùng và ${State.particles.length} particles?`)) return;
+    
+    State.paths = [];
+    State.particles = [];
+    State.currentPath = [];
+    State.selectedDirection = null;
+    State.isPlaying = false;
+    
+    document.getElementById('playBtn').innerHTML = '<i class="fas fa-play"></i> Play';
+    hideDirectionSelector();
+    
+    updateUI();
+    drawCanvas();
+    
+    showNotification('🗑️ Đã xóa tất cả!');
+}
+
+// ==================== TIỆN ÍCH ====================
+function getRandomColor() {
+    const colors = [
+        '#FF6B6B', '#4ECDC4', '#FFD166', 
+        '#06D6A0', '#118AB2', '#EF476F',
+        '#7209B7', '#3A86FF', '#FB5607'
+    ];
+    return colors[Math.floor(Math.random() * colors.length)];
+}
+
+function updateUI() {
+    // Cập nhật số lượng
+    document.getElementById('pathCount').textContent = State.paths.length;
+    document.getElementById('particleCount').textContent = State.particles.length;
+    
+    // Cập nhật trạng thái
+    const statusText = document.getElementById('statusText');
+    if (State.isPlaying) {
+        statusText.textContent = 'Đang chạy';
+        statusText.style.color = '#10b981';
+    } else if (State.paths.length > 0) {
+        statusText.textContent = 'Sẵn sàng';
+        statusText.style.color = '#60a5fa';
+    } else {
+        statusText.textContent = 'Chờ vẽ vùng';
+        statusText.style.color = '#94a3b8';
+    }
+}
+
+function showNotification(message, type = 'success') {
+    const notification = document.getElementById('notification');
+    
+    // Đặt màu dựa trên loại thông báo
+    if (type === 'warning') {
+        notification.style.background = 'linear-gradient(90deg, #f59e0b, #d97706)';
+    } else if (type === 'info') {
+        notification.style.background = 'linear-gradient(90deg, #3b82f6, #1d4ed8)';
+    } else {
+        notification.style.background = 'linear-gradient(90deg, #10b981, #059669)';
+    }
+    
+    notification.textContent = message;
+    notification.style.display = 'block';
+    
+    // Tự động ẩn sau 3 giây
     setTimeout(() => {
-        noti.style.display = 'none';
+        notification.style.display = 'none';
     }, 3000);
 }
 
-// ============================================
-// KHỞI ĐỘNG ỨNG DỤNG
-// ============================================
+// ==================== KHỞI CHẠY ỨNG DỤNG ====================
+// Chạy ứng dụng khi trang đã tải xong
 document.addEventListener('DOMContentLoaded', init);

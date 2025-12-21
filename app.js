@@ -1,170 +1,512 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motion Sim - Mô phỏng vật liệu trên GIF</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: sans-serif; background: #2d3436; color: #fff; height: 100vh; overflow: hidden; }
+// ============================================
+// MOTION SIM - Core Engine
+// Tối ưu hiệu suất, tập trung nghiệp vụ
+// ============================================
 
-        .app-container { display: flex; height: 100vh; flex-direction: column; padding: 10px; }
+// STATE - Đơn giản hoá tối đa
+const AppState = {
+    canvas: null, ctx: null,
+    drawCanvas: null, drawCtx: null,
+    background: null,
+    material: null,
+    isPlaying: false,
+    isDrawing: false,
+    currentPath: [],
+    selectedDirection: null,
+    particles: [],
+    paths: [],
 
-        /* HEADER */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #444; border-radius: 10px; margin-bottom: 10px; }
-        .logo { font-size: 1.5em; font-weight: bold; color: #74b9ff; }
-        .controls-header { display: flex; gap: 10px; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-primary { background: #0984e3; color: white; }
-        .btn-primary:hover { background: #0770c4; }
-        .btn-success { background: #00b894; color: white; }
-        .btn-success:hover { background: #00a085; }
+    // Settings với giá trị mặc định tối ưu
+    speed: 50,
+    particleCount: 150,
+    particleSize: 12,
 
-        /* MAIN CONTENT */
-        .main-content { display: flex; flex: 1; gap: 10px; overflow: hidden; }
-        .sidebar { width: 300px; background: #3c3f45; border-radius: 10px; padding: 15px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto; }
-        .canvas-container { flex: 1; background: #1e1e1e; border-radius: 10px; padding: 10px; position: relative; overflow: hidden; }
+    // Hiệu suất
+    lastFrameTime: 0,
+    fps: 0,
+    frameCount: 0,
+    fpsInterval: 1000 / 30 // Mặc định 30 FPS để mượt
+};
 
-        /* UPLOAD & CONTROLS */
-        .upload-area { background: #444; border: 3px dashed #666; border-radius: 10px; padding: 30px 20px; text-align: center; cursor: pointer; margin-bottom: 10px; }
-        .upload-area:hover { border-color: #74b9ff; }
-        .upload-icon { font-size: 2.5em; color: #aaa; margin-bottom: 10px; }
-        .control-group { margin-bottom: 15px; }
-        .control-label { display: block; margin-bottom: 8px; font-weight: bold; color: #ddd; }
-        .slider { width: 100%; }
-        .value-display { float: right; font-weight: bold; color: #74b9ff; }
+// ============================================
+// KHỞI TẠO
+// ============================================
+function init() {
+    console.log('🚀 Motion Sim - Khởi động...');
+    AppState.canvas = document.getElementById('mainCanvas');
+    AppState.ctx = AppState.canvas.getContext('2d', { alpha: false }); // Tối ưu: tắt alpha
+    AppState.drawCanvas = document.getElementById('drawCanvas');
+    AppState.drawCtx = AppState.drawCanvas.getContext('2d');
 
-        /* CANVAS */
-        #mainCanvas { background: #000; display: block; border-radius: 6px; cursor: crosshair; width: 100%; height: 100%; }
-        .canvas-overlay { position: absolute; top: 0; left: 0; pointer-events: none; }
-        #drawCanvas { position: absolute; top: 0; left: 0; }
+    setupEventListeners();
+    setupDefaultParticleCache(); // Tạo cache sẵn cho particle
+    animate(0); // Bắt đầu vòng lặp
 
-        /* DIRECTION OVERLAY */
-        #directionOverlay {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.85);
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.5);
-            border: 2px solid #0984e3;
-            display: none;
-            z-index: 100;
+    showNotification('✅ Ứng dụng sẵn sàng. Upload GIF và bắt đầu vẽ!');
+}
+
+// ============================================
+// THIẾT LẬP SỰ KIỆN
+// ============================================
+function setupEventListeners() {
+    // Upload
+    document.getElementById('uploadGif').addEventListener('change', handleGifUpload);
+    document.getElementById('uploadMaterial').addEventListener('change', handleMaterialUpload);
+    document.querySelectorAll('.upload-area').forEach(area => {
+        area.addEventListener('click', function() {
+            this.querySelector('input[type="file"]').click();
+        });
+    });
+
+    // Canvas
+    AppState.canvas.addEventListener('mousedown', startDrawing);
+    AppState.canvas.addEventListener('mousemove', draw);
+    AppState.canvas.addEventListener('mouseup', stopDrawing);
+    AppState.canvas.addEventListener('dblclick', finishDrawing);
+
+    // Controls
+    document.getElementById('speedSlider').addEventListener('input', function() {
+        AppState.speed = this.value;
+        document.getElementById('speedValue').textContent = this.value + '%';
+        updateParticleVelocity();
+    });
+    document.getElementById('countSlider').addEventListener('input', function() {
+        AppState.particleCount = this.value;
+        document.getElementById('countValue').textContent = this.value;
+        regenerateParticles();
+    });
+    document.getElementById('sizeSlider').addEventListener('input', function() {
+        AppState.particleSize = this.value;
+        document.getElementById('sizeValue').textContent = this.value + 'px';
+        updateParticleSize();
+    });
+
+    // Buttons
+    document.getElementById('playBtn').addEventListener('click', togglePlay);
+    document.getElementById('exportBtn').addEventListener('click', exportComposite);
+
+    // Direction buttons
+    document.querySelectorAll('.dir-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            selectDirection(this);
+        });
+    });
+}
+
+// ============================================
+// XỬ LÝ UPLOAD
+// ============================================
+function handleGifUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    showNotification('📁 Đang tải GIF...');
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            AppState.background = img;
+            drawCanvas();
+            showNotification('✅ GIF nền đã sẵn sàng. Click vào ảnh để vẽ vùng.');
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+function handleMaterialUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    showNotification('🎨 Đang tải vật liệu...');
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+            AppState.material = img;
+            drawCanvas();
+            showNotification('✅ Vật liệu đã tải. Vẽ vùng để xem mô phỏng.');
+        };
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+// ============================================
+// VẼ VÙNG & CHỌN HƯỚNG (Core Logic)
+// ============================================
+function startDrawing(e) {
+    if (!AppState.background) {
+        showNotification('⚠️ Hãy upload GIF trước!');
+        return;
+    }
+    const pos = getMousePos(e);
+    AppState.isDrawing = true;
+    AppState.currentPath = [pos];
+    
+    // Hiện bảng chọn hướng tại vị trí click
+    showDirectionSelector(pos.x, pos.y);
+}
+
+function draw(e) {
+    if (!AppState.isDrawing) return;
+    const pos = getMousePos(e);
+    AppState.currentPath.push(pos);
+    drawCurrentPath();
+}
+
+function stopDrawing() {
+    AppState.isDrawing = false;
+}
+
+function finishDrawing(e) {
+    if (!AppState.isDrawing || AppState.currentPath.length < 3) return;
+    
+    if (!AppState.selectedDirection) {
+        showNotification('⚠️ Hãy chọn hướng chuyển động trước!');
+        return;
+    }
+    
+    const pos = getMousePos(e);
+    AppState.currentPath.push(pos);
+    
+    // Tạo path đóng
+    const closedPath = {
+        points: [...AppState.currentPath, AppState.currentPath[0]],
+        direction: AppState.selectedDirection
+    };
+    AppState.paths.push(closedPath);
+    
+    // Tạo particles trong vùng
+    generateParticlesInPath(closedPath, AppState.paths.length - 1);
+    
+    // Reset
+    AppState.currentPath = [];
+    AppState.selectedDirection = null;
+    hideDirectionSelector();
+    
+    drawCanvas();
+    showNotification(`✅ Đã tạo vùng mô phỏng với ${closedPath.points.length} điểm.`);
+}
+
+function drawCurrentPath() {
+    const ctx = AppState.drawCtx;
+    ctx.clearRect(0, 0, AppState.drawCanvas.width, AppState.drawCanvas.height);
+    
+    if (AppState.currentPath.length < 2) return;
+    
+    ctx.strokeStyle = '#00ff00';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 3]);
+    ctx.beginPath();
+    ctx.moveTo(AppState.currentPath[0].x, AppState.currentPath[0].y);
+    for (let i = 1; i < AppState.currentPath.length; i++) {
+        ctx.lineTo(AppState.currentPath[i].x, AppState.currentPath[i].y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+}
+
+// ============================================
+// CHỌN HƯỚNG
+// ============================================
+function showDirectionSelector(x, y) {
+    const overlay = document.getElementById('directionOverlay');
+    overlay.style.display = 'block';
+    overlay.style.left = (x - 100) + 'px';
+    overlay.style.top = (y - 120) + 'px';
+}
+
+function hideDirectionSelector() {
+    document.getElementById('directionOverlay').style.display = 'none';
+}
+
+function selectDirection(btn) {
+    document.querySelectorAll('.dir-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    
+    AppState.selectedDirection = {
+        vx: parseFloat(btn.dataset.vx || 0),
+        vy: parseFloat(btn.dataset.vy || 0),
+        isScroll: btn.dataset.scroll === 'true'
+    };
+    showNotification(`🎯 Hướng đã chọn: ${btn.textContent}`);
+}
+
+// ============================================
+// HỆ THỐNG PARTICLE - TỐI ƯU HIỆU SUẤT
+// ============================================
+// Cache cho particle (chỉ vẽ 1 lần)
+let particleCache = null;
+function setupDefaultParticleCache() {
+    const size = 50;
+    const cache = document.createElement('canvas');
+    cache.width = cache.height = size;
+    const ctx = cache.getContext('2d');
+    
+    // Vẽ hình tròn đơn giản với gradient
+    const gradient = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+    gradient.addColorStop(0, 'rgba(255, 107, 107, 1)');
+    gradient.addColorStop(1, 'rgba(255, 71, 87, 0.7)');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size/2, 0, Math.PI * 2);
+    ctx.fill();
+    
+    particleCache = cache;
+}
+
+function generateParticlesInPath(path, pathIndex) {
+    // Tính bounds của polygon
+    const xs = path.points.map(p => p.x);
+    const ys = path.points.map(p => p.y);
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    
+    const newParticles = [];
+    const attempts = AppState.particleCount * 3;
+    
+    for (let i = 0; i < attempts && newParticles.length < AppState.particleCount; i++) {
+        const x = minX + Math.random() * (maxX - minX);
+        const y = minY + Math.random() * (maxY - minY);
+        
+        if (isPointInPolygon({x, y}, path.points)) {
+            newParticles.push({
+                x, y,
+                vx: path.direction.vx * (AppState.speed / 100),
+                vy: path.direction.vy * (AppState.speed / 100),
+                size: AppState.particleSize * (0.7 + Math.random() * 0.6),
+                pathIndex,
+                life: Math.random() * 100,
+                rotation: Math.random() * Math.PI * 2
+            });
         }
-        .direction-title { text-align: center; margin-bottom: 10px; font-weight: bold; color: #74b9ff; }
-        .direction-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+    }
+    
+    // Xóa particles cũ của path này (nếu có) và thêm mới
+    AppState.particles = AppState.particles.filter(p => p.pathIndex !== pathIndex);
+    AppState.particles.push(...newParticles);
+}
+
+function updateParticles(deltaTime) {
+    AppState.particles.forEach(p => {
+        // Cập nhật vị trí
+        p.x += p.vx * deltaTime * 0.05;
+        p.y += p.vy * deltaTime * 0.05;
+        p.life += deltaTime * 0.001;
+        p.rotation += 0.01;
+        
+        // Giữ particle trong path của nó
+        const path = AppState.paths[p.pathIndex];
+        if (path && !isPointInPolygon({x: p.x, y: p.y}, path.points)) {
+            // Nếu ra ngoài, đặt lại vị trí random trong path
+            const xs = path.points.map(pt => pt.x);
+            const ys = path.points.map(pt => pt.y);
+            const minX = Math.min(...xs), maxX = Math.max(...xs);
+            const minY = Math.min(...ys), maxY = Math.max(...ys);
+            
+            for (let i = 0; i < 5; i++) {
+                const testX = minX + Math.random() * (maxX - minX);
+                const testY = minY + Math.random() * (maxY - minY);
+                if (isPointInPolygon({x: testX, y: testY}, path.points)) {
+                    p.x = testX;
+                    p.y = testY;
+                    break;
+                }
+            }
         }
-        .dir-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
-            border: 2px solid #555;
-            background: #333;
-            color: white;
-            font-size: 1.5em;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+    });
+}
+
+// ============================================
+// VẼ CANVAS - TỐI ƯU
+// ============================================
+function drawCanvas() {
+    const ctx = AppState.ctx;
+    const width = AppState.canvas.width;
+    const height = AppState.canvas.height;
+    
+    // 1. Vẽ nền (nếu có)
+    ctx.clearRect(0, 0, width, height);
+    if (AppState.background) {
+        ctx.drawImage(AppState.background, 0, 0, width, height);
+    } else {
+        ctx.fillStyle = '#1e1e1e';
+        ctx.fillRect(0, 0, width, height);
+    }
+    
+    // 2. Vẽ các paths đã tạo
+    AppState.paths.forEach(path => {
+        if (path.points.length < 2) return;
+        ctx.strokeStyle = 'rgba(0, 255, 0, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(path.points[0].x, path.points[0].y);
+        for (let i = 1; i < path.points.length; i++) {
+            ctx.lineTo(path.points[i].x, path.points[i].y);
         }
-        .dir-btn:hover { background: #555; border-color: #74b9ff; }
-        .dir-btn.selected { background: #0984e3; border-color: #74b9ff; transform: scale(1.1); }
+        ctx.stroke();
+    });
+    
+    // 3. Vẽ particles - SỬ DỤNG CACHE để tối ưu
+    AppState.particles.forEach(p => {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotation);
+        
+        if (AppState.material && AppState.material.complete) {
+            // Vẽ material image từ cache
+            ctx.drawImage(
+                AppState.material,
+                -p.size/2, -p.size/2,
+                p.size, p.size
+            );
+        } else {
+            // Vẽ từ particle cache
+            ctx.drawImage(
+                particleCache,
+                -p.size/2, -p.size/2,
+                p.size, p.size
+            );
+        }
+        ctx.restore();
+    });
+}
 
-        /* STATUS & NOTIFICATION */
-        .status-bar { margin-top: auto; padding-top: 15px; border-top: 1px solid #555; font-size: 0.9em; color: #aaa; }
-        #notification { position: fixed; bottom: 20px; right: 20px; background: #00b894; color: white; padding: 15px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); display: none; z-index: 1000; }
-    </style>
-</head>
-<body>
-    <div class="app-container">
-        <!-- HEADER -->
-        <div class="header">
-            <div class="logo">⚙️ Motion Sim</div>
-            <div class="controls-header">
-                <button id="playBtn" class="btn btn-primary">▶️ Play</button>
-                <button id="exportBtn" class="btn btn-success">💾 Export GIF</button>
-            </div>
-        </div>
+// ============================================
+// VÒNG LẶP CHÍNH - GIỚI HẠN 30 FPS
+// ============================================
+function animate(currentTime) {
+    requestAnimationFrame(animate);
+    
+    // Giới hạn FPS ~30 để hiệu suất ổn định
+    if (currentTime - AppState.lastFrameTime < AppState.fpsInterval) return;
+    
+    AppState.lastFrameTime = currentTime;
+    
+    if (AppState.isPlaying) {
+        updateParticles(AppState.fpsInterval);
+    }
+    
+    drawCanvas();
+}
 
-        <!-- MAIN CONTENT -->
-        <div class="main-content">
-            <!-- SIDEBAR -->
-            <div class="sidebar">
-                <!-- UPLOAD -->
-                <div>
-                    <h3 style="color:#74b9ff; margin-bottom:10px;">📁 Upload Files</h3>
-                    <label class="upload-area">
-                        <div class="upload-icon">🎬</div>
-                        <div style="font-weight:bold;">GIF Background</div>
-                        <div style="font-size:0.8em; color:#aaa;">Layer nền thiết bị</div>
-                        <input type="file" id="uploadGif" accept="image/gif" style="display:none;">
-                    </label>
-                    <label class="upload-area">
-                        <div class="upload-icon">🖼️</div>
-                        <div style="font-weight:bold;">Material Image</div>
-                        <div style="font-size:0.8em; color:#aaa;">Hình dạng vật liệu</div>
-                        <input type="file" id="uploadMaterial" accept="image/*" style="display:none;">
-                    </label>
-                </div>
+// ============================================
+// CONTROLS & UTILITIES
+// ============================================
+function getMousePos(e) {
+    const rect = AppState.canvas.getBoundingClientRect();
+    return {
+        x: (e.clientX - rect.left) * (AppState.canvas.width / rect.width),
+        y: (e.clientY - rect.top) * (AppState.canvas.height / rect.height)
+    };
+}
 
-                <!-- CONTROLS -->
-                <div>
-                    <h3 style="color:#74b9ff; margin-bottom:15px;">🎛️ Controls</h3>
-                    <div class="control-group">
-                        <div class="control-label">Speed: <span id="speedValue" class="value-display">50%</span></div>
-                        <input type="range" id="speedSlider" class="slider" min="1" max="100" value="50">
-                    </div>
-                    <div class="control-group">
-                        <div class="control-label">Particle Count: <span id="countValue" class="value-display">150</span></div>
-                        <input type="range" id="countSlider" class="slider" min="10" max="500" value="150">
-                    </div>
-                    <div class="control-group">
-                        <div class="control-label">Particle Size: <span id="sizeValue" class="value-display">12px</span></div>
-                        <input type="range" id="sizeSlider" class="slider" min="2" max="50" value="12">
-                    </div>
-                </div>
+function isPointInPolygon(point, polygon) {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i].x, yi = polygon[i].y;
+        const xj = polygon[j].x, yj = polygon[j].y;
+        
+        const intersect = ((yi > point.y) !== (yj > point.y))
+            && (point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+    return inside;
+}
 
-                <!-- INSTRUCTIONS -->
-                <div class="status-bar">
-                    <strong>🎯 Hướng dẫn nhanh:</strong><br>
-                    1. Upload GIF & Material<br>
-                    2. <strong>Click vào GIF</strong> để bắt đầu vẽ vùng<br>
-                    3. Chọn hướng từ bảng mũi tên<br>
-                    4. <strong>Double-click</strong> để kết thúc vẽ<br>
-                    5. Play để xem, Export để lưu.
-                </div>
-            </div>
+function togglePlay() {
+    AppState.isPlaying = !AppState.isPlaying;
+    const btn = document.getElementById('playBtn');
+    btn.textContent = AppState.isPlaying ? '⏸ Pause' : '▶️ Play';
+    showNotification(AppState.isPlaying ? '▶️ Mô phỏng đang chạy' : '⏸ Đã dừng');
+}
 
-            <!-- CANVAS AREA -->
-            <div class="canvas-container">
-                <canvas id="mainCanvas" width="1200" height="675"></canvas>
-                <canvas id="drawCanvas" class="canvas-overlay" width="1200" height="675"></canvas>
+function updateParticleVelocity() {
+    AppState.particles.forEach(p => {
+        const path = AppState.paths[p.pathIndex];
+        if (path && path.direction) {
+            p.vx = path.direction.vx * (AppState.speed / 100);
+            p.vy = path.direction.vy * (AppState.speed / 100);
+        }
+    });
+}
 
-                <!-- DIRECTION OVERLAY -->
-                <div id="directionOverlay">
-                    <div class="direction-title">Chọn Hướng Chuyển Động</div>
-                    <div class="direction-grid">
-                        <button class="dir-btn" data-vx="-0.7" data-vy="-0.7">↖</button>
-                        <button class="dir-btn" data-vx="0" data-vy="-1">↑</button>
-                        <button class="dir-btn" data-vx="0.7" data-vy="-0.7">↗</button>
-                        <button class="dir-btn" data-vx="-1" data-vy="0">←</button>
-                        <button class="dir-btn" data-vx="0" data-vy="0" data-scroll="true">↻</button>
-                        <button class="dir-btn" data-vx="1" data-vy="0">→</button>
-                        <button class="dir-btn" data-vx="-0.7" data-vy="0.7">↙</button>
-                        <button class="dir-btn" data-vx="0" data-vy="1">↓</button>
-                        <button class="dir-btn" data-vx="0.7" data-vy="0.7">↘</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+function updateParticleSize() {
+    // Particle size được cập nhật khi tạo mới
+}
 
-    <!-- NOTIFICATION -->
-    <div id="notification"></div>
+function regenerateParticles() {
+    AppState.particles = [];
+    AppState.paths.forEach((path, index) => {
+        generateParticlesInPath(path, index);
+    });
+    showNotification(`🔄 Tái tạo ${AppState.particles.length} particles`);
+}
 
-    <script src="app.js"></script>
-</body>
-</html>
+// ============================================
+// EXPORT - Tạo file kết hợp đơn giản
+// ============================================
+function exportComposite() {
+    if (!AppState.background) {
+        showNotification('⚠️ Chưa có GIF để export!');
+        return;
+    }
+    
+    showNotification('🎬 Đang tạo ảnh kết hợp...');
+    
+    // Tạo canvas tạm để vẽ kết quả cuối cùng
+    const exportCanvas = document.createElement('canvas');
+    exportCanvas.width = AppState.canvas.width;
+    exportCanvas.height = AppState.canvas.height;
+    const exportCtx = exportCanvas.getContext('2d');
+    
+    // 1. Vẽ nền
+    exportCtx.drawImage(AppState.background, 0, 0, exportCanvas.width, exportCanvas.height);
+    
+    // 2. Vẽ particles
+    AppState.particles.forEach(p => {
+        exportCtx.save();
+        exportCtx.translate(p.x, p.y);
+        
+        if (AppState.material && AppState.material.complete) {
+            exportCtx.drawImage(AppState.material, -p.size/2, -p.size/2, p.size, p.size);
+        } else {
+            const gradient = exportCtx.createRadialGradient(0, 0, 0, 0, 0, p.size/2);
+            gradient.addColorStop(0, 'rgba(255, 107, 107, 0.9)');
+            gradient.addColorStop(1, 'rgba(255, 71, 87, 0.6)');
+            exportCtx.fillStyle = gradient;
+            exportCtx.beginPath();
+            exportCtx.arc(0, 0, p.size/2, 0, Math.PI * 2);
+            exportCtx.fill();
+        }
+        
+        exportCtx.restore();
+    });
+    
+    // 3. Tạo link download
+    const dataUrl = exportCanvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = `motion-sim-export-${Date.now()}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showNotification('✅ Đã xuất file PNG! (GIF export đang phát triển)');
+}
+
+// ============================================
+// UI HELPER
+// ============================================
+function showNotification(msg) {
+    const noti = document.getElementById('notification');
+    noti.textContent = msg;
+    noti.style.display = 'block';
+    setTimeout(() => {
+        noti.style.display = 'none';
+    }, 3000);
+}
+
+// ============================================
+// KHỞI ĐỘNG ỨNG DỤNG
+// ============================================
+document.addEventListener('DOMContentLoaded', init);

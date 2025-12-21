@@ -3,410 +3,736 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motion AI Studio - Mô phỏng Vít Tải & Thiết bị</title>
+    <title>Motion AI Studio - Hoàn chỉnh với Layer System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="icon" type="image/x-icon" href="https://img.icons8.com/color/96/000000/conveyor-belt.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin: 20px;
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo i {
+            font-size: 28px;
+            color: #ffd166;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-play {
+            background: #06d6a0;
+            color: white;
+        }
+
+        .btn-play:hover {
+            background: #05c490;
+            transform: translateY(-2px);
+        }
+
+        .btn-stop {
+            background: #ef476f;
+            color: white;
+        }
+
+        .btn-stop:hover {
+            background: #e0355d;
+            transform: translateY(-2px);
+        }
+
+        /* MAIN CONTENT */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 320px;
+            background: #f8f9fa;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #e9ecef;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .section h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            color: #495057;
+            font-size: 16px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        /* UPLOAD */
+        .upload-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .upload-btn {
+            background: white;
+            border: 2px dashed #dee2e6;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upload-btn:hover {
+            border-color: #667eea;
+            background: #f8f9fe;
+            transform: translateY(-2px);
+        }
+
+        .upload-btn i {
+            font-size: 32px;
+            color: #adb5bd;
+        }
+
+        .upload-text {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .upload-subtitle {
+            font-size: 11px;
+            color: #6c757d;
+        }
+
+        /* LAYER CONTROLS */
+        .layer-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            margin-bottom: 8px;
+        }
+
+        .layer-btn.active {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .layer-btn:hover {
+            transform: translateX(4px);
+        }
+
+        /* TOOLS */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .tool-btn {
+            background: white;
+            border: 2px solid #dee2e6;
+            padding: 16px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .tool-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .tool-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .tool-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-danger {
+            background: #fee;
+            color: #dc3545;
+            border: 2px solid #fcc;
+        }
+
+        .btn-danger:hover {
+            background: #fdd;
+            border-color: #faa;
+        }
+
+        /* INFO BOX */
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196f3;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 6px;
+            color: #0d47a1;
+        }
+
+        /* CONTROLS */
+        .control-group {
+            margin-bottom: 16px;
+        }
+
+        .control-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #dee2e6;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        /* EXPORT BUTTON */
+        .btn-export {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        /* CANVAS AREA */
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: #2d3436;
+            position: relative;
+        }
+
+        #mainCanvas {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            cursor: crosshair;
+        }
+
+        /* DIRECTION SELECTOR */
+        .direction-selector {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            border: 4px solid #667eea;
+            z-index: 1000;
+        }
+
+        .direction-selector.hidden {
+            display: none;
+        }
+
+        .direction-title {
+            text-align: center;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+
+        .direction-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .dir-btn {
+            width: 50px;
+            height: 50px;
+            background: #f8f9fa;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.2s ease;
+        }
+
+        .dir-btn:hover {
+            background: #e9ecef;
+            transform: scale(1.1);
+        }
+
+        .dir-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.15);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .direction-info {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 600;
+        }
+
+        /* INFO PANEL */
+        .info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            padding: 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            min-width: 200px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #6c757d;
+            font-size: 13px;
+        }
+
+        .info-value {
+            font-weight: 700;
+            font-size: 20px;
+            color: #667eea;
+        }
+
+        .info-selected {
+            color: #06d6a0;
+            font-weight: 600;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+
+        /* LAYER INDICATOR */
+        .layer-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            font-size: 12px;
+        }
+
+        .layer-indicator-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .layer-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+
+        .layer-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .layer-dot.active {
+            background: #06d6a0;
+        }
+
+        .layer-dot.inactive {
+            background: #dee2e6;
+        }
+
+        /* NOTIFICATION */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            width: 350px;
+        }
+
+        .notification {
+            background: white;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-left: 4px solid #667eea;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification.success {
+            border-left-color: #06d6a0;
+        }
+
+        .notification.error {
+            border-left-color: #ef476f;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <!-- HEADER -->
         <header class="header">
             <div class="logo">
-                <i class="fas fa-industry"></i>
+                <i class="fas fa-layer-group"></i>
                 <div>
                     <h1>Motion AI Studio</h1>
-                    <p class="subtitle">Mô phỏng chuyển động vật liệu công nghiệp</p>
+                    <div class="subtitle">Mô phỏng chuyển động vật liệu - Layer System</div>
                 </div>
             </div>
             <div class="header-controls">
-                <div class="status-indicator active" id="statusIndicator">
-                    <i class="fas fa-circle"></i>
-                    <span>Ready</span>
-                </div>
-                <button id="helpBtn" class="btn-help">
-                    <i class="fas fa-question-circle"></i> Hướng dẫn
+                <button id="playBtn" class="btn btn-play">
+                    <i class="fas fa-play"></i> Phát
+                </button>
+                <button id="stopBtn" class="btn btn-stop">
+                    <i class="fas fa-stop"></i> Reset
                 </button>
             </div>
         </header>
 
         <!-- MAIN CONTENT -->
         <div class="main-content">
-            <!-- LEFT PANEL -->
-            <div class="panel left-panel">
+            <!-- SIDEBAR -->
+            <div class="sidebar">
                 <!-- UPLOAD SECTION -->
                 <div class="section">
-                    <h3><i class="fas fa-file-upload"></i> Tải file nền & vật liệu</h3>
+                    <h3><i class="fas fa-upload"></i> 📁 Tải lên</h3>
                     <div class="upload-group">
-                        <div class="upload-area" id="gifUploadArea">
-                            <i class="fas fa-video"></i>
-                            <p>Kéo thả GIF/Video làm nền</p>
-                            <span class="file-types">.gif, .mp4, .webm, .jpg, .png</span>
-                            <input type="file" id="uploadBackground" accept=".gif,.mp4,.webm,.jpg,.jpeg,.png" hidden>
-                        </div>
+                        <label class="upload-btn">
+                            <i class="fas fa-film"></i>
+                            <span class="upload-text">🎞️ GIF Background</span>
+                            <span class="upload-subtitle">Layer 1 - Nền thiết bị</span>
+                            <input type="file" id="uploadBackground" accept="image/*" hidden>
+                        </label>
                         
-                        <div class="upload-area" id="materialUploadArea">
-                            <i class="fas fa-pallet"></i>
-                            <p>Kéo thả ảnh vật liệu</p>
-                            <span class="file-types">.jpg, .png, .svg</span>
-                            <input type="file" id="uploadMaterial" accept=".jpg,.jpeg,.png,.svg" hidden>
-                        </div>
-                        
-                        <button id="loadScrewDemo" class="btn-primary">
-                            <i class="fas fa-screwdriver"></i> Demo Vít Tải
-                        </button>
+                        <label class="upload-btn">
+                            <i class="fas fa-image"></i>
+                            <span class="upload-text">🎨 Material Image</span>
+                            <span class="upload-subtitle">Hình dạng particle</span>
+                            <input type="file" id="uploadMaterial" accept="image/*" hidden>
+                        </label>
                     </div>
                 </div>
 
-                <!-- DRAWING TOOLS -->
+                <!-- LAYERS SECTION -->
                 <div class="section">
-                    <h3><i class="fas fa-draw-polygon"></i> Công cụ vẽ vùng</h3>
+                    <h3><i class="fas fa-layer-group"></i> 🎬 Layers</h3>
+                    <button id="toggleGifLayer" class="layer-btn active">
+                        <span><i class="fas fa-eye"></i> Layer 1: GIF Background</span>
+                    </button>
+                    <button id="toggleAnimLayer" class="layer-btn active">
+                        <span><i class="fas fa-eye"></i> Layer 2: Animation</span>
+                    </button>
+                </div>
+
+                <!-- TOOLS SECTION -->
+                <div class="section">
+                    <h3><i class="fas fa-tools"></i> 🛠️ Công cụ</h3>
                     <div class="tool-grid">
-                        <button class="tool-btn active" data-tool="select" title="Chọn và di chuyển">
-                            <i class="fas fa-mouse-pointer"></i>
-                            <span>Select</span>
+                        <button class="tool-btn active" data-tool="select">
+                            <span style="font-size: 24px;">👆</span>
+                            Select
                         </button>
-                        <button class="tool-btn" data-tool="pen" title="Vẽ vùng tự do">
+                        <button class="tool-btn" data-tool="pen">
                             <i class="fas fa-pen"></i>
-                            <span>Pen Tool</span>
+                            Pen
                         </button>
-                        <button class="tool-btn" data-tool="rect" title="Vẽ vùng hình chữ nhật">
-                            <i class="fas fa-square"></i>
-                            <span>Rectangle</span>
-                        </button>
-                        <button class="tool-btn" data-tool="edit" title="Sửa điểm (như PowerPoint)">
+                        <button class="tool-btn" id="editPointsBtn" disabled>
                             <i class="fas fa-edit"></i>
-                            <span>Edit Points</span>
+                            Edit Points
+                        </button>
+                        <button class="tool-btn btn-danger" id="deletePathBtn" disabled>
+                            <i class="fas fa-trash"></i>
+                            Delete
                         </button>
                     </div>
-                    
-                    <div class="tool-options">
-                        <div class="option">
-                            <label>Độ dày nét: <span id="brushSizeValue">3</span>px</label>
-                            <input type="range" id="brushSize" min="1" max="10" value="3" class="slider">
-                        </div>
-                        <button id="clearPathBtn" class="btn-secondary">
-                            <i class="fas fa-trash"></i> Xóa vùng chọn
-                        </button>
-                    </div>
-                </div>
-
-                <!-- DEVICE PRESETS -->
-                <div class="section">
-                    <h3><i class="fas fa-cogs"></i> Mẫu thiết bị</h3>
-                    <div class="preset-grid">
-                        <button class="preset-btn active" data-preset="screw">
-                            <i class="fas fa-screwdriver"></i>
-                            <span>Vít tải</span>
-                            <small>Chuyển động xoắn</small>
-                        </button>
-                        <button class="preset-btn" data-preset="conveyor">
-                            <i class="fas fa-conveyor-belt"></i>
-                            <span>Băng tải</span>
-                            <small>Chuyển động thẳng</small>
-                        </button>
-                        <button class="preset-btn" data-preset="mixer">
-                            <i class="fas fa-blender"></i>
-                            <span>Máy trộn</span>
-                            <small>Chuyển động hỗn hợp</small>
-                        </button>
-                        <button class="preset-btn" data-preset="vibrating">
-                            <i class="fas fa-vihara"></i>
-                            <span>Sàng rung</span>
-                            <small>Rung và sàng</small>
-                        </button>
-                        <button class="preset-btn" data-preset="pump">
-                            <i class="fas fa-tint"></i>
-                            <span>Bơm</span>
-                            <small>Chảy theo đường ống</small>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CANVAS AREA -->
-            <div class="canvas-container">
-                <div class="canvas-header">
-                    <div class="canvas-info">
-                        <h3><i class="fas fa-play-circle"></i> Khu vực mô phỏng</h3>
-                        <div class="canvas-stats">
-                            <span id="canvasStats">Kích thước: 1920x1080</span>
-                        </div>
-                    </div>
-                    <div class="canvas-controls">
-                        <button id="zoomInBtn" class="btn-icon" title="Phóng to">
-                            <i class="fas fa-search-plus"></i>
-                        </button>
-                        <button id="zoomOutBtn" class="btn-icon" title="Thu nhỏ">
-                            <i class="fas fa-search-minus"></i>
-                        </button>
-                        <button id="resetViewBtn" class="btn-secondary">
-                            <i class="fas fa-sync-alt"></i> Reset
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- CANVAS WRAPPER -->
-                <div class="canvas-wrapper" id="canvasWrapper">
-                    <canvas id="mainCanvas" width="1920" height="1080"></canvas>
-                    <canvas id="drawCanvas" width="1920" height="1080"></canvas>
-                    
-                    <!-- DIRECTION ARROWS (Hiển thị khi vẽ) -->
-                    <div class="direction-overlay" id="directionOverlay">
-                        <div class="direction-grid">
-                            <button class="dir-btn" data-dir="↖" title="Hướng Tây Bắc">↖</button>
-                            <button class="dir-btn" data-dir="↑" title="Hướng Bắc">↑</button>
-                            <button class="dir-btn" data-dir="↗" title="Hướng Đông Bắc">↗</button>
-                            <button class="dir-btn" data-dir="←" title="Hướng Tây">←</button>
-                            <button class="dir-btn" data-dir="○" title="Xoay tròn">○</button>
-                            <button class="dir-btn" data-dir="→" title="Hướng Đông">→</button>
-                            <button class="dir-btn" data-dir="↙" title="Hướng Tây Nam">↙</button>
-                            <button class="dir-btn" data-dir="↓" title="Hướng Nam">↓</button>
-                            <button class="dir-btn" data-dir="↘" title="Hướng Đông Nam">↘</button>
-                        </div>
-                    </div>
-                    
-                    <!-- INSTRUCTIONS -->
-                    <div class="canvas-instruction" id="canvasInstruction">
-                        <div class="instruction-content">
-                            <h4><i class="fas fa-mouse-pointer"></i> Hướng dẫn vẽ vùng</h4>
-                            <ol>
-                                <li>Chọn công cụ vẽ (Pen hoặc Rectangle)</li>
-                                <li><strong>Click chuột trái</strong> vào ảnh để bắt đầu vẽ</li>
-                                <li>Giữ và kéo để tạo vùng chọn</li>
-                                <li><strong>Double click</strong> để kết thúc vẽ</li>
-                                <li>Sử dụng mũi tên để chọn hướng chuyển động</li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- ANIMATION CONTROLS -->
-                <div class="animation-controls">
-                    <button id="playBtn" class="btn-play">
-                        <i class="fas fa-play"></i> Xem trước
-                    </button>
-                    <button id="pauseBtn" class="btn-secondary" disabled>
-                        <i class="fas fa-pause"></i> Tạm dừng
-                    </button>
-                    <button id="stopBtn" class="btn-stop">
-                        <i class="fas fa-stop"></i> Dừng
+                    <button class="tool-btn btn-danger" id="clearAllBtn" style="width: 100%; margin-top: 8px;">
+                        <i class="fas fa-trash-alt"></i> Xóa tất cả
                     </button>
                     
-                    <div class="playback-controls">
-                        <label>Speed:</label>
-                        <input type="range" id="playbackSpeed" min="10" max="200" value="100" class="slider-small">
-                        <span id="speedPercent">100%</span>
-                    </div>
-                    
-                    <div class="loop-control">
-                        <input type="checkbox" id="loopToggle" checked>
-                        <label for="loopToggle">Lặp lại</label>
+                    <div class="info-box" style="margin-top: 12px;">
+                        <strong>💡 Hướng dẫn vẽ:</strong>
+                        1️⃣ Click để bắt đầu vẽ<br>
+                        2️⃣ Chọn hướng từ bảng mũi tên<br>
+                        3️⃣ Double-click để kết thúc<br>
+                        4️⃣ Particles chỉ chuyển động TRONG vùng
                     </div>
                 </div>
-            </div>
 
-            <!-- RIGHT PANEL -->
-            <div class="panel right-panel">
-                <!-- MOTION SETTINGS -->
+                <!-- SETTINGS SECTION -->
                 <div class="section">
-                    <h3><i class="fas fa-sliders-h"></i> Cài đặt chuyển động</h3>
+                    <h3><i class="fas fa-sliders-h"></i> ⚙️ Cài đặt</h3>
                     
                     <div class="control-group">
-                        <label>Hướng chuyển động</label>
-                        <div class="direction-preview">
-                            <div class="selected-direction" id="selectedDirection">↗</div>
-                            <span id="directionText">Đông Bắc (45°)</span>
+                        <div class="control-label">
+                            <span>Tốc độ:</span>
+                            <span id="speedValue">50%</span>
+                        </div>
+                        <input type="range" id="speedSlider" class="slider" min="1" max="100" value="50">
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Tốc độ cuộn:</span>
+                            <span id="scrollValue">50%</span>
+                        </div>
+                        <input type="range" id="scrollSlider" class="slider" min="0" max="100" value="50">
+                        <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">
+                            Dùng cho chuyển động xoay/cuộn
                         </div>
                     </div>
 
                     <div class="control-group">
-                        <label>Tốc độ: <span id="motionSpeedValue">50</span>%</label>
-                        <input type="range" id="motionSpeed" min="1" max="100" value="50" class="slider">
+                        <div class="control-label">
+                            <span>Số lượng:</span>
+                            <span id="countValue">100</span>
+                        </div>
+                        <input type="range" id="countSlider" class="slider" min="10" max="500" value="100">
                     </div>
 
                     <div class="control-group">
-                        <label>Số lượng hạt: <span id="particleCountValue">120</span></label>
-                        <input type="range" id="particleCount" min="10" max="500" value="120" class="slider">
-                    </div>
-
-                    <div class="control-group">
-                        <label>Kích thước vật liệu: <span id="materialSizeValue">15</span>px</label>
-                        <input type="range" id="materialSize" min="5" max="50" value="15" class="slider">
-                    </div>
-
-                    <div class="control-group">
-                        <label>Độ xoáy (cho vít tải): <span id="swirlValue">75</span>%</label>
-                        <input type="range" id="swirlStrength" min="0" max="100" value="75" class="slider">
-                    </div>
-                </div>
-
-                <!-- AI OPTIMIZATION -->
-                <div class="section">
-                    <h3><i class="fas fa-robot"></i> Tối ưu hóa AI</h3>
-                    <div class="ai-actions">
-                        <button id="aiDetectMotion" class="btn-ai">
-                            <i class="fas fa-eye"></i> Phát hiện chuyển động
-                        </button>
-                        <button id="aiOptimizePath" class="btn-ai">
-                            <i class="fas fa-magic"></i> Tối ưu đường đi
-                        </button>
-                        <button id="aiSuggestParams" class="btn-ai">
-                            <i class="fas fa-lightbulb"></i> Đề xuất thông số
-                        </button>
-                    </div>
-                    
-                    <div class="ai-presets">
-                        <button class="ai-preset-btn" data-preset="gentle">
-                            <i class="fas fa-wind"></i> Nhẹ nhàng
-                        </button>
-                        <button class="ai-preset-btn" data-preset="intense">
-                            <i class="fas fa-bolt"></i> Mạnh mẽ
-                        </button>
-                        <button class="ai-preset-btn" data-preset="natural">
-                            <i class="fas fa-leaf"></i> Tự nhiên
-                        </button>
+                        <div class="control-label">
+                            <span>Kích thước:</span>
+                            <span id="sizeValue">10px</span>
+                        </div>
+                        <input type="range" id="sizeSlider" class="slider" min="2" max="50" value="10">
                     </div>
                 </div>
 
                 <!-- EXPORT SECTION -->
-                <div class="section">
-                    <h3><i class="fas fa-file-export"></i> Xuất file kết quả</h3>
-                    
-                    <div class="export-format">
-                        <button class="format-btn active" data-format="gif">
-                            <i class="fas fa-film"></i> GIF động
-                        </button>
-                        <button class="format-btn" data-format="mp4">
-                            <i class="fas fa-video"></i> MP4 Video
-                        </button>
-                        <button class="format-btn" data-format="png">
-                            <i class="fas fa-image"></i> PNG Sequence
-                        </button>
-                    </div>
-                    
-                    <div class="export-settings">
-                        <div class="setting">
-                            <label>Chất lượng:</label>
-                            <select id="qualitySelect">
-                                <option value="low">Thấp (nhanh)</option>
-                                <option value="medium" selected>Trung bình</option>
-                                <option value="high">Cao</option>
-                                <option value="ultra">Siêu nét</option>
-                            </select>
-                        </div>
-                        
-                        <div class="setting">
-                            <label>FPS:</label>
-                            <select id="fpsSelect">
-                                <option value="12">12 FPS</option>
-                                <option value="24">24 FPS</option>
-                                <option value="30" selected>30 FPS</option>
-                                <option value="60">60 FPS</option>
-                            </select>
-                        </div>
-                        
-                        <div class="setting">
-                            <label>Thời lượng: <span id="durationValue">5</span>s</label>
-                            <input type="range" id="durationSlider" min="1" max="30" value="5" class="slider">
-                        </div>
-                    </div>
-                    
-                    <button id="exportBtn" class="btn-export">
-                        <i class="fas fa-download"></i> Xuất file kết hợp
-                    </button>
-                    
-                    <div class="export-note">
-                        <small><i class="fas fa-info-circle"></i> File xuất ra sẽ kết hợp GIF nền + chuyển động tạo thành 1 file duy nhất</small>
-                    </div>
-                </div>
+                <button id="exportBtn" class="btn-export">
+                    <i class="fas fa-download"></i>
+                    📤 Export GIF (Gộp Layers)
+                </button>
             </div>
-        </div>
 
-        <!-- STATUS BAR -->
-        <footer class="status-bar">
-            <div class="status-item">
-                <i class="fas fa-layer-group"></i>
-                <span>Chế độ: <strong>Layer trên GIF</strong></span>
-            </div>
-            <div class="status-item">
-                <i class="fas fa-draw-polygon"></i>
-                <span>Vùng chọn: <strong id="selectionStatus">Chưa có</strong></span>
-            </div>
-            <div class="status-item">
-                <i class="fas fa-cube"></i>
-                <span>Vật liệu: <strong id="materialStatus">Chưa tải</strong></span>
-            </div>
-            <div class="status-item">
-                <i class="fas fa-history"></i>
-                <span>FPS: <strong id="fpsCounter">60</strong></span>
-            </div>
-            <div class="status-item">
-                <i class="fas fa-database"></i>
-                <span>Bộ nhớ: <strong id="memoryUsage">45MB</strong></span>
-            </div>
-        </footer>
-    </div>
-
-    <!-- MODALS -->
-    <div id="tutorialModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2><i class="fas fa-graduation-cap"></i> Hướng dẫn sử dụng: Mô phỏng Vít Tải</h2>
-                <button class="modal-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div class="tutorial-section">
-                    <h3><i class="fas fa-screwdriver"></i> Ví dụ: Mô phỏng Vít Tải</h3>
-                    <p>1. Tải lên <strong>file GIF vít tải</strong> làm background</p>
-                    <p>2. Tải <strong>ảnh vật liệu</strong> (hạt, bột, viên nén)</p>
-                    <p>3. Dùng <strong>Pen Tool</strong> vẽ vùng vật liệu chuyển động trong vít</p>
-                    <p>4. Chọn hướng chuyển động <strong>xoắn ốc</strong> (↗ hoặc ○)</p>
-                    <p>5. Điều chỉnh <strong>độ xoáy</strong> cho giống thực tế</p>
-                    <p>6. Xuất file GIF kết hợp cả vít tải và vật liệu chuyển động</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="exportModal" class="modal">
-        <div class="modal-content export-modal">
-            <div class="modal-header">
-                <h2><i class="fas fa-cogs"></i> Đang xuất file kết hợp...</h2>
-            </div>
-            <div class="modal-body">
-                <div class="export-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="exportProgressFill"></div>
-                    </div>
-                    <div class="progress-text" id="exportProgressText">Đang xử lý khung hình 1/150...</div>
-                </div>
+            <!-- CANVAS AREA -->
+            <div class="canvas-container">
+                <canvas id="mainCanvas" width="1200" height="675"></canvas>
                 
-                <div class="export-details">
-                    <div class="detail">
-                        <span>Định dạng:</span>
-                        <strong id="exportFormat">GIF</strong>
+                <!-- DIRECTION SELECTOR -->
+                <div id="directionSelector" class="direction-selector hidden">
+                    <div class="direction-title">Chọn hướng chuyển động:</div>
+                    <div class="direction-grid">
+                        <button class="dir-btn" data-dir="up-left">↖️</button>
+                        <button class="dir-btn" data-dir="up">⬆️</button>
+                        <button class="dir-btn" data-dir="up-right">↗️</button>
+                        <button class="dir-btn" data-dir="left">⬅️</button>
+                        <button class="dir-btn" data-dir="scroll">🔄</button>
+                        <button class="dir-btn" data-dir="right">➡️</button>
+                        <button class="dir-btn" data-dir="down-left">↙️</button>
+                        <button class="dir-btn" data-dir="down">⬇️</button>
+                        <button class="dir-btn" data-dir="down-right">↘️</button>
                     </div>
-                    <div class="detail">
-                        <span>Kích thước:</span>
-                        <strong>1920x1080</strong>
+                    <div id="directionInfo" class="direction-info">Chọn một hướng</div>
+                </div>
+
+                <!-- INFO PANEL -->
+                <div class="info-panel">
+                    <div class="info-row">
+                        <span class="info-label">🎯 Paths:</span>
+                        <span class="info-value" id="pathCount">0</span>
                     </div>
-                    <div class="detail">
-                        <span>Thời lượng:</span>
-                        <strong id="exportDuration">5 giây</strong>
+                    <div class="info-row">
+                        <span class="info-label">⚫ Particles:</span>
+                        <span class="info-value" id="particleCount">0</span>
                     </div>
-                    <div class="detail">
-                        <span>Kết hợp:</span>
-                        <strong>GIF nền + Layer chuyển động</strong>
+                    <div id="selectedPathInfo" class="info-selected" style="display: none;"></div>
+                </div>
+
+                <!-- LAYER INDICATOR -->
+                <div class="layer-indicator">
+                    <div class="layer-indicator-title">📊 Trạng thái Layers:</div>
+                    <div class="layer-status">
+                        <div class="layer-dot active" id="gifLayerDot"></div>
+                        <span id="gifLayerText">Layer 1: GIF</span>
+                    </div>
+                    <div class="layer-status">
+                        <div class="layer-dot active" id="animLayerDot"></div>
+                        <span id="animLayerText">Layer 2: Animation</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- NOTIFICATION CENTER -->
-    <div class="notification-center" id="notificationCenter"></div>
+    <!-- NOTIFICATION CONTAINER -->
+    <div id="notificationContainer" class="notification-container"></div>
 
     <script src="app.js"></script>
 </body>

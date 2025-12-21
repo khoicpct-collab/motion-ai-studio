@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+// Copy code này và paste vào file index.html
+export const htmlCode = `<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motion AI Studio - Layer System</title>
+    <title>Motion AI Studio - Tạo hiệu ứng chuyển động</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -14,67 +14,72 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #333;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            margin: 20px;
+            gap: 20px;
         }
 
-        /* HEADER */
+        /* Header */
         .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 15px;
         }
 
-        .logo i {
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ffd166, #ff9f1c);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 28px;
-            color: #ffd166;
         }
 
-        .logo h1 {
+        .logo-text h1 {
+            color: white;
             font-size: 24px;
             font-weight: 700;
         }
 
-        .subtitle {
+        .logo-text p {
+            color: rgba(255, 255, 255, 0.8);
             font-size: 12px;
-            opacity: 0.9;
-            margin-top: 2px;
         }
 
-        .header-controls {
+        .header-buttons {
             display: flex;
             gap: 10px;
         }
 
         .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
+            padding: 12px 24px;
+            border-radius: 12px;
             border: none;
-            cursor: pointer;
             font-weight: 600;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -82,157 +87,135 @@
             font-size: 14px;
         }
 
-        .btn-play {
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-preview {
             background: #06d6a0;
             color: white;
         }
 
-        .btn-play:hover {
-            background: #05c490;
-            transform: translateY(-2px);
-        }
-
-        .btn-stop {
-            background: #ef476f;
+        .btn-export {
+            background: linear-gradient(135deg, #ec4899, #ef4444);
             color: white;
         }
 
-        .btn-stop:hover {
-            background: #e0355d;
-            transform: translateY(-2px);
-        }
-
-        /* MAIN CONTENT */
+        /* Main Content */
         .main-content {
             display: flex;
-            flex: 1;
-            overflow: hidden;
+            gap: 20px;
         }
 
-        /* SIDEBAR */
+        /* Sidebar */
         .sidebar {
-            width: 320px;
-            background: #f8f9fa;
-            padding: 20px;
+            width: 350px;
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             overflow-y: auto;
-            border-right: 1px solid #e9ecef;
+            max-height: calc(100vh - 140px);
         }
 
         .section {
             margin-bottom: 25px;
         }
 
-        .section h3 {
+        .section-title {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 16px;
-            color: #495057;
-            font-size: 16px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #e9ecef;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 15px;
         }
 
-        /* UPLOAD */
-        .upload-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .upload-btn {
-            background: white;
-            border: 2px dashed #dee2e6;
-            padding: 16px;
-            border-radius: 8px;
+        /* Upload boxes */
+        .upload-box {
+            border: 2px dashed #ddd;
+            border-radius: 15px;
+            padding: 25px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
+            margin-bottom: 15px;
+            position: relative;
         }
 
-        .upload-btn:hover {
+        .upload-box:hover {
             border-color: #667eea;
-            background: #f8f9fe;
+            background: #f8f9ff;
             transform: translateY(-2px);
         }
 
-        .upload-btn i {
-            font-size: 32px;
-            color: #adb5bd;
+        .upload-box i {
+            font-size: 40px;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+
+        .upload-box.uploaded {
+            border-color: #06d6a0;
+            background: #f0fdf9;
+        }
+
+        .upload-box.uploaded i {
+            color: #06d6a0;
         }
 
         .upload-text {
             font-weight: 600;
-            color: #495057;
+            color: #333;
+            margin-bottom: 5px;
         }
 
         .upload-subtitle {
-            font-size: 11px;
-            color: #6c757d;
+            font-size: 12px;
+            color: #999;
         }
 
-        /* LAYER CONTROLS */
-        .layer-btn {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            border: 2px solid #dee2e6;
-            background: white;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .layer-btn.active {
-            border-color: #667eea;
-            background: #f0f2ff;
-        }
-
-        .layer-btn:hover {
-            transform: translateX(4px);
-        }
-
-        /* TOOLS */
+        /* Tool buttons */
         .tool-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
 
         .tool-btn {
+            padding: 20px 10px;
+            border: 2px solid #ddd;
+            border-radius: 12px;
             background: white;
-            border: 2px solid #dee2e6;
-            padding: 16px 12px;
-            border-radius: 8px;
             cursor: pointer;
+            transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
-            transition: all 0.3s ease;
-            font-weight: 600;
             font-size: 13px;
+            font-weight: 600;
+        }
+
+        .tool-btn:hover {
+            transform: translateY(-2px);
+            border-color: #667eea;
         }
 
         .tool-btn.active {
-            border-color: #667eea;
             background: #667eea;
             color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .tool-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .tool-btn:disabled {
@@ -240,52 +223,126 @@
             cursor: not-allowed;
         }
 
+        .tool-btn i {
+            font-size: 20px;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .action-buttons .btn {
+            flex: 1;
+            justify-content: center;
+            padding: 10px;
+            font-size: 13px;
+        }
+
         .btn-danger {
             background: #fee;
             color: #dc3545;
-            border: 2px solid #fcc;
+            border: 1px solid #fcc;
         }
 
-        .btn-danger:hover:not(:disabled) {
+        .btn-danger:hover {
             background: #fdd;
-            border-color: #faa;
         }
 
-        /* INFO BOX */
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        /* Info box */
         .info-box {
             background: #e7f3ff;
             border-left: 4px solid #2196f3;
-            padding: 12px;
-            border-radius: 6px;
+            padding: 15px;
+            border-radius: 8px;
             font-size: 13px;
             line-height: 1.6;
+            margin-top: 15px;
         }
 
         .info-box strong {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             color: #0d47a1;
         }
 
-        /* CONTROLS */
-        .control-group {
-            margin-bottom: 16px;
+        .info-box ul {
+            margin-left: 15px;
+            color: #1565c0;
         }
 
-        .control-label {
+        /* Direction grid */
+        .direction-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .direction-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 20px;
+        }
+
+        .direction-btn:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        .direction-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .direction-btn.empty {
+            border: none;
+            background: transparent;
+            cursor: default;
+        }
+
+        /* Slider controls */
+        .slider-control {
+            margin-bottom: 20px;
+        }
+
+        .slider-label {
             display: flex;
             justify-content: space-between;
             margin-bottom: 8px;
-            font-weight: 600;
             font-size: 14px;
-            color: #495057;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .slider-label .value {
+            color: #667eea;
         }
 
         .slider {
             width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: #dee2e6;
+            height: 8px;
+            border-radius: 4px;
+            background: #e0e0e0;
             outline: none;
             -webkit-appearance: none;
         }
@@ -297,7 +354,7 @@
             border-radius: 50%;
             background: #667eea;
             cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
         }
 
         .slider::-moz-range-thumb {
@@ -307,448 +364,847 @@
             background: #667eea;
             cursor: pointer;
             border: none;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
         }
 
-        /* EXPORT BUTTON */
-        .btn-export {
-            width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 16px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-export:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
-        }
-
-        /* CANVAS AREA */
-        .canvas-container {
+        /* Canvas area */
+        .canvas-area {
             flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background: #2d3436;
+            background: #1a1a2e;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             position: relative;
         }
 
         #mainCanvas {
-            max-width: 100%;
-            max-height: 100%;
-            border-radius: 8px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            cursor: crosshair;
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
-        /* DIRECTION SELECTOR */
-        .direction-selector {
+        /* Drawing indicator */
+        .drawing-indicator {
             position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 16px;
-            border-radius: 16px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            border: 4px solid #667eea;
-            z-index: 1000;
-        }
-
-        .direction-selector.hidden {
-            display: none;
-        }
-
-        .direction-title {
-            text-align: center;
-            font-weight: 700;
-            color: #667eea;
-            margin-bottom: 12px;
-            font-size: 14px;
-        }
-
-        .direction-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 6px;
-        }
-
-        .dir-btn {
-            width: 50px;
-            height: 50px;
-            background: #f8f9fa;
-            border: 2px solid #dee2e6;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            transition: all 0.2s ease;
-        }
-
-        .dir-btn:hover {
-            background: #e9ecef;
-            transform: scale(1.1);
-        }
-
-        .dir-btn.active {
-            background: #667eea;
+            top: 20px;
+            left: 20px;
+            background: #06d6a0;
             color: white;
-            border-color: #667eea;
-            transform: scale(1.15);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .direction-info {
-            text-align: center;
-            margin-top: 10px;
-            font-size: 12px;
-            color: #6c757d;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
             font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(6, 214, 160, 0.4);
         }
 
-        /* INFO PANEL */
-        .info-panel {
+        .drawing-indicator.active {
+            display: flex;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        /* Path counter */
+        .path-counter {
             position: absolute;
             bottom: 20px;
             left: 20px;
-            background: white;
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            min-width: 200px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
         }
 
-        .info-row {
+        /* Preview modal */
+        .preview-modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .preview-modal.active {
+            display: flex;
+        }
+
+        .preview-container {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .preview-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid #e9ecef;
         }
 
-        .info-row:last-child {
-            border-bottom: none;
+        .preview-header h3 {
+            font-size: 18px;
+            color: #333;
         }
 
-        .info-label {
-            color: #6c757d;
-            font-size: 13px;
-        }
-
-        .info-value {
-            font-weight: 700;
-            font-size: 20px;
-            color: #667eea;
-        }
-
-        .info-selected {
-            color: #06d6a0;
-            font-weight: 600;
-            margin-top: 8px;
-            font-size: 13px;
-        }
-
-        /* LAYER INDICATOR */
-        .layer-indicator {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 12px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-            font-size: 12px;
-        }
-
-        .layer-indicator-title {
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .layer-status {
+        .preview-controls {
             display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 4px;
+            gap: 10px;
         }
 
-        .layer-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
+        .preview-canvas-container {
+            background: #1a1a2e;
+            padding: 30px;
         }
 
-        .layer-dot.active {
-            background: #06d6a0;
+        #previewCanvas {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .layer-dot.inactive {
-            background: #dee2e6;
-        }
-
-        /* NOTIFICATION */
-        .notification-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 2000;
-            width: 350px;
-        }
-
-        .notification {
-            background: white;
-            padding: 16px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            border-left: 4px solid #667eea;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sidebar {
+                width: 300px;
             }
         }
 
-        .notification.success {
-            border-left-color: #06d6a0;
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: none;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .header-buttons {
+                width: 100%;
+            }
+
+            .header-buttons .btn {
+                flex: 1;
+            }
         }
 
-        .notification.error {
-            border-left-color: #ef476f;
-        }
-
-        /* SCROLLBAR */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
+        .divider {
+            height: 1px;
+            background: #eee;
+            margin: 20px 0;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- HEADER -->
-        <header class="header">
+        <!-- Header -->
+        <div class="header">
             <div class="logo">
-                <i class="fas fa-layer-group"></i>
-                <div>
+                <div class="logo-icon">✨</div>
+                <div class="logo-text">
                     <h1>Motion AI Studio</h1>
-                    <div class="subtitle">Mô phỏng chuyển động vật liệu - Layer System</div>
+                    <p>Tạo hiệu ứng chuyển động chuyên nghiệp</p>
                 </div>
             </div>
-            <div class="header-controls">
-                <button id="playBtn" class="btn btn-play">
-                    <i class="fas fa-play"></i> Phát
+            <div class="header-buttons">
+                <button class="btn btn-preview" onclick="showPreview()" id="previewBtn" disabled>
+                    <i class="fas fa-eye"></i> Xem trước
                 </button>
-                <button id="stopBtn" class="btn btn-stop">
-                    <i class="fas fa-stop"></i> Reset
+                <button class="btn btn-export" onclick="exportGIF()" id="exportBtn" disabled>
+                    <i class="fas fa-download"></i> Xuất GIF
                 </button>
             </div>
-        </header>
+        </div>
 
-        <!-- MAIN CONTENT -->
+        <!-- Main Content -->
         <div class="main-content">
-            <!-- SIDEBAR -->
+            <!-- Sidebar -->
             <div class="sidebar">
-                <!-- UPLOAD SECTION -->
+                <!-- Upload Section -->
                 <div class="section">
-                    <h3><i class="fas fa-upload"></i> 📁 Tải lên</h3>
-                    <div class="upload-group">
-                        <label class="upload-btn">
-                            <i class="fas fa-film"></i>
-                            <span class="upload-text">🎞️ GIF Background</span>
-                            <span class="upload-subtitle">Layer 1 - Nền thiết bị</span>
-                            <input type="file" id="uploadBackground" accept="image/*" hidden>
-                        </label>
-                        
-                        <label class="upload-btn">
-                            <i class="fas fa-image"></i>
-                            <span class="upload-text">🎨 Material Image</span>
-                            <span class="upload-subtitle">Hình dạng particle</span>
-                            <input type="file" id="uploadMaterial" accept="image/*" hidden>
-                        </label>
+                    <h3 class="section-title">
+                        <i class="fas fa-upload"></i> Tải lên
+                    </h3>
+                    
+                    <input type="file" id="gifInput" accept=".gif" style="display: none;" onchange="handleGifUpload(event)">
+                    <div class="upload-box" id="gifBox" onclick="document.getElementById('gifInput').click()">
+                        <i class="fas fa-file-video"></i>
+                        <div class="upload-text">GIF tham chiếu</div>
+                        <div class="upload-subtitle">Chuyển động mẫu</div>
+                    </div>
+
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    <div class="upload-box" id="imageBox" onclick="document.getElementById('imageInput').click()">
+                        <i class="fas fa-image"></i>
+                        <div class="upload-text">Ảnh tĩnh</div>
+                        <div class="upload-subtitle">Vật liệu chuyển động</div>
                     </div>
                 </div>
 
-                <!-- LAYERS SECTION -->
+                <!-- Tools Section -->
                 <div class="section">
-                    <h3><i class="fas fa-layer-group"></i> 🎬 Layers</h3>
-                    <button id="toggleGifLayer" class="layer-btn active">
-                        <i class="fas fa-eye"></i>
-                        <span>Layer 1: GIF Background</span>
-                    </button>
-                    <button id="toggleAnimLayer" class="layer-btn active">
-                        <i class="fas fa-eye"></i>
-                        <span>Layer 2: Animation</span>
-                    </button>
-                </div>
-
-                <!-- TOOLS SECTION -->
-                <div class="section">
-                    <h3><i class="fas fa-tools"></i> 🛠️ Công cụ</h3>
+                    <h3 class="section-title">
+                        <i class="fas fa-pen"></i> Công cụ
+                    </h3>
+                    
                     <div class="tool-grid">
-                        <button class="tool-btn active" data-tool="select">
-                            <span style="font-size: 24px;">👆</span>
-                            Select
-                        </button>
-                        <button class="tool-btn" data-tool="pen">
+                        <div class="tool-btn" id="selectTool" onclick="setTool('select')">
+                            <i class="fas fa-mouse-pointer"></i>
+                            <span>Chọn</span>
+                        </div>
+                        <div class="tool-btn active" id="penTool" onclick="setTool('pen')">
                             <i class="fas fa-pen"></i>
-                            Pen
-                        </button>
-                        <button class="tool-btn" id="editPointsBtn" disabled>
-                            <i class="fas fa-edit"></i>
-                            Edit Points
-                        </button>
-                        <button class="tool-btn btn-danger" id="deletePathBtn" disabled>
-                            <i class="fas fa-trash"></i>
-                            Delete
-                        </button>
+                            <span>Vẽ</span>
+                        </div>
+                        <div class="tool-btn" id="editTool" onclick="setTool('edit')" disabled>
+                            <i class="fas fa-arrows-alt"></i>
+                            <span>Sửa</span>
+                        </div>
                     </div>
-                    <button class="tool-btn btn-danger" id="clearAllBtn" style="width: 100%; margin-top: 8px;">
-                        <i class="fas fa-trash-alt"></i> Xóa tất cả
-                    </button>
-                    
-                    <div class="info-box" style="margin-top: 12px;">
-                        <strong>💡 Hướng dẫn vẽ:</strong>
-                        1️⃣ Click để bắt đầu vẽ<br>
-                        2️⃣ Chọn hướng từ bảng mũi tên<br>
-                        3️⃣ Double-click để kết thúc<br>
-                        4️⃣ Particles chỉ chuyển động TRONG vùng
+
+                    <div class="action-buttons">
+                        <button class="btn btn-danger" onclick="deleteSelectedPath()" id="deleteBtn" disabled>
+                            <i class="fas fa-trash"></i> Xóa vùng
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearAll()">
+                            <i class="fas fa-redo"></i> Xóa hết
+                        </button>
                     </div>
                 </div>
 
-                <!-- SETTINGS SECTION -->
+                <!-- Instructions -->
+                <div class="info-box" id="penInstructions">
+                    <strong>Hướng dẫn vẽ:</strong>
+                    <ul>
+                        <li>Click để bắt đầu vẽ</li>
+                        <li>Click thêm điểm để tạo vùng</li>
+                        <li>Double-click để kết thúc</li>
+                    </ul>
+                </div>
+
+                <!-- Direction Controls -->
+                <div class="section" id="directionSection" style="display: none;">
+                    <h3 class="section-title">
+                        <i class="fas fa-arrow-right"></i> Hướng chuyển động
+                    </h3>
+                    
+                    <div class="direction-grid">
+                        <div class="direction-btn" onclick="setDirection('upLeft')">↖️</div>
+                        <div class="direction-btn" onclick="setDirection('up')">⬆️</div>
+                        <div class="direction-btn" onclick="setDirection('upRight')">↗️</div>
+                        <div class="direction-btn" onclick="setDirection('left')">⬅️</div>
+                        <div class="direction-btn empty"></div>
+                        <div class="direction-btn" onclick="setDirection('right')">➡️</div>
+                        <div class="direction-btn" onclick="setDirection('downLeft')">↙️</div>
+                        <div class="direction-btn" onclick="setDirection('down')">⬇️</div>
+                        <div class="direction-btn" onclick="setDirection('downRight')">↘️</div>
+                    </div>
+                </div>
+
+                <!-- Motion Settings -->
+                <div class="section" id="motionSection" style="display: none;">
+                    <div class="slider-control">
+                        <div class="slider-label">
+                            <span>Tốc độ</span>
+                            <span class="value" id="speedValue">50%</span>
+                        </div>
+                        <input type="range" class="slider" id="speedSlider" min="1" max="100" value="50" oninput="updateSpeed(this.value)">
+                    </div>
+
+                    <div class="slider-control">
+                        <div class="slider-label">
+                            <span>Cường độ</span>
+                            <span class="value" id="intensityValue">80%</span>
+                        </div>
+                        <input type="range" class="slider" id="intensitySlider" min="1" max="100" value="80" oninput="updateIntensity(this.value)">
+                    </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Global Settings -->
                 <div class="section">
-                    <h3><i class="fas fa-sliders-h"></i> ⚙️ Cài đặt</h3>
+                    <h3 class="section-title">
+                        <i class="fas fa-play"></i> Cài đặt xuất
+                    </h3>
                     
-                    <div class="control-group">
-                        <div class="control-label">
-                            <span>Tốc độ:</span>
-                            <span id="speedValue">50%</span>
+                    <div class="slider-control">
+                        <div class="slider-label">
+                            <span>FPS</span>
+                            <span class="value" id="fpsValue">12</span>
                         </div>
-                        <input type="range" id="speedSlider" class="slider" min="1" max="100" value="50">
+                        <input type="range" class="slider" id="fpsSlider" min="6" max="30" value="12" oninput="updateFPS(this.value)">
                     </div>
 
-                    <div class="control-group">
-                        <div class="control-label">
-                            <span>Tốc độ cuộn:</span>
-                            <span id="scrollValue">50%</span>
+                    <div class="slider-control">
+                        <div class="slider-label">
+                            <span>Thời lượng</span>
+                            <span class="value" id="durationValue">2s</span>
                         </div>
-                        <input type="range" id="scrollSlider" class="slider" min="0" max="100" value="50">
-                        <div style="font-size: 11px; color: #6c757d; margin-top: 4px;">
-                            Dùng cho chuyển động xoay/cuộn
-                        </div>
-                    </div>
-
-                    <div class="control-group">
-                        <div class="control-label">
-                            <span>Số lượng:</span>
-                            <span id="countValue">100</span>
-                        </div>
-                        <input type="range" id="countSlider" class="slider" min="10" max="500" value="100">
-                    </div>
-
-                    <div class="control-group">
-                        <div class="control-label">
-                            <span>Kích thước:</span>
-                            <span id="sizeValue">10px</span>
-                        </div>
-                        <input type="range" id="sizeSlider" class="slider" min="2" max="50" value="10">
+                        <input type="range" class="slider" id="durationSlider" min="1" max="10" step="0.5" value="2" oninput="updateDuration(this.value)">
                     </div>
                 </div>
-
-                <!-- EXPORT SECTION -->
-                <button id="exportBtn" class="btn-export">
-                    <i class="fas fa-download"></i>
-                    📤 Export GIF (Gộp Layers)
-                </button>
             </div>
 
-            <!-- CANVAS AREA -->
-            <div class="canvas-container">
-                <canvas id="mainCanvas" width="1200" height="675"></canvas>
+            <!-- Canvas Area -->
+            <div class="canvas-area">
+                <canvas id="mainCanvas" width="1200" height="800"></canvas>
                 
-                <!-- DIRECTION SELECTOR -->
-                <div id="directionSelector" class="direction-selector hidden">
-                    <div class="direction-title">Chọn hướng chuyển động:</div>
-                    <div class="direction-grid">
-                        <button class="dir-btn" data-dir="up-left" data-vx="-0.707" data-vy="-0.707">↖️</button>
-                        <button class="dir-btn" data-dir="up" data-vx="0" data-vy="-1">⬆️</button>
-                        <button class="dir-btn" data-dir="up-right" data-vx="0.707" data-vy="-0.707">↗️</button>
-                        <button class="dir-btn" data-dir="left" data-vx="-1" data-vy="0">⬅️</button>
-                        <button class="dir-btn" data-dir="scroll" data-vx="0" data-vy="0" data-scroll="true">🔄</button>
-                        <button class="dir-btn" data-dir="right" data-vx="1" data-vy="0">➡️</button>
-                        <button class="dir-btn" data-dir="down-left" data-vx="-0.707" data-vy="0.707">↙️</button>
-                        <button class="dir-btn" data-dir="down" data-vx="0" data-vy="1">⬇️</button>
-                        <button class="dir-btn" data-dir="down-right" data-vx="0.707" data-vy="0.707">↘️</button>
-                    </div>
-                    <div id="directionInfo" class="direction-info">Chọn một hướng</div>
+                <div class="drawing-indicator" id="drawingIndicator">
+                    <div class="pulse-dot"></div>
+                    Đang vẽ... (Double-click để kết thúc)
                 </div>
 
-                <!-- INFO PANEL -->
-                <div class="info-panel">
-                    <div class="info-row">
-                        <span class="info-label">🎯 Paths:</span>
-                        <span class="info-value" id="pathCount">0</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">⚫ Particles:</span>
-                        <span class="info-value" id="particleCount">0</span>
-                    </div>
-                    <div id="selectedPathInfo" class="info-selected" style="display: none;"></div>
-                </div>
-
-                <!-- LAYER INDICATOR -->
-                <div class="layer-indicator">
-                    <div class="layer-indicator-title">📊 Trạng thái Layers:</div>
-                    <div class="layer-status">
-                        <div class="layer-dot active" id="gifLayerDot"></div>
-                        <span id="gifLayerText">Layer 1: GIF</span>
-                    </div>
-                    <div class="layer-status">
-                        <div class="layer-dot active" id="animLayerDot"></div>
-                        <span id="animLayerText">Layer 2: Animation</span>
-                    </div>
+                <div class="path-counter" id="pathCounter">
+                    0 vùng chuyển động
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- NOTIFICATION CONTAINER -->
-    <div id="notificationContainer" class="notification-container"></div>
+    <!-- Preview Modal -->
+    <div class="preview-modal" id="previewModal">
+        <div class="preview-container">
+            <div class="preview-header">
+                <h3>Xem trước</h3>
+                <div class="preview-controls">
+                    <button class="btn btn-preview" onclick="togglePreviewPlay()" id="playBtn">
+                        <i class="fas fa-play"></i> Phát
+                    </button>
+                    <button class="btn btn-secondary" onclick="closePreview()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="preview-canvas-container">
+                <canvas id="previewCanvas" width="1200" height="800"></canvas>
+            </div>
+        </div>
+    </div>
 
-    <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
+    <script>
+        // State
+        let state = {
+            gifFile: null,
+            staticImage: null,
+            staticImageObj: null,
+            paths: [],
+            currentPath: [],
+            selectedPathIndex: null,
+            pathSettings: {},
+            activeTool: 'pen',
+            isDrawing: false,
+            drawingStarted: false,
+            editingPointIndex: null,
+            isPlaying: false,
+            fps: 12,
+            duration: 2,
+            animationFrame: null,
+            currentFrame: 0
+        };
+
+        // Direction vectors
+        const directions = {
+            up: { x: 0, y: -1 },
+            down: { x: 0, y: 1 },
+            left: { x: -1, y: 0 },
+            right: { x: 1, y: 0 },
+            upLeft: { x: -1, y: -1 },
+            upRight: { x: 1, y: -1 },
+            downLeft: { x: -1, y: 1 },
+            downRight: { x: 1, y: 1 }
+        };
+
+        // Canvas setup
+        const canvas = document.getElementById('mainCanvas');
+        const ctx = canvas.getContext('2d');
+        const previewCanvas = document.getElementById('previewCanvas');
+        const previewCtx = previewCanvas.getContext('2d');
+
+        // File upload handlers
+        function handleGifUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            state.gifFile = URL.createObjectURL(file);
+            document.getElementById('gifBox').classList.add('uploaded');
+            updateCanvas();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const img = new Image();
+            img.onload = function() {
+                state.staticImage = URL.createObjectURL(file);
+                state.staticImageObj = img;
+                document.getElementById('imageBox').classList.add('uploaded');
+                updateCanvas();
+            };
+            img.src = URL.createObjectURL(file);
+        }
+
+        // Tool management
+        function setTool(tool) {
+            state.activeTool = tool;
+            
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tool + 'Tool').classList.add('active');
+            
+            if (tool === 'pen') {
+                document.getElementById('penInstructions').style.display = 'block';
+            } else {
+                document.getElementById('penInstructions').style.display = 'none';
+            }
+            
+            canvas.style.cursor = tool === 'pen' ? 'crosshair' : tool === 'edit' ? 'move' : 'default';
+        }
+
+        // Canvas event handlers
+        canvas.addEventListener('click', function(e) {
+            const coords = getCanvasCoords(e);
+            
+            if (state.activeTool === 'pen') {
+                if (!state.drawingStarted) {
+                    state.drawingStarted = true;
+                    state.currentPath = [coords];
+                    document.getElementById('drawingIndicator').classList.add('active');
+                } else {
+                    state.currentPath.push(coords);
+                }
+                updateCanvas();
+            } else if (state.activeTool === 'select') {
+                const clickedIndex = findPathAtPoint(coords);
+                selectPath(clickedIndex);
+            }
+        });
+
+        canvas.addEventListener('dblclick', function(e) {
+            if (state.activeTool === 'pen' && state.drawingStarted && state.currentPath.length >= 3) {
+                finishDrawing();
+            }
+        });
+
+        canvas.addEventListener('mousemove', function(e) {
+            if (state.activeTool === 'edit' && state.editingPointIndex !== null && state.selectedPathIndex !== null) {
+                const coords = getCanvasCoords(e);
+                state.paths[state.selectedPathIndex][state.editingPointIndex] = coords;
+                updateCanvas();
+            }
+        });
+
+        canvas.addEventListener('mousedown', function(e) {
+            if (state.activeTool === 'edit' && state.selectedPathIndex !== null) {
+                const coords = getCanvasCoords(e);
+                const path = state.paths[state.selectedPathIndex];
+                const pointIndex = path.findIndex(p => 
+                    Math.sqrt((p.x - coords.x) ** 2 + (p.y - coords.y) ** 2) < 10
+                );
+                if (pointIndex >= 0) {
+                    state.editingPointIndex = pointIndex;
+                }
+            }
+        });
+
+        canvas.addEventListener('mouseup', function() {
+            state.editingPointIndex = null;
+        });
+
+        function getCanvasCoords(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            return {
+                x: (e.clientX - rect.left) * scaleX,
+                y: (e.clientY - rect.top) * scaleY
+            };
+        }
+
+        function finishDrawing() {
+            const newIndex = state.paths.length;
+            state.paths.push([...state.currentPath]);
+            state.pathSettings[newIndex] = {
+                direction: 'right',
+                speed: 50,
+                intensity: 80
+            };
+            state.currentPath = [];
+            state.drawingStarted = false;
+            document.getElementById('drawingIndicator').classList.remove('active');
+            selectPath(newIndex);
+            updateCanvas();
+            updateUI();
+        }
+
+        function findPathAtPoint(point) {
+            for (let i = state.paths.length - 1; i >= 0; i--) {
+                if (isPointInPath(point, state.paths[i])) {
+                    return i;
+                }
+            }
+            return null;
+        }
+
+        function isPointInPath(point, path) {
+            if (path.length < 3) return false;
+            let inside = false;
+            for (let i = 0, j = path.length - 1; i < path.length; j = i++) {
+                const xi = path[i].x, yi = path[i].y;
+                const xj = path[j].x, yj = path[j].y;
+                if ((yi > point.y) !== (yj > point.y) &&
+                    point.x < (xj - xi) * (point.y - yi) / (yj - yi) + xi) {
+                    inside = !inside;
+                }
+            }
+            return inside;
+        }
+
+        function selectPath(index) {
+            state.selectedPathIndex = index;
+            
+            if (index !== null) {
+                document.getElementById('directionSection').style.display = 'block';
+                document.getElementById('motionSection').style.display = 'block';
+                document.getElementById('editTool').disabled = false;
+                document.getElementById('deleteBtn').disabled = false;
+                
+                const settings = state.pathSettings[index];
+                document.getElementById('speedSlider').value = settings.speed;
+                document.getElementById('speedValue').textContent = settings.speed + '%';
+                document.getElementById('intensitySlider').value = settings.intensity;
+                document.getElementById('intensityValue').textContent = settings.intensity + '%';
+                
+                updateDirectionButtons(settings.direction);
+            } else {
+                document.getElementById('directionSection').style.display = 'none';
+                document.getElementById('motionSection').style.display = 'none';
+                document.getElementById('editTool').disabled = true;
+                document.getElementById('deleteBtn').disabled = true;
+            }
+            
+            updateCanvas();
+        }
+
+        function updateDirectionButtons(activeDir) {
+            document.querySelectorAll('.direction-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const dirIndex = Object.keys(directions).indexOf(activeDir);
+            if (dirIndex >= 0) {
+                document.querySelectorAll('.direction-btn')[dirIndex].classList.add('active');
+            }
+        }
+
+        // Settings handlers
+        function setDirection(dir) {
+            if (state.selectedPathIndex !== null) {
+                state.pathSettings[state.selectedPathIndex].direction = dir;
+                updateDirectionButtons(dir);
+                updateCanvas();
+            }
+        }
+
+        function updateSpeed(value) {
+            document.getElementById('speedValue').textContent = value + '%';
+            if (state.selectedPathIndex !== null) {
+                state.pathSettings[state.selectedPathIndex].speed = parseInt(value);
+            }
+        }
+
+        function updateIntensity(value) {
+            document.getElementById('intensityValue').textContent = value + '%';
+            if (state.selectedPathIndex !== null) {
+                state.pathSettings[state.selectedPathIndex].intensity = parseInt(value);
+            }
+        }
+
+        function updateFPS(value) {
+            document.getElementById('fpsValue').textContent = value;
+            state.fps = parseInt(value);
+        }
+
+        function updateDuration(value) {
+            document.getElementById('durationValue').textContent = value + 's';
+            state.duration = parseFloat(value);
+        }
+
+        // Path actions
+        function deleteSelectedPath() {
+            if (state.selectedPathIndex === null) return;
+            
+            state.paths.splice(state.selectedPathIndex, 1);
+            
+            const newSettings = {};
+            Object.keys(state.pathSettings).forEach(key => {
+                const idx = parseInt(key);
+                if (idx < state.selectedPathIndex) {
+                    newSettings[idx] = state.pathSettings[idx];
+                } else if (idx > state.selectedPathIndex) {
+                    newSettings[idx - 1] = state.pathSettings[idx];
+                }
+            });
+            state.pathSettings = newSettings;
+            
+            state.selectedPathIndex = null;
+            updateCanvas();
+            updateUI();
+        }
+
+        function clearAll() {
+            state.paths = [];
+            state.pathSettings = {};
+            state.currentPath = [];
+            state.selectedPathIndex = null;
+            state.drawingStarted = false;
+            document.getElementById('drawingIndicator').classList.remove('active');
+            updateCanvas();
+            updateUI();
+        }
+
+        // Canvas drawing
+        function updateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Background
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw static image
+            if (state.staticImageObj) {
+                ctx.drawImage(state.staticImageObj, 0, 0, canvas.width, canvas.height);
+            }
+            
+            // Draw paths
+            state.paths.forEach((path, index) => {
+                drawPath(ctx, path, index === state.selectedPathIndex);
+                
+                if (index === state.selectedPathIndex && state.pathSettings[index]) {
+                    drawDirectionArrow(ctx, path, state.pathSettings[index].direction);
+                }
+            });
+            
+            // Draw current path
+            if (state.currentPath.length > 0) {
+                ctx.beginPath();
+                ctx.moveTo(state.currentPath[0].x, state.currentPath[0].y);
+                state.currentPath.forEach(p => ctx.lineTo(p.x, p.y));
+                ctx.strokeStyle = '#06d6a0';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                state.currentPath.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+                    ctx.fillStyle = '#06d6a0';
+                    ctx.fill();
+                });
+            }
+            
+            // Instructions
+            if (state.paths.length === 0 && state.currentPath.length === 0 && !state.staticImage) {
+                ctx.fillStyle = 'rgba(255,255,255,0.5)';
+                ctx.font = '20px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Upload ảnh tĩnh và chọn Pen Tool để vẽ vùng chuyển động', canvas.width / 2, canvas.height / 2);
+            }
+        }
+
+        function drawPath(context, path, isSelected) {
+            if (path.length < 2) return;
+            
+            context.beginPath();
+            context.moveTo(path[0].x, path[0].y);
+            path.forEach(p => context.lineTo(p.x, p.y));
+            context.closePath();
+            
+            context.fillStyle = isSelected ? 'rgba(102, 126, 234, 0.3)' : 'rgba(102, 126, 234, 0.15)';
+            context.fill();
+            
+            context.strokeStyle = isSelected ? '#667eea' : '#8b9dc3';
+            context.lineWidth = isSelected ? 3 : 2;
+            context.stroke();
+            
+            if (isSelected && state.activeTool === 'edit') {
+                path.forEach(p => {
+                    context.beginPath();
+                    context.arc(p.x, p.y, 6, 0, Math.PI * 2);
+                    context.fillStyle = '#fff';
+                    context.fill();
+                    context.strokeStyle = '#667eea';
+                    context.lineWidth = 2;
+                    context.stroke();
+                });
+            }
+        }
+
+        function drawDirectionArrow(context, path, direction) {
+            const center = getPathCenter(path);
+            const dir = directions[direction];
+            const arrowLength = 60;
+            
+            context.beginPath();
+            context.moveTo(center.x, center.y);
+            context.lineTo(center.x + dir.x * arrowLength, center.y + dir.y * arrowLength);
+            context.strokeStyle = '#ffd166';
+            context.lineWidth = 5;
+            context.stroke();
+            
+            const angle = Math.atan2(dir.y, dir.x);
+            context.beginPath();
+            context.moveTo(
+                center.x + dir.x * arrowLength,
+                center.y + dir.y * arrowLength
+            );
+            context.lineTo(
+                center.x + dir.x * arrowLength - 15 * Math.cos(angle - Math.PI / 6),
+                center.y + dir.y * arrowLength - 15 * Math.sin(angle - Math.PI / 6)
+            );
+            context.lineTo(
+                center.x + dir.x * arrowLength - 15 * Math.cos(angle + Math.PI / 6),
+                center.y + dir.y * arrowLength - 15 * Math.sin(angle + Math.PI / 6)
+            );
+            context.closePath();
+            context.fillStyle = '#ffd166';
+            context.fill();
+        }
+
+        function getPathCenter(path) {
+            const sum = path.reduce((acc, p) => ({ x: acc.x + p.x, y: acc.y + p.y }), { x: 0, y: 0 });
+            return { x: sum.x / path.length, y: sum.y / path.length };
+        }
+
+        // Preview
+        function showPreview() {
+            document.getElementById('previewModal').classList.add('active');
+            state.isPlaying = false;
+            renderPreviewFrame(0);
+        }
+
+        function closePreview() {
+            document.getElementById('previewModal').classList.remove('active');
+            stopAnimation();
+        }
+
+        function togglePreviewPlay() {
+            state.isPlaying = !state.isPlaying;
+            const playBtn = document.getElementById('playBtn');
+            
+            if (state.isPlaying) {
+                playBtn.innerHTML = '<i class="fas fa-pause"></i> Tạm dừng';
+                animatePreview();
+            } else {
+                playBtn.innerHTML = '<i class="fas fa-play"></i> Phát';
+                stopAnimation();
+            }
+        }
+
+        function animatePreview() {
+            if (!state.isPlaying) return;
+            
+            const totalFrames = state.fps * state.duration;
+            state.currentFrame = (state.currentFrame + 1) % totalFrames;
+            
+            renderPreviewFrame(state.currentFrame);
+            
+            state.animationFrame = requestAnimationFrame(animatePreview);
+        }
+
+        function renderPreviewFrame(frame) {
+            const totalFrames = state.fps * state.duration;
+            const progress = frame / totalFrames;
+            
+            previewCtx.clearRect(0, 0, previewCanvas.width, previewCanvas.height);
+            
+            // Draw base image
+            if (state.staticImageObj) {
+                previewCtx.drawImage(state.staticImageObj, 0, 0, previewCanvas.width, previewCanvas.height);
+            }
+            
+            // Animate each path
+            state.paths.forEach((path, index) => {
+                const settings = state.pathSettings[index];
+                if (!settings) return;
+                
+                const dir = directions[settings.direction];
+                const offset = Math.sin(progress * Math.PI * 2) * settings.speed * 0.8;
+                
+                previewCtx.save();
+                previewCtx.beginPath();
+                previewCtx.moveTo(path[0].x, path[0].y);
+                path.forEach(p => previewCtx.lineTo(p.x, p.y));
+                previewCtx.closePath();
+                previewCtx.clip();
+                
+                if (state.staticImageObj) {
+                    previewCtx.drawImage(
+                        state.staticImageObj,
+                        dir.x * offset,
+                        dir.y * offset,
+                        previewCanvas.width,
+                        previewCanvas.height
+                    );
+                }
+                
+                previewCtx.restore();
+            });
+        }
+
+        function stopAnimation() {
+            if (state.animationFrame) {
+                cancelAnimationFrame(state.animationFrame);
+                state.animationFrame = null;
+            }
+        }
+
+        // Export GIF
+        function exportGIF() {
+            alert('Đang phát triển tính năng xuất GIF...\n\nĐể xuất GIF, cần tích hợp thêm thư viện gif.js hoặc tương tự.');
+        }
+
+        // UI updates
+        function updateUI() {
+            document.getElementById('pathCounter').textContent = state.paths.length + ' vùng chuyển động';
+            document.getElementById('previewBtn').disabled = state.paths.length === 0;
+            document.getElementById('exportBtn').disabled = state.paths.length === 0;
+        }
+
+        // Initialize
+        updateCanvas();
+        updateUI();
+    </script>
 </body>
-</html>
+</html>`;

@@ -1,5 +1,6 @@
 // ============================================
 // MOTION AI STUDIO - LAYER SYSTEM
+// Hoàn chỉnh đã fix lỗi
 // ============================================
 
 // STATE
@@ -29,21 +30,7 @@ const state = {
     particleSize: 10,
     
     // Animation
-    animationId: null,
-    lastTime: 0
-};
-
-// DIRECTIONS
-const DIRECTIONS = {
-    'up-left': { vx: -0.707, vy: -0.707, angle: 225, name: '↖️ Up-Left' },
-    'up': { vx: 0, vy: -1, angle: 270, name: '⬆️ Up' },
-    'up-right': { vx: 0.707, vy: -0.707, angle: 315, name: '↗️ Up-Right' },
-    'left': { vx: -1, vy: 0, angle: 180, name: '⬅️ Left' },
-    'scroll': { vx: 0, vy: 0, angle: 0, name: '🔄 Scroll', scroll: true },
-    'right': { vx: 1, vy: 0, angle: 0, name: '➡️ Right' },
-    'down-left': { vx: -0.707, vy: 0.707, angle: 135, name: '↙️ Down-Left' },
-    'down': { vx: 0, vy: 1, angle: 90, name: '⬇️ Down' },
-    'down-right': { vx: 0.707, vy: 0.707, angle: 45, name: '↘️ Down-Right' }
+    animationId: null
 };
 
 // ============================================
@@ -99,7 +86,7 @@ function setupEventListeners() {
     // Direction buttons
     document.querySelectorAll('.dir-btn').forEach(btn => {
         btn.addEventListener('click', function() {
-            selectDirection(this.dataset.dir);
+            selectDirection(this);
         });
     });
     
@@ -149,6 +136,9 @@ function handleBackgroundUpload(e) {
             drawCanvas();
             showNotification('✅ Background uploaded!', 'success');
         };
+        img.onerror = function() {
+            showNotification('❌ Error loading image', 'error');
+        };
         img.src = event.target.result;
     };
     reader.readAsDataURL(file);
@@ -165,6 +155,9 @@ function handleMaterialUpload(e) {
             state.materialImage = img;
             drawCanvas();
             showNotification('✅ Material uploaded!', 'success');
+        };
+        img.onerror = function() {
+            showNotification('❌ Error loading image', 'error');
         };
         img.src = event.target.result;
     };
@@ -265,7 +258,8 @@ function handleDoubleClick() {
     // Close the path
     const closedPath = {
         ...state.currentPath,
-        points: [...state.currentPath.points, state.currentPath.points[0]]
+        points: [...state.currentPath.points, state.currentPath.points[0]],
+        direction: state.selectedDirection
     };
     
     state.paths.push(closedPath);
@@ -297,17 +291,29 @@ function hideDirectionSelector() {
     document.getElementById('directionSelector').classList.add('hidden');
 }
 
-function selectDirection(dirName) {
-    state.selectedDirection = DIRECTIONS[dirName];
+function selectDirection(btn) {
+    const vx = parseFloat(btn.dataset.vx);
+    const vy = parseFloat(btn.dataset.vy);
+    const isScroll = btn.dataset.scroll === 'true';
+    const name = btn.dataset.dir;
+    
+    state.selectedDirection = {
+        name: name,
+        vx: vx,
+        vy: vy,
+        scroll: isScroll
+    };
     
     // Update UI
-    document.querySelectorAll('.dir-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.dir === dirName);
+    document.querySelectorAll('.dir-btn').forEach(b => {
+        b.classList.remove('active');
     });
+    btn.classList.add('active');
     
-    document.getElementById('directionInfo').textContent = state.selectedDirection.name;
+    const displayName = isScroll ? '🔄 Cuộn/Xoay' : `➡️ ${name}`;
+    document.getElementById('directionInfo').textContent = displayName;
     
-    showNotification(`🎯 Direction: ${state.selectedDirection.name}`);
+    showNotification(`🎯 Direction: ${displayName}`);
 }
 
 // ============================================
@@ -332,7 +338,7 @@ function isPointInPath(point, path) {
 // PARTICLE GENERATION
 // ============================================
 function generateParticlesForPath(path, pathIndex) {
-    if (!path.points || path.points.length < 3) return;
+    if (!path.points || path.points.length < 3 || !path.direction) return;
     
     const xs = path.points.map(p => p[0]);
     const ys = path.points.map(p => p[1]);
@@ -357,8 +363,8 @@ function generateParticlesForPath(path, pathIndex) {
             const angle = Math.atan2(y - centerY, x - centerX);
             
             newParticles.push({
-                x,
-                y,
+                x: x,
+                y: y,
                 vx: dir.scroll ? 0 : dir.vx * state.speed / 50,
                 vy: dir.scroll ? 0 : dir.vy * state.speed / 50,
                 size: state.particleSize,
@@ -366,6 +372,8 @@ function generateParticlesForPath(path, pathIndex) {
                 isScroll: dir.scroll || false,
                 angle: angle,
                 radius: radius,
+                centerX: centerX,
+                centerY: centerY,
                 life: 0
             });
         }
@@ -387,15 +395,10 @@ function updateParticles() {
         let newY = particle.y;
         
         if (particle.isScroll) {
-            // Scrolling motion
-            const xs = path.points.map(p => p[0]);
-            const ys = path.points.map(p => p[1]);
-            const centerX = (Math.min(...xs) + Math.max(...xs)) / 2;
-            const centerY = (Math.min(...ys) + Math.max(...ys)) / 2;
-            
+            // Scrolling motion - rotate around center
             particle.angle += state.scrollSpeed / 1000;
-            newX = centerX + particle.radius * Math.cos(particle.angle);
-            newY = centerY + particle.radius * Math.sin(particle.angle);
+            newX = particle.centerX + particle.radius * Math.cos(particle.angle);
+            newY = particle.centerY + particle.radius * Math.sin(particle.angle);
         } else {
             // Linear motion
             newX = particle.x + particle.vx;
@@ -418,6 +421,12 @@ function updateParticles() {
                 if (isPointInPath({ x: testX, y: testY }, path)) {
                     newX = testX;
                     newY = testY;
+                    
+                    // Recalculate for scroll
+                    if (particle.isScroll) {
+                        particle.radius = Math.hypot(newX - particle.centerX, newY - particle.centerY);
+                        particle.angle = Math.atan2(newY - particle.centerY, newX - particle.centerX);
+                    }
                     break;
                 }
             }
@@ -460,7 +469,11 @@ function drawCanvas() {
     
     // Layer 1: Background GIF
     if (state.backgroundGif && state.showGifLayer) {
-        ctx.drawImage(state.backgroundGif, 0, 0, state.canvas.width, state.canvas.height);
+        try {
+            ctx.drawImage(state.backgroundGif, 0, 0, state.canvas.width, state.canvas.height);
+        } catch (e) {
+            console.error('Error drawing background:', e);
+        }
     }
     
     // Layer 2: Animation
@@ -515,15 +528,23 @@ function drawCanvas() {
         
         // Draw particles
         state.particles.forEach(particle => {
-            if (state.materialImage) {
-                ctx.drawImage(
-                    state.materialImage,
-                    particle.x - particle.size / 2,
-                    particle.y - particle.size / 2,
-                    particle.size,
-                    particle.size
-                );
-            } else {
+            try {
+                if (state.materialImage && state.materialImage.complete) {
+                    ctx.drawImage(
+                        state.materialImage,
+                        particle.x - particle.size / 2,
+                        particle.y - particle.size / 2,
+                        particle.size,
+                        particle.size
+                    );
+                } else {
+                    ctx.fillStyle = '#FF6B6B';
+                    ctx.beginPath();
+                    ctx.arc(particle.x, particle.y, particle.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            } catch (e) {
+                // Fallback to circle if image fails
                 ctx.fillStyle = '#FF6B6B';
                 ctx.beginPath();
                 ctx.arc(particle.x, particle.y, particle.size / 2, 0, Math.PI * 2);
@@ -550,11 +571,14 @@ function animate() {
 function togglePlay() {
     state.isPlaying = !state.isPlaying;
     const btn = document.getElementById('playBtn');
-    btn.innerHTML = state.isPlaying 
-        ? '<i class="fas fa-pause"></i> Tạm dừng' 
-        : '<i class="fas fa-play"></i> Phát';
     
-    showNotification(state.isPlaying ? '▶️ Animation started' : '⏸️ Animation paused');
+    if (state.isPlaying) {
+        btn.innerHTML = '<i class="fas fa-pause"></i> Tạm dừng';
+        showNotification('▶️ Animation started');
+    } else {
+        btn.innerHTML = '<i class="fas fa-play"></i> Phát';
+        showNotification('⏸️ Animation paused');
+    }
 }
 
 function resetAnimation() {
@@ -585,7 +609,10 @@ function toggleEditMode() {
 function deletePath() {
     if (state.selectedPathIndex === null) return;
     
+    // Remove particles for this path
     state.particles = state.particles.filter(p => p.pathIndex !== state.selectedPathIndex);
+    
+    // Remove path
     state.paths.splice(state.selectedPathIndex, 1);
     
     // Update particle indices
@@ -654,44 +681,48 @@ function updateUI() {
     document.getElementById('pathCount').textContent = state.paths.length;
     document.getElementById('particleCount').textContent = state.particles.length;
     
-    const editBtn = document.getElementById('editPointsBtn');
-    const deleteBtn = document.getElementById('deletePathBtn');
-    
-    editBtn.disabled = state.selectedPathIndex === null;
-    deleteBtn.disabled = state.selectedPathIndex === null;
-    
-    const selectedInfo = document.getElementById('selectedPathInfo');
-    if (state.selectedPathIndex !== null) {
-        selectedInfo.style.display = 'block';
-        selectedInfo.textContent = `✅ Path #${state.selectedPathIndex + 1} được chọn`;
-    } else {
-        selectedInfo.style.display = 'none';
-    }
-}
+    const editBtn =Resumed code export from interrupted function.The user wants me to continue exporting the code. I was in the middle of the updateUI() function in the app.js file. Let me continue from where I left off.document.getElementById('editPointsBtn');
+const deleteBtn = document.getElementById('deletePathBtn');
+editBtn.disabled = state.selectedPathIndex === null;
+deleteBtn.disabled = state.selectedPathIndex === null;
 
+const selectedInfo = document.getElementById('selectedPathInfo');
+if (state.selectedPathIndex !== null) {
+    selectedInfo.style.display = 'block';
+    selectedInfo.textContent = `✅ Path #${state.selectedPathIndex + 1} được chọn`;
+} else {
+    selectedInfo.style.display = 'none';
+}
+}
 // ============================================
 // EXPORT
 // ============================================
 function exportAnimation() {
-    showNotification('🎬 Đang xuất file...\n\n✅ Sẽ gộp:\n• GIF Background (Layer 1)\n• Animation Layer (Layer 2)\n→ Thành 1 file GIF mới', 'success');
-    
-    // TODO: Implement actual GIF export with libraries like gif.js
-    setTimeout(() => {
-        showNotification('💡 Chức năng export đang phát triển!\nSử dụng thư viện gif.js hoặc WebCodecs API', 'success');
-    }, 2000);
+showNotification('🎬 Đang xuất file...', 'success');
+setTimeout(() => {
+    showNotification('💡 Chức năng export đang phát triển!\n\n✅ Sẽ gộp:\n• GIF Background (Layer 1)\n• Animation Layer (Layer 2)\n→ Thành 1 file GIF mới\n\nSử dụng thư viện gif.js hoặc WebCodecs API', 'success');
+}, 1000);
 }
-
 // ============================================
 // NOTIFICATIONS
 // ============================================
-function showNotification(message, type = 'success') {const container = document.getElementById('notificationContainer');
+function showNotification(message, type = 'success') {
+const container = document.getElementById('notificationContainer');
 const notification = document.createElement('div');
-notification.className = `notification ${type}`;
+notification.className = notification ${type};
 notification.textContent = message;
-
 container.appendChild(notification);
 
 setTimeout(() => {
     notification.style.animation = 'slideIn 0.3s ease reverse';
-    setTimeout(() => notification.remove(), 300);
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 300);
 }, 3000);
+}
+// ============================================
+// INITIALIZE
+// ============================================
+document.addEventListener('DOMContentLoaded', init);

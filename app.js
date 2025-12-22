@@ -194,7 +194,7 @@ class MotionAIStudio {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
-        this.maskEngine.addPoint(x, y);
+        this.maskEngine.startDrawing(x, y);
     }
     
     handleCanvasDoubleClick(e) {
@@ -204,33 +204,37 @@ class MotionAIStudio {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
-        const mask = this.maskEngine.finishDrawing(x, y);
-        if (mask) {
-            this.showDirectionSelector(mask.center);
+        // Finish the current drawing
+        this.maskEngine.addPoint(x, y); // Add final point
+        const completedMask = this.maskEngine.finishDrawing();
+        
+        if (completedMask && completedMask.center) {
+            // Show direction selector at the center of the mask
+            this.directionSelector.show(completedMask.center.x, completedMask.center.y);
+            
+            // Store reference to the mask index for later
+            this.pendingMaskIndex = this.maskEngine.masks.length - 1;
+            
+            // Handle direction selection
+            this.directionSelector.onSelect = (direction) => {
+                this.createMaskWithDirection(direction);
+                this.directionSelector.hide();
+            };
         }
     }
     
-    showDirectionSelector(center) {
-        this.directionSelector.show(center.x, center.y);
-        
-        // Handle direction selection
-        this.directionSelector.onSelect = (direction) => {
-            this.createMaskWithDirection(direction);
-            this.directionSelector.hide();
-        };
-    }
-    
     createMaskWithDirection(direction) {
-        const mask = this.maskEngine.getCurrentMask();
-        mask.direction = direction;
+        // Update the mask with the selected direction
+        this.maskEngine.updateMaskDirection(this.pendingMaskIndex, direction);
         
         // Add to state
+        const mask = this.maskEngine.masks[this.pendingMaskIndex];
         this.state.masks.push(mask);
         
         // Generate particles for this mask
         if (this.state.materialLoaded) {
             const particles = this.materialLayer.generateParticlesForMask(mask);
-            this.state.particles.push(...particles);
+            this.materialLayer.addParticles(particles);
         }
         
         this.updateUI();
@@ -267,10 +271,11 @@ class MotionAIStudio {
     }
     
     regenerateParticles() {
-        this.state.particles = [];
+        // Clear and regenerate all particles
+        this.materialLayer.clear();
         this.state.masks.forEach(mask => {
             const particles = this.materialLayer.generateParticlesForMask(mask);
-            this.state.particles.push(...particles);
+            this.materialLayer.addParticles(particles);
         });
         this.updateParticleCount();
     }
@@ -392,8 +397,9 @@ class MotionAIStudio {
     }
     
     updateParticleCount() {
-        const count = this.state.particles.reduce((sum, arr) => sum + arr.length, 0);
-        document.getElementById('particleCount').textContent = count;
+        // This needs to be implemented based on how particles are stored
+        const particleCount = this.materialLayer.particles ? this.materialLayer.particles.length : 0;
+        document.getElementById('particleCount').textContent = particleCount;
     }
     
     showNotification(message, type = 'info') {

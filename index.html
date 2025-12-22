@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Motion AI Studio - Mô phỏng Vật liệu</title>
+    <title>Motion AI Studio - Mô phỏng vật liệu trên GIF</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Liên kết đến file CSS riêng -->
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,21 +13,21 @@
         <!-- HEADER -->
         <header class="header">
             <div class="logo">
-                <div class="logo-icon"><i class="fas fa-atom"></i></div>
+                <div class="logo-icon"><i class="fas fa-wave-square"></i></div>
                 <div class="logo-text">
                     <h1>Motion AI Studio</h1>
-                    <p>Mô phỏng chuyển động vật liệu trên nền GIF</p>
+                    <p>Mô phỏng vật liệu chuyển động trên nền GIF</p>
                 </div>
             </div>
-            <div class="controls-header">
+            <div class="header-controls">
                 <button id="playBtn" class="btn btn-primary">
                     <i class="fas fa-play"></i> Play
                 </button>
-                <button id="exportBtn" class="btn btn-export">
-                    <i class="fas fa-download"></i> Export PNG
+                <button id="exportBtn" class="btn btn-success">
+                    <i class="fas fa-download"></i> Export Video
                 </button>
-                <button id="clearAllBtn" class="btn btn-danger">
-                    <i class="fas fa-trash-alt"></i> Clear All
+                <button id="clearBtn" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Clear All
                 </button>
             </div>
         </header>
@@ -39,91 +38,104 @@
             <div class="sidebar">
                 <!-- UPLOAD SECTION -->
                 <div class="section">
-                    <div class="section-title">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <span>📁 Upload Files</span>
+                    <h3><i class="fas fa-upload"></i> Upload Files</h3>
+                    <div class="upload-area" id="gifUploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-film"></i>
+                        </div>
+                        <div class="upload-text">
+                            <strong>GIF Background</strong>
+                            <p>Upload file GIF làm nền</p>
+                        </div>
+                        <input type="file" id="gifInput" accept="image/gif" hidden>
                     </div>
-                    <label class="upload-zone" for="uploadGif">
-                        <div class="upload-icon"><i class="fas fa-film"></i></div>
-                        <div class="upload-text">🎬 GIF Background</div>
-                        <div class="upload-sub">Layer nền thiết bị hoặc băng tải</div>
-                        <input type="file" id="uploadGif" accept="image/gif" hidden>
-                    </label>
-                    <label class="upload-zone" for="uploadMaterial">
-                        <div class="upload-icon"><i class="fas fa-palette"></i></div>
-                        <div class="upload-text">🎨 Material Image</div>
-                        <div class="upload-sub">Hạt, bột, vật liệu cần mô phỏng</div>
-                        <input type="file" id="uploadMaterial" accept="image/*" hidden>
-                    </label>
+                    
+                    <div class="upload-area" id="materialUploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <div class="upload-text">
+                            <strong>Material Image</strong>
+                            <p>Hình ảnh vật liệu mô phỏng</p>
+                        </div>
+                        <input type="file" id="materialInput" accept="image/*" hidden>
+                    </div>
                 </div>
 
                 <!-- TOOLS SECTION -->
                 <div class="section">
-                    <div class="section-title">
-                        <i class="fas fa-tools"></i>
-                        <span>🛠️ Công Cụ Vẽ</span>
-                    </div>
-                    <div class="tools-grid">
+                    <h3><i class="fas fa-pen"></i> Drawing Tools</h3>
+                    <div class="tool-buttons">
                         <button class="tool-btn active" data-tool="select">
                             <i class="fas fa-mouse-pointer"></i>
                             <span>Select</span>
                         </button>
                         <button class="tool-btn" data-tool="pen">
-                            <i class="fas fa-pen"></i>
-                            <span>Pen Tool</span>
+                            <i class="fas fa-draw-polygon"></i>
+                            <span>Draw Area</span>
                         </button>
                         <button class="tool-btn" data-tool="edit">
                             <i class="fas fa-edit"></i>
                             <span>Edit Points</span>
                         </button>
                     </div>
+                    
                     <div class="info-box">
-                        <strong><i class="fas fa-lightbulb"></i> Hướng dẫn nhanh:</strong><br>
-                        1. Upload GIF và Material<br>
-                        2. <strong>Click vào canvas</strong> để bắt đầu vẽ vùng<br>
-                        3. Chọn hướng từ bảng mũi tên<br>
-                        4. <strong>Double-click</strong> để kết thúc vẽ<br>
-                        5. Bấm Play để xem mô phỏng
+                        <strong><i class="fas fa-info-circle"></i> Hướng dẫn:</strong>
+                        <ol>
+                            <li>Click vào canvas để bắt đầu vẽ</li>
+                            <li>Click tiếp các điểm để tạo vùng</li>
+                            <li><strong>Double-click</strong> để kết thúc</li>
+                            <li>Chọn hướng từ mũi tên hiện ra</li>
+                        </ol>
                     </div>
                 </div>
 
-                <!-- SETTINGS SECTION -->
+                <!-- MATERIAL SETTINGS -->
                 <div class="section">
-                    <div class="section-title">
-                        <i class="fas fa-sliders-h"></i>
-                        <span>⚙️ Cài Đặt Chuyển Động</span>
+                    <h3><i class="fas fa-sliders-h"></i> Material Settings</h3>
+                    
+                    <div class="control-group">
+                        <label>Density (Mật độ)</label>
+                        <div class="slider-container">
+                            <input type="range" id="densitySlider" min="1" max="100" value="50">
+                            <span id="densityValue">50%</span>
+                        </div>
                     </div>
                     
                     <div class="control-group">
-                        <div class="control-label">
-                            <span>Tốc độ:</span>
-                            <span id="speedValue" class="value-display">50%</span>
+                        <label>Speed (Tốc độ)</label>
+                        <div class="slider-container">
+                            <input type="range" id="speedSlider" min="1" max="200" value="100">
+                            <span id="speedValue">100%</span>
                         </div>
-                        <input type="range" id="speedSlider" class="slider" min="1" max="100" value="50">
                     </div>
-
+                    
                     <div class="control-group">
-                        <div class="control-label">
-                            <span>Số lượng hạt:</span>
-                            <span id="countValue" class="value-display">150</span>
+                        <label>Size (Kích thước)</label>
+                        <div class="slider-container">
+                            <input type="range" id="sizeSlider" min="5" max="50" value="20">
+                            <span id="sizeValue">20px</span>
                         </div>
-                        <input type="range" id="countSlider" class="slider" min="20" max="500" value="150">
                     </div>
-
+                    
                     <div class="control-group">
-                        <div class="control-label">
-                            <span>Kích thước hạt:</span>
-                            <span id="sizeValue" class="value-display">15px</span>
+                        <label>Opacity (Độ trong)</label>
+                        <div class="slider-container">
+                            <input type="range" id="opacitySlider" min="10" max="100" value="80">
+                            <span id="opacityValue">80%</span>
                         </div>
-                        <input type="range" id="sizeSlider" class="slider" min="5" max="50" value="15">
                     </div>
+                </div>
 
-                    <div class="control-group">
-                        <div class="control-label">
-                            <span>Độ xoáy (Swirl):</span>
-                            <span id="swirlValue" class="value-display">30%</span>
-                        </div>
-                        <input type="range" id="swirlSlider" class="slider" min="0" max="100" value="30">
+                <!-- MOTION PRESETS -->
+                <div class="section">
+                    <h3><i class="fas fa-running"></i> Motion Presets</h3>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-preset="flow">Flow (Chảy)</button>
+                        <button class="preset-btn" data-preset="swirl">Swirl (Xoáy)</button>
+                        <button class="preset-btn" data-preset="bounce">Bounce (Nảy)</button>
+                        <button class="preset-btn" data-preset="random">Random (Ngẫu nhiên)</button>
                     </div>
                 </div>
             </div>
@@ -131,59 +143,76 @@
             <!-- CANVAS AREA -->
             <div class="canvas-area">
                 <div class="canvas-header">
-                    <h2><i class="fas fa-play-circle"></i> Khu Vực Mô Phỏng</h2>
+                    <h2><i class="fas fa-play-circle"></i> Simulation Area</h2>
                     <div class="canvas-stats">
-                        <div><i class="fas fa-draw-polygon"></i> Vùng: <span id="pathCount" class="status-value">0</span></div>
-                        <div><i class="fas fa-circle"></i> Hạt: <span id="particleCount" class="status-value">0</span></div>
-                        <div><i class="fas fa-tachometer-alt"></i> FPS: <span id="fpsCounter" class="status-value">0</span></div>
+                        <span><i class="fas fa-draw-polygon"></i> Areas: <span id="areaCount">0</span></span>
+                        <span><i class="fas fa-circle"></i> Particles: <span id="particleCount">0</span></span>
+                        <span><i class="fas fa-tachometer-alt"></i> FPS: <span id="fpsCounter">0</span></span>
                     </div>
                 </div>
                 
-                <!-- MAIN CANVAS -->
-                <canvas id="mainCanvas" width="1200" height="675"></canvas>
-                
-                <!-- DIRECTION SELECTOR OVERLAY -->
-                <div id="directionOverlay">
-                    <div class="direction-title">🎯 Chọn Hướng Chuyển Động</div>
-                    <div class="direction-grid">
-                        <button class="dir-btn" data-dir="up-left" data-vx="-0.7" data-vy="-0.7">↖</button>
-                        <button class="dir-btn" data-dir="up" data-vx="0" data-vy="-1">↑</button>
-                        <button class="dir-btn" data-dir="up-right" data-vx="0.7" data-vy="-0.7">↗</button>
-                        <button class="dir-btn" data-dir="left" data-vx="-1" data-vy="0">←</button>
-                        <button class="dir-btn" data-dir="scroll" data-vx="0" data-vy="0" data-scroll="true">↻</button>
-                        <button class="dir-btn" data-dir="right" data-vx="1" data-vy="0">→</button>
-                        <button class="dir-btn" data-dir="down-left" data-vx="-0.7" data-vy="0.7">↙</button>
-                        <button class="dir-btn" data-dir="down" data-vx="0" data-vy="1">↓</button>
-                        <button class="dir-btn" data-dir="down-right" data-vx="0.7" data-vy="0.7">↘</button>
-                    </div>
-                    <div class="direction-hint">
-                        ↻ = Chuyển động xoay tròn (cho vít tải)
+                <!-- CANVAS CONTAINER -->
+                <div class="canvas-container">
+                    <!-- Background GIF Layer -->
+                    <canvas id="gifCanvas" class="canvas-layer"></canvas>
+                    
+                    <!-- Mask Drawing Layer -->
+                    <canvas id="maskCanvas" class="canvas-layer"></canvas>
+                    
+                    <!-- Material Layer -->
+                    <canvas id="materialCanvas" class="canvas-layer"></canvas>
+                    
+                    <!-- Direction Selector (ẩn ban đầu) -->
+                    <div id="directionSelector" class="direction-selector">
+                        <div class="direction-title">Select Direction</div>
+                        <div class="direction-grid">
+                            <button class="dir-btn" data-dir="up-left">↖</button>
+                            <button class="dir-btn" data-dir="up">↑</button>
+                            <button class="dir-btn" data-dir="up-right">↗</button>
+                            <button class="dir-btn" data-dir="left">←</button>
+                            <button class="dir-btn center-btn" data-dir="none">●</button>
+                            <button class="dir-btn" data-dir="right">→</button>
+                            <button class="dir-btn" data-dir="down-left">↙</button>
+                            <button class="dir-btn" data-dir="down">↓</button>
+                            <button class="dir-btn" data-dir="down-right">↘</button>
+                        </div>
+                        <div class="direction-hint">
+                            Click arrow to set motion direction
+                        </div>
                     </div>
                 </div>
-
+                
                 <!-- STATUS BAR -->
                 <div class="status-bar">
                     <div class="status-item">
                         <i class="fas fa-info-circle"></i>
-                        <span>Trạng thái: <span id="statusText" class="status-value">Sẵn sàng</span></span>
+                        <span>Status: <span id="statusText">Ready</span></span>
                     </div>
                     <div class="status-item">
-                        <i class="fas fa-layer-group"></i>
-                        <span>Vật liệu: <span id="materialStatus" class="status-value">Chưa tải</span></span>
+                        <i class="fas fa-image"></i>
+                        <span>Material: <span id="materialStatus">Not loaded</span></span>
                     </div>
                     <div class="status-item">
-                        <i class="fas fa-compress-arrows-alt"></i>
-                        <span>Kích thước: <span class="status-value">1200×675px</span></span>
+                        <i class="fas fa-expand-arrows-alt"></i>
+                        <span>Canvas: <span id="canvasSize">800x450</span></span>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- NOTIFICATION -->
+        <div id="notification" class="notification"></div>
     </div>
 
-    <!-- NOTIFICATION -->
-    <div id="notification"></div>
-
-    <!-- Liên kết đến file JavaScript chính -->
+    <!-- SCRIPTS -->
+    <script src="lib/gif-player.js"></script>
+    <script src="lib/mask-engine.js"></script>
+    <script src="lib/material-layer.js"></script>
+    <script src="lib/direction-selector.js"></script>
+    <script src="lib/video-exporter.js"></script>
+    <script src="utils/canvas-utils.js"></script>
+    <script src="utils/file-utils.js"></script>
+    <script src="utils/ui-utils.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
